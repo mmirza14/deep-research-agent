@@ -10,6 +10,7 @@ const RECONNECT_DELAY = 2000;
 export default function useGraphSocket() {
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
   const [connected, setConnected] = useState(false);
+  const [sessionState, setSessionState] = useState(null);
   const wsRef = useRef(null);
   const reconnectTimer = useRef(null);
 
@@ -29,6 +30,8 @@ export default function useGraphSocket() {
         const msg = JSON.parse(event.data);
         if (msg.type === "graph_update") {
           setGraph(msg.data);
+        } else if (msg.type === "session_state") {
+          setSessionState(msg.data);
         }
       } catch {
         // ignore parse errors
@@ -85,13 +88,20 @@ export default function useGraphSocket() {
     [send]
   );
 
+  const resumeSession = useCallback(
+    (sessionId) => send("resume_session", { session_id: sessionId }),
+    [send]
+  );
+
   return {
     graph,
     connected,
+    sessionState,
     addNode,
     updateNode,
     addEdge,
     deleteNode,
     flagNode,
+    resumeSession,
   };
 }

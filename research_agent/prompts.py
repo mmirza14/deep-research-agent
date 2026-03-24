@@ -361,3 +361,87 @@ REPORT_WRITER_AGENT_DESCRIPTION = """\
 A Report Writer subagent that produces structured markdown documents from the \
 knowledge graph and Socratic review outcomes. Read-only graph access.\
 """
+
+# ---------------------------------------------------------------------------
+# Collaborative Analysis prompts (Phase 4)
+# ---------------------------------------------------------------------------
+
+SYNTHESIS_PROMPT_COLLABORATIVE = """\
+You are the Lead Research Agent performing synthesis after Socratic review AND user feedback.
+
+Session ID: {session_id}
+
+The research findings have been through adversarial review. After review, the user examined \
+the validated findings via the mind map and provided feedback by adding new nodes, editing \
+existing nodes, flagging nodes for re-investigation, or deleting nodes they consider irrelevant.
+
+Socratic Review Summary:
+{review_summary}
+
+Current graph state (post-user-feedback):
+{graph_summary}
+
+User Feedback Summary:
+{user_feedback}
+
+Your task:
+1. Prioritize the user's annotations. Their added questions and flags indicate what matters \
+most for the analysis.
+2. Synthesize the reviewed findings into a coherent analysis that addresses the user's focus areas.
+3. For each user-added question node, provide a direct analytical response as a new "decision" \
+or "concept" node linked to supporting evidence via add_node and add_edge.
+4. For flagged nodes, explicitly address the user's concern — either reinforce with additional \
+reasoning or acknowledge the weakness.
+5. Respect user confidence adjustments — if the user lowered confidence on a node, treat it as \
+contested. If they raised it, treat it as user-validated.
+6. Create "decision" or "concept" nodes for key conclusions, linked to evidence.
+7. Present a structured synthesis covering:
+   - Key findings (prioritizing user-flagged areas)
+   - Direct responses to user questions
+   - Contradictions or tensions in the evidence
+   - Confidence assessment (what we're most/least sure about)
+   - Gaps identified during review
+8. Output your synthesis as your final response.
+"""
+
+
+def format_user_feedback(diff: dict) -> str:
+    """Format a graph diff into readable text for the collaborative synthesis prompt."""
+    lines = []
+
+    if diff["user_added_nodes"]:
+        lines.append("### User-added nodes")
+        for n in diff["user_added_nodes"]:
+            lines.append(
+                f"- [{n['id']}] **{n.get('label', '')}** ({n.get('type', '')}): "
+                f"{n.get('description', '')}"
+            )
+
+    if diff["flagged_nodes"]:
+        lines.append("\n### Flagged for re-investigation")
+        for n in diff["flagged_nodes"]:
+            lines.append(
+                f"- [{n['id']}] **{n.get('label', '')}**: {n.get('description', '')}"
+            )
+
+    if diff["user_modified_nodes"]:
+        lines.append("\n### User-modified nodes")
+        for mod in diff["user_modified_nodes"]:
+            parts = [f"- [{mod['id']}] **{mod['label']}**"]
+            if mod["old_confidence"] != mod["new_confidence"]:
+                parts.append(
+                    f" confidence: {mod['old_confidence']:.2f} → {mod['new_confidence']:.2f}"
+                )
+            if mod["old_description"] != mod["new_description"]:
+                parts.append(" (description edited)")
+            lines.append("".join(parts))
+
+    if diff["user_deleted_node_ids"]:
+        lines.append(
+            f"\n### Deleted by user: {len(diff['user_deleted_node_ids'])} nodes removed"
+        )
+
+    if not lines:
+        lines.append("(No user feedback received — user accepted findings as-is.)")
+
+    return "\n".join(lines)

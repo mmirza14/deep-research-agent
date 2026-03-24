@@ -15,8 +15,10 @@ Socratic review runs as a separate orchestration step outside the lead agent loo
 from __future__ import annotations
 
 import asyncio
+import json
 import sys
 import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 
 from claude_agent_sdk import (
@@ -30,9 +32,16 @@ from research_agent.config import (
     LEAD_MODEL,
     RESEARCHER_MODEL,
     MAX_TURNS,
+    PAUSE_POLL_INTERVAL,
+    SESSIONS_DIR,
+    GRAPH_PATH,
 )
-from research_agent.graph.store import snapshot_graph
-from research_agent.prompts import RESEARCHER_AGENT_DESCRIPTION
+from research_agent.graph.store import snapshot_graph, diff_graph_since
+from research_agent.prompts import (
+    RESEARCHER_AGENT_DESCRIPTION,
+    SYNTHESIS_PROMPT_COLLABORATIVE,
+    format_user_feedback,
+)
 from research_agent.socratic.review import (
     run_findings_review,
     run_synthesis_review,
@@ -174,6 +183,81 @@ def build_synthesis_options(
     )
 
 
+def build_collaborative_synthesis_options(
+    session_id: str,
+    review_summary: str,
+    graph_summary: str,
+    user_feedback: str,
+) -> ClaudeAgentOptions:
+    """Build options for collaborative synthesis (post-user-feedback)."""
+    mcp_server_config = {
+        "type": "stdio",
+        "command": "python3",
+        "args": [MCP_SERVER_SCRIPT],
+    }
+
+    return ClaudeAgentOptions(
+        model=LEAD_MODEL,
+        system_prompt=SYNTHESIS_PROMPT_COLLABORATIVE.format(
+            session_id=session_id,
+            review_summary=review_summary,
+            graph_summary=graph_summary,
+            user_feedback=user_feedback,
+        ),
+        tools=[],
+        allowed_tools=[
+            "mcp__research-graph__add_node",
+            "mcp__research-graph__add_edge",
+            "mcp__research-graph__update_node",
+            "mcp__research-graph__get_graph_summary",
+            "mcp__research-graph__get_neighborhood",
+        ],
+        mcp_servers={"research-graph": mcp_server_config},
+        max_turns=MAX_TURNS,
+        permission_mode="bypassPermissions",
+    )
+
+
+async def _wait_for_user_input(
+    session_id: str, question: str, lit_review_path: Path
+) -> None:
+    """Write state file and poll until user signals resume via the mind map UI."""
+    state_path = SESSIONS_DIR / f"session_{session_id}" / "state.json"
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+
+    state = {
+        "phase": "awaiting_user_input",
+        "session_id": session_id,
+        "research_question": question,
+        "lit_review_path": str(lit_review_path),
+        "paused_at": datetime.now(timezone.utc).isoformat(),
+    }
+    state_path.write_text(json.dumps(state, indent=2))
+
+    print("\n" + "=" * 60)
+    print("PAUSED — Analysis Mode")
+    print("=" * 60)
+    print("Review findings in the mind map. Add questions, flag nodes,")
+    print("edit confidence scores, then click 'Proceed to Synthesis'.")
+    print("=" * 60 + "\n")
+
+    while True:
+        await asyncio.sleep(PAUSE_POLL_INTERVAL)
+        try:
+            current = json.loads(state_path.read_text())
+        except (json.JSONDecodeError, FileNotFoundError):
+            continue
+        if current.get("phase") == "resume_synthesis":
+            print("\n** User signaled resume. Proceeding to synthesis. **\n")
+            return
+
+
+def _collect_user_feedback(session_id: str) -> str:
+    """Diff the graph against the session snapshot and format as prompt text."""
+    diff = diff_graph_since(session_id)
+    return format_user_feedback(diff)
+
+
 async def _collect_agent_output(options: ClaudeAgentOptions, prompt: str) -> str:
     """Run an agent and collect all text output."""
     result_text = []
@@ -227,11 +311,11 @@ async def run_research(question: str, session_id: str) -> None:
         transcript_1, changelog_1 = await run_findings_review(session_id)
 
         stats = changelog_1.summary_stats()
+        stats_str = ", ".join(f"{v} {k}" for k, v in stats.items())
         review_summary = (
             f"Stage 1 (Findings Review): {changelog_1.total_rounds} rounds, "
             f"terminated: {changelog_1.termination_reason}. "
-            f"Outcomes: {stats['retained']} retained, {stats['modified']} modified, "
-            f"{stats['removed']} removed."
+            f"Outcomes: {stats_str}."
         )
         print(f"\n{review_summary}")
         print(f"Transcript saved: {transcript_1.save()}")
@@ -248,13 +332,20 @@ async def run_research(question: str, session_id: str) -> None:
         print(f"\nLiterature review saved: {lit_review_path}")
     else:
         review_summary = "No findings to review."
+        lit_review_path = None
         print("\nNo researcher findings found — skipping Socratic review.")
 
     # -----------------------------------------------------------------------
-    # Step 3: Synthesis — lead agent synthesizes reviewed findings
+    # Step 2.5: Analysis Mode — pause for user feedback via mind map
+    # -----------------------------------------------------------------------
+    await _wait_for_user_input(session_id, question, lit_review_path or Path())
+    user_feedback = _collect_user_feedback(session_id)
+
+    # -----------------------------------------------------------------------
+    # Step 3: Synthesis — lead agent synthesizes with user feedback
     # -----------------------------------------------------------------------
     print("\n\n" + "=" * 60)
-    print("PHASE: Synthesis (post-review)")
+    print("PHASE: Collaborative Synthesis (post-review + user feedback)")
     print("=" * 60 + "\n")
 
     from research_agent.graph.summarizer import summarize_graph
@@ -263,10 +354,12 @@ async def run_research(question: str, session_id: str) -> None:
     graph = load_graph()
     graph_summary = summarize_graph(graph)
 
-    synth_options = build_synthesis_options(session_id, review_summary, graph_summary)
+    synth_options = build_collaborative_synthesis_options(
+        session_id, review_summary, graph_summary, user_feedback
+    )
     synthesis_output = await _collect_agent_output(
         synth_options,
-        "Synthesize the reviewed findings into a coherent analysis.",
+        "Synthesize the reviewed findings into a coherent analysis, incorporating user feedback.",
     )
 
     # -----------------------------------------------------------------------
@@ -282,11 +375,11 @@ async def run_research(question: str, session_id: str) -> None:
         )
 
         stats_2 = changelog_2.summary_stats()
+        stats_2_str = ", ".join(f"{v} {k}" for k, v in stats_2.items())
         print(
             f"\nStage 2 complete: {changelog_2.total_rounds} rounds, "
             f"terminated: {changelog_2.termination_reason}. "
-            f"Outcomes: {stats_2['retained']} retained, {stats_2['modified']} modified, "
-            f"{stats_2['removed']} removed."
+            f"Outcomes: {stats_2_str}."
         )
         print(f"Transcript saved: {transcript_2.save()}")
         print(f"Changelog saved: {changelog_2.save()}")

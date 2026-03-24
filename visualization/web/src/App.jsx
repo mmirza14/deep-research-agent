@@ -2,11 +2,21 @@ import { useCallback, useState } from "react";
 import GraphView from "./GraphView";
 import NodeEditor from "./NodeEditor";
 import AddNodeDialog from "./AddNodeDialog";
+import AnalysisBanner from "./AnalysisBanner";
 import useGraphSocket from "./useGraphSocket";
 
 export default function App() {
-  const { graph, connected, addNode, updateNode, addEdge, deleteNode, flagNode } =
-    useGraphSocket();
+  const {
+    graph,
+    connected,
+    sessionState,
+    addNode,
+    updateNode,
+    addEdge,
+    deleteNode,
+    flagNode,
+    resumeSession,
+  } = useGraphSocket();
 
   const [selectedNode, setSelectedNode] = useState(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -55,6 +65,15 @@ export default function App() {
           />
         </div>
       </div>
+
+      {/* Analysis mode banner (Phase 4) */}
+      {sessionState?.phase === "awaiting_user_input" && (
+        <AnalysisBanner
+          sessionId={sessionState.session_id}
+          pausedAt={sessionState.paused_at}
+          onResume={() => resumeSession(sessionState.session_id)}
+        />
+      )}
 
       {/* Graph */}
       <GraphView

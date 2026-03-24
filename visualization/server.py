@@ -191,13 +191,72 @@ def handle_flag_node(data: dict) -> bool:
     return True
 
 
+def handle_resume_session(data: dict) -> dict:
+    """User clicked 'Proceed to Synthesis'. Write resume signal to state.json."""
+    session_id = data.get("session_id")
+    if not session_id:
+        return {"error": "session_id required"}
+
+    state_path = DATA_DIR / "sessions" / f"session_{session_id}" / "state.json"
+    if not state_path.exists():
+        return {"error": "no active session"}
+
+    state = json.loads(state_path.read_text())
+    if state.get("phase") != "awaiting_user_input":
+        return {"error": f"session not paused (phase={state.get('phase')})"}
+
+    state["phase"] = "resume_synthesis"
+    state["resumed_at"] = datetime.now(timezone.utc).isoformat()
+    state_path.write_text(json.dumps(state, indent=2))
+    return {"ok": True, "session_id": session_id}
+
+
 HANDLERS = {
     "add_node": handle_add_node,
     "update_node": handle_update_node,
     "add_edge": handle_add_edge,
     "delete_node": handle_delete_node,
     "flag_node": handle_flag_node,
+    "resume_session": handle_resume_session,
 }
+
+
+# ---------------------------------------------------------------------------
+# Session state broadcasting (Phase 4: Analysis Mode)
+# ---------------------------------------------------------------------------
+
+_last_session_state: dict | None = None
+
+
+def _find_active_session_state() -> dict | None:
+    """Check for any session in awaiting_user_input phase."""
+    sessions_dir = DATA_DIR / "sessions"
+    if not sessions_dir.exists():
+        return None
+    for session_dir in sorted(sessions_dir.iterdir(), reverse=True):
+        state_path = session_dir / "state.json"
+        if state_path.exists():
+            try:
+                state = json.loads(state_path.read_text())
+                if state.get("phase") == "awaiting_user_input":
+                    return state
+            except (json.JSONDecodeError, OSError):
+                continue
+    return None
+
+
+async def broadcast_session_state() -> None:
+    """Broadcast active session state to all connected clients."""
+    global _last_session_state
+    state = _find_active_session_state()
+    if state != _last_session_state:
+        _last_session_state = state
+        payload = json.dumps({"type": "session_state", "data": state})
+        if clients:
+            await asyncio.gather(
+                *(c.send(payload) for c in clients),
+                return_exceptions=True,
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -210,6 +269,11 @@ async def ws_handler(websocket: websockets.asyncio.server.ServerConnection) -> N
         # Send current graph state on connect
         graph = _load_graph()
         await websocket.send(json.dumps({"type": "graph_update", "data": graph}))
+
+        # Send active session state if any (Phase 4 analysis mode)
+        session_state = _find_active_session_state()
+        if session_state:
+            await websocket.send(json.dumps({"type": "session_state", "data": session_state}))
 
         async for raw in websocket:
             try:
@@ -259,6 +323,7 @@ async def watch_graph() -> None:
         current = _graph_hash()
         if current != _last_graph_hash:
             await broadcast_graph()
+        await broadcast_session_state()
 
 
 # ---------------------------------------------------------------------------

@@ -151,22 +151,11 @@ def _parse_defender_json(defender_text: str, findings: list[dict]) -> list[dict]
     return outcomes if outcomes else None
 
 
-def _parse_defender_response(defender_text: str, findings: list[dict]) -> list[dict]:
-    """Extract per-node outcomes from the Defender's structured response.
+def _parse_defender_regex(defender_text: str, findings: list[dict]) -> list[dict]:
+    """Extract per-node outcomes from the Defender's markdown prose.
 
-    Tries JSON parsing first (preferred); falls back to regex extraction
-    from markdown if no valid JSON block is found.
-
-    Returns a list of dicts with keys:
-    - node_id, node_label, response (DEFEND/CONCEDE/PARTIALLY CONCEDE),
-      reasoning, post_confidence, proposed_change, secondary_updates
+    Used as a fallback/supplement when the JSON block is missing or incomplete.
     """
-    # Try structured JSON first
-    json_outcomes = _parse_defender_json(defender_text, findings)
-    if json_outcomes is not None:
-        return json_outcomes
-
-    # Fall back to regex parsing
     outcomes = []
     node_map = {n["id"]: n for n in findings}
 
@@ -243,6 +232,36 @@ def _parse_defender_response(defender_text: str, findings: list[dict]) -> list[d
     outcomes = [outcomes[i] for i in sorted(seen.values())]
 
     return outcomes
+
+
+def _parse_defender_response(defender_text: str, findings: list[dict]) -> list[dict]:
+    """Extract per-node outcomes from the Defender's structured response.
+
+    Uses JSON as primary source, then supplements with regex-parsed outcomes
+    for any nodes discussed in prose but missing from the JSON block.
+
+    Returns a list of dicts with keys:
+    - node_id, node_label, response (DEFEND/CONCEDE/PARTIALLY CONCEDE),
+      reasoning, post_confidence, proposed_change, secondary_updates
+    """
+    # Try structured JSON first
+    json_outcomes = _parse_defender_json(defender_text, findings)
+
+    # Always run regex as well
+    regex_outcomes = _parse_defender_regex(defender_text, findings)
+
+    if json_outcomes is None:
+        # No JSON block at all — regex is all we have
+        return regex_outcomes
+
+    # Merge: JSON takes priority, regex fills gaps
+    covered_ids = {o["node_id"] for o in json_outcomes}
+    for regex_o in regex_outcomes:
+        if regex_o["node_id"] not in covered_ids:
+            json_outcomes.append(regex_o)
+            covered_ids.add(regex_o["node_id"])
+
+    return json_outcomes
 
 
 def _apply_graph_mutations(
@@ -470,6 +489,23 @@ async def run_findings_review(session_id: str) -> tuple[Transcript, Changelog]:
     else:
         changelog.termination_reason = "max_rounds"
         changelog.total_rounds = MAX_SOCRATIC_ROUNDS
+
+    # --- Backfill: unchallenged findings get "retained" outcomes ---
+    challenged_ids = {o.node_id for o in changelog.outcomes}
+    for finding in findings:
+        if finding["id"] not in challenged_ids and not finding.get("withdrawn", False):
+            conf = finding.get("confidence", 0.5)
+            changelog.add_outcome(ChallengeOutcome(
+                node_id=finding["id"],
+                node_label=finding.get("label", ""),
+                grounds="",
+                challenge_summary="Not challenged during Socratic review",
+                outcome="retained_unchallenged",
+                change_description="",
+                original_confidence=conf,
+                final_confidence=conf,
+                round_number=0,
+            ))
 
     # Persist
     transcript.save()

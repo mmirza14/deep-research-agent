@@ -41,11 +41,10 @@ class Changelog:
         self.outcomes.append(outcome)
 
     def summary_stats(self) -> dict:
-        """Return counts of retained/modified/removed."""
-        stats = {"retained": 0, "modified": 0, "removed": 0}
+        """Return counts by outcome type."""
+        stats: dict[str, int] = {}
         for o in self.outcomes:
-            if o.outcome in stats:
-                stats[o.outcome] += 1
+            stats[o.outcome] = stats.get(o.outcome, 0) + 1
         return stats
 
     def save(self) -> Path:
