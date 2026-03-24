@@ -11,11 +11,14 @@ def summarize_graph(graph: Graph) -> str:
     if not graph.nodes:
         return "Knowledge graph is empty. No nodes or edges yet."
 
-    type_counts = Counter(n["type"] for n in graph.nodes)
+    # Filter out withdrawn nodes from all summaries
+    active_nodes = [n for n in graph.nodes if not n.get("withdrawn", False)]
+
+    type_counts = Counter(n["type"] for n in active_nodes)
     edge_count = len(graph.edges)
 
     lines = [
-        f"Graph: {len(graph.nodes)} nodes, {edge_count} edges.",
+        f"Graph: {len(active_nodes)} nodes, {edge_count} edges.",
         "",
         "Nodes by type:",
     ]
@@ -23,7 +26,7 @@ def summarize_graph(graph: Graph) -> str:
         lines.append(f"  {t}: {c}")
 
     # Low-confidence nodes
-    low_conf = [n for n in graph.nodes if n.get("confidence", 1.0) < 0.4]
+    low_conf = [n for n in active_nodes if n.get("confidence", 1.0) < 0.4]
     if low_conf:
         lines.append("")
         lines.append(f"Low-confidence nodes ({len(low_conf)}):")
@@ -31,7 +34,7 @@ def summarize_graph(graph: Graph) -> str:
             lines.append(f"  - [{n['id']}] {n['label']} (conf={n['confidence']:.2f})")
 
     # Recent additions (last 10 by list order, which is insertion order)
-    recent = graph.nodes[-10:]
+    recent = active_nodes[-10:]
     lines.append("")
     lines.append("Recent nodes:")
     for n in reversed(recent):

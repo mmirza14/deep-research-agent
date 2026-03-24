@@ -48,7 +48,9 @@ Session ID: {session_id}
 Review stage: Findings Review (Stage 1)
 Round: {round_number} of {max_rounds}
 
-Below are the findings under review (graph nodes added by researchers this session):
+Below are the findings under review (graph nodes added by researchers this session).
+Nodes marked ⚠ UNSOURCED QUANTITATIVE CLAIM lack citation edges to source nodes — prioritize these.
+Nodes marked ⚠ POTENTIAL COI have a cited source whose domain appears in the claim — flag the conflict.
 
 {findings_text}
 
@@ -104,6 +106,26 @@ after considering the challenge. If your confidence drops below {confidence_thre
    - Proposed change: [if conceding — what should change]
 
 Be honest. If the Critic is right, concede. The goal is better research, not winning.
+
+After your natural language response, you MUST emit a structured JSON summary block. \
+This is mandatory and must cover every challenge you responded to:
+
+```json
+[
+  {{
+    "node_id": "12-char-hex-id",
+    "response": "DEFEND | CONCEDE | PARTIALLY CONCEDE",
+    "confidence": 0.85,
+    "change_description": "what should change (empty string if DEFEND)",
+    "secondary_updates": [
+      {{"node_id": "12-char-hex-id", "confidence": 0.65}}
+    ]
+  }}
+]
+```
+
+The secondary_updates array captures confidence changes to nodes OTHER than the \
+primary challenged node that you referenced in your response. Include it even if empty.
 """
 
 CRITIC_SYNTHESIS = """\
@@ -157,6 +179,26 @@ Your task:
 3. Rate your post-challenge confidence (0.0-1.0) for each challenged conclusion.
 
 Structure your response the same way as a findings defense — per-challenge, with clear outcomes.
+
+After your natural language response, you MUST emit a structured JSON summary block. \
+This is mandatory and must cover every challenge you responded to:
+
+```json
+[
+  {{
+    "node_id": "12-char-hex-id",
+    "response": "DEFEND | CONCEDE | PARTIALLY CONCEDE",
+    "confidence": 0.85,
+    "change_description": "what should change (empty string if DEFEND)",
+    "secondary_updates": [
+      {{"node_id": "12-char-hex-id", "confidence": 0.65}}
+    ]
+  }}
+]
+```
+
+The secondary_updates array captures confidence changes to nodes OTHER than the \
+primary challenged node that you referenced in your response. Include it even if empty.
 """
 
 CRITIC_AGENT_DESCRIPTION = """\

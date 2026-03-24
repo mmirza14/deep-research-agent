@@ -62,9 +62,52 @@ def add_node(
         mode: Research mode — survey, analysis, or direction.
     """
     import uuid
+    from difflib import SequenceMatcher
 
     graph = _load()
+
+    # --- Cross-session deduplication ---
+    for existing in graph["nodes"]:
+        if existing.get("type") != type:
+            continue
+        if existing.get("withdrawn", False):
+            continue
+        ratio = SequenceMatcher(
+            None, existing["label"].lower(), label.lower()
+        ).ratio()
+        if ratio > 0.85:
+            edge_id = uuid.uuid4().hex[:12]
+            graph["edges"].append({
+                "id": edge_id,
+                "source": existing["id"],
+                "target": existing["id"],
+                "relationship": "corroborates",
+                "weight": ratio,
+                "provenance": {
+                    "session_id": session_id,
+                    "subagent": subagent,
+                    "mode": mode,
+                },
+            })
+            old_conf = existing.get("confidence", 0.5)
+            existing["confidence"] = min(old_conf + 0.05, 0.95)
+            _save(graph)
+            return (
+                f"Near-duplicate found: [{existing['id']}] {existing['label']} "
+                f"(similarity={ratio:.2f}). Linked via corroborates edge. "
+                f"Confidence boosted {old_conf:.2f} → {existing['confidence']:.2f}."
+            )
+
     node_id = uuid.uuid4().hex[:12]
+    # Extract domain for source nodes
+    domain = None
+    if type == "source" and url:
+        from urllib.parse import urlparse
+        try:
+            domain = urlparse(url).netloc or None
+        except Exception:
+            pass
+
     node = {
         "id": node_id,
         "label": label,
@@ -80,6 +123,7 @@ def add_node(
             "url": url or None,
             "source_type": source_type or None,
             "user_added": False,
+            "domain": domain,
         },
     }
     graph["nodes"].append(node)
@@ -165,7 +209,8 @@ def get_graph_summary() -> str:
     from collections import Counter
 
     graph = _load()
-    nodes = graph["nodes"]
+    # Filter out withdrawn nodes from summaries
+    nodes = [n for n in graph["nodes"] if not n.get("withdrawn", False)]
     edges = graph["edges"]
 
     if not nodes:
@@ -211,6 +256,118 @@ def get_graph_summary() -> str:
             lines.append(f"  - {label}: {count} connections")
 
     return "\n".join(lines)
+
+
+@mcp.tool()
+def detect_coi(session_id: str = "") -> str:
+    """Detect potential conflicts of interest in claim nodes.
+
+    Checks if any claim's cited source domain appears in the claim's text,
+    indicating the source may have a commercial interest in the claim.
+
+    Args:
+        session_id: If provided, only check claims from this session.
+    """
+    from urllib.parse import urlparse as _urlparse
+
+    graph = _load()
+    nodes = graph["nodes"]
+    edges = graph["edges"]
+
+    # Map source node id → domain
+    source_domains: dict[str, str] = {}
+    for n in nodes:
+        if n.get("type") != "source":
+            continue
+        domain = n.get("metadata", {}).get("domain")
+        if domain:
+            source_domains[n["id"]] = domain
+
+    # Map claim → cited source ids
+    claim_sources: dict[str, set[str]] = {}
+    for e in edges:
+        if e.get("relationship") == "cites":
+            claim_sources.setdefault(e["source"], set()).add(e["target"])
+
+    flagged = []
+    for n in nodes:
+        if n.get("type") != "claim":
+            continue
+        if session_id and n.get("provenance", {}).get("session_id") != session_id:
+            continue
+
+        text = (n.get("label", "") + " " + n.get("description", "")).lower()
+        for src_id in claim_sources.get(n["id"], set()):
+            domain = source_domains.get(src_id, "")
+            if not domain:
+                continue
+            company = domain.split(".")[-2] if "." in domain else domain
+            company = company.replace("www", "").strip()
+            if len(company) < 3:
+                continue
+            if company.lower() in text:
+                meta = n.setdefault("metadata", {})
+                meta["potential_coi"] = True
+                original = n.get("confidence", 0.5)
+                n["confidence"] = max(original - 0.10, 0.10)
+                flagged.append(f"[{n['id']}] {n['label']} (source: {domain})")
+                break
+
+    if flagged:
+        _save(graph)
+        return f"COI detected in {len(flagged)} claims:\n" + "\n".join(flagged)
+    return "No conflicts of interest detected."
+
+
+@mcp.tool()
+def validate_claims(session_id: str = "") -> str:
+    """Flag quantitative claim nodes that lack citation edges to source nodes.
+
+    Checks all claim nodes (optionally filtered by session_id) for numeric
+    content in their description. If a quantitative claim has no 'cites' edge,
+    its confidence is capped at 0.50 and it is tagged with needs_source=true.
+
+    Args:
+        session_id: If provided, only validate claims from this session.
+    """
+    import re as _re
+
+    graph = _load()
+    nodes = graph["nodes"]
+    edges = graph["edges"]
+
+    # Build set of claim node IDs that have a cites edge (claim → source)
+    cited_claims: set[str] = set()
+    for e in edges:
+        if e.get("relationship") == "cites":
+            cited_claims.add(e["source"])
+
+    quant_pattern = _re.compile(r"\d+\.?\d*\s*%|\b\d{2,}\b")
+    flagged = []
+
+    for node in nodes:
+        if node.get("type") != "claim":
+            continue
+        if session_id and node.get("provenance", {}).get("session_id") != session_id:
+            continue
+        desc = node.get("description", "")
+        if not quant_pattern.search(desc):
+            continue
+        if node["id"] in cited_claims:
+            continue
+
+        # Flag it
+        meta = node.setdefault("metadata", {})
+        meta["needs_source"] = True
+        node["confidence"] = min(node.get("confidence", 0.5), 0.50)
+        flagged.append(f"[{node['id']}] {node['label']} (conf capped at {node['confidence']:.2f})")
+
+    if flagged:
+        _save(graph)
+
+    if not flagged:
+        return "All quantitative claims have citation edges."
+    return f"Flagged {len(flagged)} unsourced quantitative claims:\n" + "\n".join(flagged)
 
 
 @mcp.tool()

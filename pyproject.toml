@@ -13,5 +13,11 @@ dependencies = [
 [tool.setuptools.packages.find]
 include = ["research_agent*", "visualization*"]
 
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [project.scripts]
 research = "research_agent.agent:main"

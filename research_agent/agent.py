@@ -206,6 +206,17 @@ async def run_research(question: str, session_id: str) -> None:
     # -----------------------------------------------------------------------
     # Step 2: Stage 1 Socratic Review — Critic/Defender review findings
     # -----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
+    # Step 1.5: Validate quantitative claims before review
+    # -----------------------------------------------------------------------
+    from research_agent.validation import validate_session_claims, detect_coi
+    validation_result = validate_session_claims(session_id)
+    if validation_result:
+        print(f"\n{validation_result}")
+    coi_result = detect_coi(session_id)
+    if coi_result:
+        print(f"\n{coi_result}")
+
     findings = get_session_findings(session_id)
     if findings:
         print("\n\n" + "=" * 60)

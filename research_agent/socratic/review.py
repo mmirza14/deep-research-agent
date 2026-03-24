@@ -52,16 +52,25 @@ def get_session_findings(session_id: str) -> list[dict]:
 
 def format_findings_for_review(nodes: list[dict]) -> str:
     """Format graph nodes into readable text for the Critic/Defender."""
+    # Filter out withdrawn nodes
+    nodes = [n for n in nodes if not n.get("withdrawn", False)]
     if not nodes:
         return "(No findings to review.)"
     lines = []
     for n in nodes:
-        lines.append(
+        entry = (
             f"- [{n['id']}] **{n['label']}** ({n['type']}, conf={n.get('confidence', 0.5):.2f})\n"
             f"  Description: {n.get('description', 'N/A')}\n"
             f"  Source: {n.get('metadata', {}).get('url', 'N/A')} "
             f"({n.get('metadata', {}).get('source_type', 'N/A')})"
         )
+        # Surface validation flags
+        meta = n.get("metadata", {})
+        if meta.get("needs_source"):
+            entry += "\n  ⚠ UNSOURCED QUANTITATIVE CLAIM — confidence capped at 0.50"
+        if meta.get("potential_coi"):
+            entry += "\n  ⚠ POTENTIAL COI — source domain appears in claim"
+        lines.append(entry)
     return "\n".join(lines)
 
 
@@ -97,19 +106,67 @@ async def _run_agent(system_prompt: str, model: str) -> str:
 # Outcome parsing
 # ---------------------------------------------------------------------------
 
+def _parse_defender_json(defender_text: str, findings: list[dict]) -> list[dict] | None:
+    """Try to extract structured JSON outcomes from the Defender's response.
+
+    The Defender is instructed to emit a ```json [...] ``` block after its
+    natural language response.  Returns parsed outcomes or None if no valid
+    JSON block is found.
+    """
+    node_map = {n["id"]: n for n in findings}
+
+    json_match = re.search(r"```json\s*(\[.*?\])\s*```", defender_text, re.DOTALL)
+    if not json_match:
+        return None
+
+    try:
+        raw = json.loads(json_match.group(1))
+    except (json.JSONDecodeError, ValueError):
+        return None
+
+    if not isinstance(raw, list):
+        return None
+
+    outcomes = []
+    for entry in raw:
+        if not isinstance(entry, dict):
+            continue
+        node_id = entry.get("node_id", "")
+        if node_id not in node_map:
+            continue
+        response = entry.get("response", "").upper().strip()
+        if response not in ("DEFEND", "CONCEDE", "PARTIALLY CONCEDE"):
+            continue
+
+        outcomes.append({
+            "node_id": node_id,
+            "node_label": node_map[node_id].get("label", ""),
+            "response": response,
+            "reasoning": entry.get("change_description", ""),
+            "post_confidence": entry.get("confidence"),
+            "proposed_change": entry.get("change_description", ""),
+            "secondary_updates": entry.get("secondary_updates", []),
+        })
+
+    return outcomes if outcomes else None
+
+
 def _parse_defender_response(defender_text: str, findings: list[dict]) -> list[dict]:
     """Extract per-node outcomes from the Defender's structured response.
 
-    The Defender typically produces blocks separated by `---` dividers or
-    section headers (`### CHALLENGE N`, `### C<N> — [id] ...`).  Each block
-    contains a **Node:** line, a **Response:** line, **Reasoning:**,
-    **Post-challenge confidence:**, and **Proposed change:** fields —
-    sometimes with markdown bold markers (`**`).
+    Tries JSON parsing first (preferred); falls back to regex extraction
+    from markdown if no valid JSON block is found.
 
     Returns a list of dicts with keys:
     - node_id, node_label, response (DEFEND/CONCEDE/PARTIALLY CONCEDE),
-      reasoning, post_confidence, proposed_change
+      reasoning, post_confidence, proposed_change, secondary_updates
     """
+    # Try structured JSON first
+    json_outcomes = _parse_defender_json(defender_text, findings)
+    if json_outcomes is not None:
+        return json_outcomes
+
+    # Fall back to regex parsing
     outcomes = []
     node_map = {n["id"]: n for n in findings}
 
@@ -175,6 +232,7 @@ def _parse_defender_response(defender_text: str, findings: list[dict]) -> list[d
             "reasoning": reasoning,
             "post_confidence": post_confidence,
             "proposed_change": proposed_change,
+            "secondary_updates": [],
         })
 
     # Deduplicate by node_id — keep the last occurrence per node
@@ -192,11 +250,15 @@ def _apply_graph_mutations(
     changelog: Changelog,
     findings: list[dict],
     round_number: int,
-) -> None:
-    """Apply concessions to the graph and record in changelog."""
+) -> list[dict]:
+    """Apply concessions to the graph and record in changelog.
+
+    Returns a list of mutation records: [{node_id, field, old, new}].
+    """
     graph = load_graph()
     node_map = {n["id"]: n for n in graph.nodes}
     findings_map = {n["id"]: n for n in findings}
+    mutations: list[dict] = []
 
     for outcome in outcomes:
         node_id = outcome["node_id"]
@@ -208,6 +270,7 @@ def _apply_graph_mutations(
         response = outcome["response"]
 
         if response == "DEFEND":
+            final_conf = outcome.get("post_confidence") or original_conf
             changelog.add_outcome(ChallengeOutcome(
                 node_id=node_id,
                 node_label=outcome["node_label"],
@@ -216,7 +279,7 @@ def _apply_graph_mutations(
                 outcome="retained",
                 change_description="",
                 original_confidence=original_conf,
-                final_confidence=outcome.get("post_confidence") or original_conf,
+                final_confidence=final_conf,
                 round_number=round_number,
             ))
         elif response in ("CONCEDE", "PARTIALLY CONCEDE"):
@@ -225,24 +288,78 @@ def _apply_graph_mutations(
 
             # Apply to graph
             node["confidence"] = new_conf
+            mutations.append({"node_id": node_id, "field": "confidence",
+                              "old": original_conf, "new": new_conf})
             if change_desc and len(change_desc) > 10:
                 # Append caveat to description rather than replacing
                 existing = node.get("description", "")
                 node["description"] = f"{existing} [Socratic revision: {change_desc}]"
+                mutations.append({"node_id": node_id, "field": "description",
+                                  "old": "(appended)", "new": "(revised)"})
 
+            # Soft-delete if confidence drops very low
+            if new_conf < 0.15:
+                node["withdrawn"] = True
+
+            outcome_label = "removed" if new_conf < 0.15 else "modified"
             changelog.add_outcome(ChallengeOutcome(
                 node_id=node_id,
                 node_label=outcome["node_label"],
                 grounds="",
                 challenge_summary=outcome["reasoning"][:200],
-                outcome="modified" if response == "PARTIALLY CONCEDE" else "modified",
+                outcome=outcome_label,
                 change_description=change_desc,
                 original_confidence=original_conf,
                 final_confidence=new_conf,
                 round_number=round_number,
             ))
 
+        # --- Process secondary confidence updates ---
+        for sec in outcome.get("secondary_updates", []):
+            sec_id = sec.get("node_id", "")
+            sec_node = node_map.get(sec_id)
+            if not sec_node:
+                continue
+            sec_conf = sec.get("confidence")
+            if sec_conf is None:
+                continue
+            sec_original = sec_node.get("confidence", 0.5)
+            sec_node["confidence"] = sec_conf
+            mutations.append({"node_id": sec_id, "field": "confidence",
+                              "old": sec_original, "new": sec_conf})
+            if sec_conf < 0.15:
+                sec_node["withdrawn"] = True
+            changelog.add_outcome(ChallengeOutcome(
+                node_id=sec_id,
+                node_label=sec_node.get("label", ""),
+                grounds="",
+                challenge_summary=f"Secondary update from [{node_id}] review",
+                outcome="secondary_adjustment",
+                change_description="",
+                original_confidence=sec_original,
+                final_confidence=sec_conf,
+                round_number=round_number,
+            ))
+
     save_graph(graph)
+
+    # --- Validation pass: verify writes landed ---
+    if mutations:
+        import sys
+        verified = load_graph()
+        v_map = {n["id"]: n for n in verified.nodes}
+        for m in mutations:
+            if m["field"] != "confidence":
+                continue
+            v_node = v_map.get(m["node_id"])
+            if v_node and abs(v_node.get("confidence", -1) - m["new"]) > 0.001:
+                print(
+                    f"WARNING: confidence drift on [{m['node_id']}]: "
+                    f"expected {m['new']}, got {v_node.get('confidence')}",
+                    file=sys.stderr,
+                )
+
+    return mutations
 
 
 # ---------------------------------------------------------------------------
@@ -269,6 +386,7 @@ async def run_findings_review(session_id: str) -> tuple[Transcript, Changelog]:
 
     last_critic_message = ""
     last_defender_message = ""
+    mutation_summaries: list[str] = []
 
     for round_num in range(1, MAX_SOCRATIC_ROUNDS + 1):
         # --- Critic turn ---
@@ -278,13 +396,19 @@ async def run_findings_review(session_id: str) -> tuple[Transcript, Changelog]:
             max_rounds=MAX_SOCRATIC_ROUNDS,
             findings_text=findings_text,
         )
-        # After round 1, include the Defender's prior response as context
+        # After round 1, include the Defender's prior response and applied mutations
         if last_critic_message:
             critic_prompt += (
                 f"\n\nThe Defender's response from the previous round:\n\n"
                 f"{last_defender_message}\n\n"
-                f"Continue your review. Raise new challenges or follow up on unresolved ones."
             )
+            if mutation_summaries:
+                critic_prompt += (
+                    "Changes applied to the graph in previous rounds:\n\n"
+                    + "\n".join(mutation_summaries)
+                    + "\n\n"
+                )
+            critic_prompt += "Continue your review. Raise new challenges or follow up on unresolved ones."
 
         critic_response = await _run_agent(critic_prompt, CRITIC_MODEL)
         transcript.add_entry(round_num, "critic", critic_response)
@@ -310,7 +434,19 @@ async def run_findings_review(session_id: str) -> tuple[Transcript, Changelog]:
 
         # Parse outcomes and apply mutations
         outcomes = _parse_defender_response(defender_response, findings)
-        _apply_graph_mutations(outcomes, changelog, findings, round_num)
+        round_mutations = _apply_graph_mutations(outcomes, changelog, findings, round_num)
+
+        # Build mutation summary for next round's Critic context
+        if round_mutations:
+            summary_lines = [f"### Round {round_num} applied changes"]
+            for m in round_mutations:
+                if m["field"] == "confidence":
+                    summary_lines.append(
+                        f"- [{m['node_id']}] confidence: {m['old']:.2f} → {m['new']:.2f}"
+                    )
+                else:
+                    summary_lines.append(f"- [{m['node_id']}] {m['field']} updated")
+            mutation_summaries.append("\n".join(summary_lines))
 
         # Check for confidence escalation — if any finding drops below threshold,
         # the Critic gets an extra round on that finding (handled by continuing the loop)
@@ -394,6 +530,28 @@ async def run_synthesis_review(
 
         defender_response = await _run_agent(defender_prompt, DEFENDER_MODEL)
         transcript.add_entry(round_num, "defender", defender_response)
+
+        # Parse and record outcomes (no graph mutations for synthesis)
+        outcomes = _parse_defender_response(defender_response, findings)
+        for outcome in outcomes:
+            response = outcome["response"]
+            original_conf = 0.0  # synthesis challenges don't map to node confidence
+            post_conf = outcome.get("post_confidence") or 0.0
+            if response == "DEFEND":
+                outcome_label = "synthesis_retained"
+            else:
+                outcome_label = "synthesis_modified"
+            changelog.add_outcome(ChallengeOutcome(
+                node_id=outcome.get("node_id", ""),
+                node_label=outcome.get("node_label", ""),
+                grounds="",
+                challenge_summary=outcome.get("reasoning", "")[:200],
+                outcome=outcome_label,
+                change_description=outcome.get("proposed_change", ""),
+                original_confidence=original_conf,
+                final_confidence=post_conf,
+                round_number=round_num,
+            ))
 
         last_defender_message = defender_response
     else:

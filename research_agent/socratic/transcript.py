@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -26,6 +27,12 @@ class Transcript:
     entries: list[TranscriptEntry] = field(default_factory=list)
 
     def add_entry(self, round_number: int, role: str, content: str) -> None:
+        # Deduplicate consecutive entries with identical content from the same role
+        content_hash = hashlib.sha256(content.encode()).hexdigest()[:16]
+        if self.entries and self.entries[-1].role == role:
+            prev_hash = hashlib.sha256(self.entries[-1].content.encode()).hexdigest()[:16]
+            if prev_hash == content_hash:
+                return  # skip duplicate
         self.entries.append(TranscriptEntry(
             round_number=round_number,
             role=role,
