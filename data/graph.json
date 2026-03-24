@@ -906,7 +906,7 @@
       "label": "Frontier AI Safety Frameworks (Industry)",
       "type": "concept",
       "description": "Voluntary policy documents published by 12 AI companies (including Anthropic, OpenAI, Google DeepMind, Meta, Microsoft, xAI, NVIDIA) describing how they plan to manage risks as models scale. Include responsible scaling policies, capability thresholds, and halting conditions.",
-      "confidence": 0.92,
+      "confidence": 0.72,
       "provenance": {
         "session_id": "52988714",
         "subagent": "researcher-5",
@@ -2287,6 +2287,1436 @@
       "provenance": {
         "session_id": "52988714",
         "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "1bc191d48fad",
+      "label": "LLM Inference Cost Reduction in Production",
+      "type": "question",
+      "description": "What are the main approaches to reducing LLM inference costs in production? Covers model optimization, hardware/serving strategies, caching, architectural changes, and cost management practices.",
+      "confidence": 1.0,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "b9a32cf250b7",
+      "label": "Model Compression & Quantization",
+      "type": "question",
+      "description": "Techniques for making LLM models smaller and faster at inference time: quantization (INT8, INT4, GPTQ, AWQ), pruning, distillation, and sparsity.",
+      "confidence": 0.5,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "fddaca0850fa",
+      "label": "Efficient Serving & Batching Strategies",
+      "type": "question",
+      "description": "How serving infrastructure, continuous batching, KV cache management, and speculative decoding reduce per-token costs in production LLM deployments.",
+      "confidence": 0.5,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "a6538d936481",
+      "label": "Prompt & Context Optimization",
+      "type": "question",
+      "description": "Strategies to reduce token usage and cost at the prompt level: prompt compression, caching repeated context (prefix caching), RAG over full context, and token reduction techniques.",
+      "confidence": 0.5,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "5b6b13e1990e",
+      "label": "Model Routing & Cascading",
+      "type": "question",
+      "description": "Using multiple models of varying sizes and routing queries to the cheapest capable model. Includes model cascades, LLM routing, and mixture-of-experts approaches.",
+      "confidence": 0.5,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "ac23edd4deb5",
+      "label": "Hardware, Cloud & Deployment Cost Optimization",
+      "type": "question",
+      "description": "Infrastructure-level cost reduction: GPU/TPU selection, spot instances, custom silicon (e.g., Groq LPU, AWS Trainium/Inferentia), and multi-cloud/on-prem tradeoffs for LLM inference.",
+      "confidence": 0.5,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "f10a55a8c80b",
+      "label": "vLLM PagedAttention Paper (SOSP 2023)",
+      "type": "source",
+      "description": "Seminal paper \"Efficient Memory Management for Large Language Model Serving with PagedAttention\" published at SOSP 2023. Introduces PagedAttention to manage KV cache using OS-inspired paging, reducing memory waste from 60-80% to under 4% and improving throughput 2-4x over prior systems.",
+      "confidence": 0.97,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/abs/2309.06180",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "992cd1a10190",
+      "label": "LLMLingua: Prompt Compression (Microsoft Research)",
+      "type": "source",
+      "description": "Microsoft Research's LLMLingua series (EMNLP 2023, ACL 2024) introduces coarse-to-fine prompt compression using a small language model to identify and remove unimportant tokens, achieving up to 20x compression with minimal performance loss. LLMLingua-2 adds 3x-6x faster speed for out-of-domain data.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/abs/2310.05736",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "a49a56f19ad1",
+      "label": "SGLang Llama3 Benchmark (LMSYS 2024)",
+      "type": "source",
+      "description": "LMSYS blog post benchmarking SGLang vs TensorRT-LLM vs vLLM on Llama3 models (8B, 70B, 405B). Reports SGLang achieving up to 3.1x higher throughput than vLLM on Llama-70B, and often matching or exceeding TensorRT-LLM.",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://lmsys.org/blog/2024-07-25-sglang-llama3/",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "028efffabe7e",
+      "label": "Prompt Caching: Anthropic vs OpenAI (PromptHub Analysis)",
+      "type": "source",
+      "description": "Engineering analysis comparing Anthropic and OpenAI prompt/prefix caching implementations. Anthropic offers explicit cache control with 90% cost reduction on cache reads (but +25% write cost), while OpenAI provides automatic caching with 50% cost reduction on cache reads at no write cost.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://www.prompthub.us/blog/prompt-caching-with-openai-anthropic-and-google-models",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "dde440ae5bd7",
+      "label": "FlashAttention-3 Blog (Tri Dao, 2024)",
+      "type": "source",
+      "description": "Technical blog post by Tri Dao announcing FlashAttention-3, optimized for Hopper (H100) architecture. Reports 1.5-2x speedup over FlashAttention-2, reaching 840 TFLOPs/s with BF16 (85% utilization) and 1.3 PFLOPs/s with FP8 quantization.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://tridao.me/blog/2024/flash3/",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "907c3832753d",
+      "label": "RAG vs Long-Context LLMs: Comprehensive Study (arXiv 2407.16833)",
+      "type": "source",
+      "description": "Academic study (Li et al., 2024) comparing RAG and long-context LLMs. Finds long-context LLMs outperform RAG given ample resources, but RAG is far more cost-efficient. Long-context models processing 200k+ tokens can cost up to $20 per API call; RAG's computational overhead remains at least an order of magnitude lower.",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/abs/2407.16833",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "8591bef828ad",
+      "label": "Speculative Decoding NeurIPS 2024 (Cascade Drafting)",
+      "type": "source",
+      "description": "NeurIPS 2024 paper on Cascade Speculative Drafting for LLM inference acceleration. Reports up to 81% additional speedup over standard speculative decoding, building on the 2-3x baseline speedup from the draft-then-verify paradigm.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://proceedings.neurips.cc/paper_files/paper/2024/file/9cb5b083ba4f5ca6bd05dd307a2fb354-Paper-Conference.pdf",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "6e6668751c81",
+      "label": "Prompt Compression Survey (NAACL 2025)",
+      "type": "source",
+      "description": "Comprehensive NAACL 2025 survey on prompt compression for LLMs covering token pruning (Selective Context, LLMLingua), soft prompt compression, and context-aware encoding. Classifies methods and benchmarks their token reduction rates and downstream task performance.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/html/2410.12388v2",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "31a1630eb8fd",
+      "label": "Prompt Compression Techniques",
+      "type": "concept",
+      "description": "Methods to reduce input token count before sending to LLMs, including token pruning (Selective Context, LLMLingua) and soft compression. LLMLingua uses a small language model as a budget controller to identify and remove low-information tokens, achieving 4x-20x compression ratios with minimal quality loss.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "9da7ef742edd",
+      "label": "Continuous Batching (Iteration-Level Scheduling)",
+      "type": "concept",
+      "description": "A scheduling strategy for LLM inference where the batch composition is re-evaluated at every decoding iteration (token step) rather than fixed at request arrival. Completed sequences are immediately replaced with new requests, maximizing GPU utilization and eliminating idle compute between requests. Adopted by vLLM, TGI, SGLang, TensorRT-LLM, and LMDeploy.",
+      "confidence": 0.97,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "4c6a671647af",
+      "label": "RouteLLM Framework",
+      "type": "source",
+      "description": "LMSYS open-source framework for LLM routing using preference data. Trains four router types (SW ranking, matrix factorization, BERT classifier, causal LLM) to dynamically select between strong (GPT-4) and weak (Mixtral 8x7B) models based on query complexity.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/abs/2406.18665",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "e1286690d779",
+      "label": "Prefix / Prompt Caching",
+      "type": "concept",
+      "description": "Provider-level technique where repeated prefix tokens (system prompts, few-shot examples, document contexts) are cached in KV-cache storage so subsequent requests reuse computed attention states. Reduces both cost and latency for workloads with stable long prefixes. Implemented by Anthropic (explicit, 90% read discount), OpenAI (automatic, 50% read discount), and AWS Bedrock.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "10d73accd2ca",
+      "label": "PagedAttention / KV Cache Paging",
+      "type": "concept",
+      "description": "Attention algorithm that partitions KV cache into fixed-size blocks (pages) stored in non-contiguous GPU memory, inspired by OS virtual memory paging. Enables sharing of KV cache blocks across requests (e.g., for common system prompts), eliminates fragmentation, and supports copy-on-write for beam search. Core innovation of vLLM.",
+      "confidence": 0.97,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "565d9f91604b",
+      "label": "Dynamic Model Routing & Cascading Survey",
+      "type": "source",
+      "description": "2025 survey (arxiv 2603.04445) systematically analyzing multi-LLM routing and cascading approaches, covering query difficulty routing, uncertainty quantification, reinforcement learning, multimodality, and cascading paradigms. Introduces a three-dimension framework: when decisions are made, what information is used, and how they are computed.",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/abs/2603.04445",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "c3015517c9cd",
+      "label": "Unified Routing & Cascading (Cascade Routing)",
+      "type": "source",
+      "description": "ICLR 2024 paper (arxiv 2410.10347) introducing cascade routing \u2014 a theoretically optimal unified framework combining model routing and cascading. Provides formal optimality proofs and shows cascade routing consistently outperforms either individual approach, with quality estimators identified as critical component.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/abs/2410.10347",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "1d848f638368",
+      "label": "Speculative Decoding",
+      "type": "concept",
+      "description": "Inference acceleration technique using a small, fast draft model to propose multiple tokens ahead, which are then verified in a single forward pass of the large target model. Accepts or rejects draft tokens based on the target model's distribution, preserving output quality while achieving 2-3x wallclock speedup due to reduced sequential decoding steps.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "67719acc1e73",
+      "label": "Retrieval-Augmented Generation (RAG)",
+      "type": "concept",
+      "description": "Architecture that retrieves only relevant document chunks at query time and injects them into a short context window, rather than loading entire document corpora as long context. Reduces per-request token costs by sending only relevant chunks to the LLM, making it an order of magnitude cheaper than full long-context processing for large dynamic datasets.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "5c78a8f0e2b8",
+      "label": "Google Speculative Cascades Blog",
+      "type": "source",
+      "description": "Google Research blog post describing speculative cascading \u2014 a hybrid technique combining speculative decoding with cascading, using a small drafter model and large expert model in parallel with token-level deferral decisions. Achieves better quality-latency trade-offs than standard speculative decoding.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://research.google/blog/speculative-cascades-a-hybrid-approach-for-smarter-faster-llm-inference/",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "ea83f1d84b42",
+      "label": "SpotServe: LLM Serving on Preemptible Instances (ASPLOS 2024)",
+      "type": "source",
+      "description": "Academic paper from ASPLOS 2024 presenting SpotServe, the first distributed LLM serving system on preemptible instances. Demonstrates 54% cost savings vs on-demand instances and 2.4-9.1x P99 tail latency improvements via dynamic parallelization and stateful inference recovery.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/abs/2311.15566",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "1cd1c31f24fc",
+      "label": "Continuous batching delivers up to 23x throughput over static batching",
+      "type": "claim",
+      "description": "Anyscale benchmarks show continuous batching with vLLM achieves up to 23x throughput improvement over static batching while reducing p50 latency, by eliminating GPU idle time between variable-length sequence completions. The key mechanism is inserting new requests immediately when any sequence in the batch finishes.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "11cc1b2f34de",
+      "label": "LLM Routing",
+      "type": "concept",
+      "description": "A query-dispatch strategy that classifies incoming prompts by complexity and routes them to appropriately sized models \u2014 cheap/small models for simple queries, expensive/large models for complex ones. Routers are trained on preference data or use uncertainty/similarity signals. Key systems include RouteLLM, Martian, and OpenRouter.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "eec2f1080e82",
+      "label": "LLMLingua achieves up to 20x prompt compression with ~1.5pt quality drop",
+      "type": "claim",
+      "description": "Microsoft's LLMLingua series demonstrates up to 20x compression ratio on prompts with only a 1.5 point performance drop on downstream benchmarks. LLMLingua-2 further improves out-of-domain generalization at 3x-6x faster speed. Selective Context (2023), a precursor method using self-information pruning, achieves ~40% token reduction.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "50747edce59e",
+      "label": "PagedAttention reduces KV cache memory waste from 60-80% to under 4%",
+      "type": "claim",
+      "description": "Prior LLM serving systems wasted 60-80% of KV cache GPU memory due to fragmentation and over-reservation for variable output lengths. vLLM's PagedAttention reduces this waste to under 4% by using non-contiguous paged memory allocation, enabling 2-4x throughput improvement at equivalent latency versus FasterTransformer and Orca.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "ff88360bd067",
+      "label": "Model Cascading",
+      "type": "concept",
+      "description": "An inference strategy that first invokes a cheap small model; if its confidence exceeds a threshold the answer is returned, otherwise the query escalates to a larger more expensive model. Key approaches include FrugalGPT, AutoMix, C3PO, and Agreement-Based Cascading (ABC). Differs from routing by sequential rather than single-step model selection.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "a1a0845207fa",
+      "label": "Introl: Inference Unit Economics \u2014 True Cost Per Million Tokens",
+      "type": "source",
+      "description": "Industry blog post analyzing real-world LLM inference economics: GPU cost efficiency by model size and request length, pricing trends showing 10x annual cost decline, and combined optimization techniques achieving 16x effective cost reduction. Covers GPU comparisons (L4, A10G, A100, H100) and provider pricing benchmarks.",
+      "confidence": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://introl.com/blog/inference-unit-economics-true-cost-per-million-tokens-guide",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "084bb89ed041",
+      "label": "Anthropic prompt caching cuts costs 90% on cached reads; OpenAI 50% automatically",
+      "type": "claim",
+      "description": "Anthropic's explicit cache_control mechanism reduces cached input token costs by 90% (with a +25% surcharge on cache writes) and latency by up to 85%. OpenAI's automatic prefix caching (default on) provides 50% discount on cache hits with no write cost. Both providers cache KV-states for repeated prefixes in system prompts, RAG contexts, and few-shot examples.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "e5e430d71059",
+      "label": "Sparse Mixture of Experts (MoE)",
+      "type": "concept",
+      "description": "A model architecture where each token activates only a small subset of expert sub-networks via a router, keeping active parameter count much lower than total parameter count. Mixtral 8x7B activates 13B of 47B total parameters per token, matching Llama 2 70B quality at ~1/5 the inference compute. Used in Mixtral, GPT-4 (rumored), and Grok.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "cf05b5084100",
+      "label": "SGLang achieves up to 3.1x higher throughput than vLLM on Llama-70B",
+      "type": "claim",
+      "description": "LMSYS benchmarks (July 2024) on Llama-3 models show SGLang consistently outperforming vLLM, reaching up to 3.1x higher throughput on Llama-70B and often matching or exceeding TensorRT-LLM. SGLang's RadixAttention (automatic prefix caching) and optimized batch scheduler are the primary differentiators, especially at high concurrency.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "7e475417cfec",
+      "label": "Ptolemay: LLM Total Cost of Ownership 2025 \u2014 Build vs Buy",
+      "type": "source",
+      "description": "Engineering analysis comparing self-hosted LLM infrastructure vs API providers. Quantifies break-even thresholds (>1M daily requests favors self-hosting), hidden costs including MLOps personnel (~$135K/year per 4-6 GPUs), and real-world case study showing 83% cost reduction via hybrid self-hosting for a fintech chatbot.",
+      "confidence": 0.82,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://www.ptolemay.com/post/llm-total-cost-of-ownership",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "0a6f03b7b7bc",
+      "label": "RAG is order-of-magnitude cheaper than long-context LLMs for large dynamic datasets",
+      "type": "claim",
+      "description": "Li et al. (2024) found long-context LLMs processing 200k+ tokens can cost up to $20 per API call, while RAG reduces this by retrieving only relevant chunks. The computational overhead of full long-context processing grows non-linearly and remains at least 10x higher than RAG for dynamic or large datasets. Hybrid RAG + long-context approaches show best quality-cost tradeoff.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "e6fdc46355f7",
+      "label": "FlashAttention-3 reaches 85% H100 utilization, 1.5-2x over FA2",
+      "type": "claim",
+      "description": "FlashAttention-3 (2024), optimized for Hopper (H100) GPU architecture using warp specialization and Tensor Memory Accelerator (TMA) for overlapping compute and memory transfer, achieves 840 TFLOPs/s with BF16 (85% theoretical peak utilization) and 1.3 PFLOPs/s with FP8. This is 1.5-2x faster than FlashAttention-2, which peaked at ~70% A100 utilization.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "259477a75dbc",
+      "label": "RouteLLM achieves 40\u201385% cost reduction at 95% GPT-4 quality",
+      "type": "claim",
+      "description": "RouteLLM benchmarks show over 85% cost reduction on MT Bench, 45% on MMLU, and 35% on GSM8K compared to always using GPT-4, while maintaining 95% of GPT-4's performance. Routers exhibit transfer learning and work across different strong/weak model pairs at test time.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "0704020d0ff7",
+      "label": "Hierarchical summarization reduces context 70-90% for long conversations",
+      "type": "claim",
+      "description": "Context window management via hierarchical summarization compresses older conversation segments while keeping recent exchanges verbatim, reducing context size by 70-90% for long conversations at the cost of one summarization API call roughly every 15 messages. Sliding window strategies maintain recent full exchanges while summarizing older history, preventing unbounded context growth.",
+      "confidence": 0.82,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "393e38474a17",
+      "label": "TLDL: LLM API Pricing March 2026 \u2014 GPT, Claude, Gemini, DeepSeek",
+      "type": "source",
+      "description": "Pricing aggregator tracking 30+ LLM models as of March 2026. Documents dramatic price reductions: GPT-4 equivalent costs dropped from $20/M tokens (2022) to $0.40/M (2025), Gemini 2.0 Flash at $0.10/$0.40 per million tokens, and DeepSeek R1 disrupting the market at $0.55/$2.19 \u2014 90% below Western competitors.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://www.tldl.io/resources/llm-api-pricing-2026",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "3dca2f4be955",
+      "label": "Fine-tuned SLMs can match LLMs on narrow tasks at 90% lower inference cost",
+      "type": "claim",
+      "description": "Task-specific fine-tuned small language models (1\u201315B parameters) frequently match or exceed GPT-4 class models on well-defined, domain-specific tasks while costing ~90% less in inference (e.g., Mistral 7B at $0.0001/1K tokens vs GPT-4 at $0.03/1K tokens). However, large frontier models consistently outperform SLMs on complex reasoning and open-ended tasks.",
+      "confidence": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "2cdff2c3396d",
+      "label": "Speculative decoding achieves 2-3x speedup; Cascade Drafting adds 81% more",
+      "type": "claim",
+      "description": "Standard speculative decoding with a well-chosen draft model achieves 2-3x wallclock speedup over autoregressive decoding at acceptance rates above 0.6. NeurIPS 2024 Cascade Speculative Drafting further improves on this with up to 81% additional speedup. Apple's ReDrafter achieves 2.8x speedup on H100 for Vicuna inference.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "84605411d92e",
+      "label": "Structured outputs (JSON schema) eliminate verbose natural language tokens",
+      "type": "claim",
+      "description": "Constrained decoding with JSON/grammar schemas (released by OpenAI August 2024, Google Gemini May 2024) eliminates preamble text and verbose natural language in responses. DOMINO (ICML 2024) achieves near-zero overhead for grammar-constrained decoding. Structured outputs reduce output token waste and ensure parseable responses without retry calls, lowering effective total cost.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "cd6f4ff22f51",
+      "label": "Mixtral 8x7B matches Llama 2 70B at 1/5 the inference compute",
+      "type": "claim",
+      "description": "Mixtral 8x7B uses sparse MoE with top-2 expert routing, activating only 13B of 47B total parameters per token. It matches or exceeds Llama 2 70B across most benchmarks while requiring roughly one-fifth the active compute, demonstrating that sparse activation can decouple model capacity from per-token inference cost.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "7541718a414f",
+      "label": "Custom AI Chips Outperform GPUs for Latency-Sensitive Inference",
+      "type": "claim",
+      "description": "Groq's LPU achieves ~300 tokens/second on Llama 3 70B (vs 10-30 tokens/sec on NVIDIA GPUs), with a time-to-first-token of 0.2 seconds. AWS Inferentia2 delivers inference at $0.80/hr vs $9.80/hr for H100, with 4x lower cost for NLP workloads. These custom chips offer compelling economics for latency-sensitive or high-volume inference, despite higher upfront integration complexity.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "0b249b21f901",
+      "label": "Cascade routing outperforms routing and cascading individually",
+      "type": "claim",
+      "description": "The unified cascade routing framework (ETH Zurich, 2024) proves theoretically optimal strategies for both cascading and routing, and shows empirically that combining them outperforms either approach alone by a large margin. Quality estimators \u2014 models that predict whether a small model's answer is correct \u2014 are identified as the critical bottleneck component.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "53b27ad62ea8",
+      "label": "GPU Cost Efficiency Is Request-Size Dependent, Not Universal",
+      "type": "claim",
+      "description": "No single GPU is universally most cost-efficient for LLM inference. L4 and A10G GPUs are most cost-effective for short-context/small-batch workloads (1-2 req/s), while A100 and H100 become economically superior for longer contexts and higher throughput. H100 delivers 3x better inference performance than A100 but costs 2.5x more, yielding best economics at high utilization. Cloud H100 prices dropped 64-75% from peak to $1.49-$3.50/hr in 2025.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "9554ea4ebc04",
+      "label": "Well-designed routing can outperform the best individual model",
+      "type": "claim",
+      "description": "The 2025 Dynamic Model Routing & Cascading survey finds that well-designed routing systems can outperform even the most powerful individual models by strategically leveraging specialized capabilities across models. Effective routing requires balancing competing objectives and choosing strategies based on deployment and computational constraints.",
+      "confidence": 0.82,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "0ae9d6dfc479",
+      "label": "Speculative cascading improves quality-latency tradeoff over speculative decoding",
+      "type": "claim",
+      "description": "Google Research's speculative cascading combines speculative decoding with cascading: a small drafter generates tokens while a large expert verifies, with flexible token-level deferral. It achieves better quality-latency trade-offs than standard speculative decoding across summarization, reasoning, coding, and QA benchmarks.",
+      "confidence": 0.87,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "5f418428c8f9",
+      "label": "Spot/Preemptible Instances Enable 54-80% Cost Savings for LLM Inference",
+      "type": "claim",
+      "description": "SpotServe (ASPLOS 2024) demonstrates that serving LLMs on preemptible instances is feasible, achieving 54% cost savings vs on-demand with 2.4-9.1x P99 latency improvements. Broader industry estimates indicate 60-80% savings for fault-tolerant workloads. Key enablers: dynamic parallelization reconfiguration, bipartite-matching-based migration, and stateful inference recovery using cloud preemption grace periods.",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "0e86d3a08c3a",
+      "label": "Self-Hosting Breaks Even at ~1M+ Daily Requests; Hidden Costs Shift TCO by 25-40%",
+      "type": "claim",
+      "description": "For most teams under 50M tokens/day, API providers are cheaper after accounting for full TCO. Self-hosted 7B model on H100 spot instance costs ~$0.013/1K tokens vs $0.15-$0.60 for GPT-4o Mini API. Hidden costs (MLOps personnel at ~$135K/year per 4-6 GPUs, under-utilization, compliance) shift TCO by 25-40%. Above 1M daily requests, self-hosting begins to win. One fintech case study achieved 83% cost reduction through hybrid self-hosting.",
+      "confidence": 0.87,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "53fe54de4f83",
+      "label": "LLM API Prices Declining ~10x Annually; Competitive Disruption from DeepSeek",
+      "type": "claim",
+      "description": "LLM inference API costs have declined 10x annually since 2022, faster than historical PC compute curves. GPT-4 equivalent performance dropped from $20/M to $0.40/M tokens. As of early 2026: Gemini 2.0 Flash at $0.10/$0.40 per MTok, DeepSeek R1 at $0.55/$2.19 (90% below Western competitors at launch), forcing broad price competition. AWS cut H100 cloud pricing by ~44% in June 2025 alone.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "189512103c2d",
+      "label": "Continuous Batching and PagedAttention Achieve 23x Throughput Gains",
+      "type": "claim",
+      "description": "vLLM's continuous batching enables dynamic request insertion into ongoing batches, eliminating GPU idle time from variable-length responses, achieving up to 23x throughput improvement. PagedAttention eliminates KV cache memory fragmentation, enabling higher batch sizes. Combined with auto-scaling, speculative decoding, and quantization, these techniques compound to ~16x effective cost reduction vs naive deployment.",
+      "confidence": 0.91,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "bce5906b83cd",
+      "label": "Heterogeneous GPU Serving Strategy",
+      "type": "concept",
+      "description": "The approach of deploying different GPU tiers (L4, A10G, A100, H100) based on workload characteristics rather than using a single GPU type universally. Lower-end GPUs serve short-context/low-throughput requests while high-end GPUs handle long-context and high-concurrency workloads, maximizing cost efficiency across a diverse request mix. Formalized in the Melange research paper (2024).",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "ad34267d3d3f",
+      "label": "Spot-Resilient LLM Serving Architecture",
+      "type": "concept",
+      "description": "Infrastructure pattern combining preemptible/spot GPU instances with fault-tolerance mechanisms for LLM inference. Key techniques include: stateful KV-cache checkpointing, dynamic tensor parallelism reconfiguration, multi-region spot instance hedging, and grace-period-aware migration. Enables 54-80% cloud cost savings while maintaining SLA compliance through redundant on-demand fallback.",
+      "confidence": 0.87,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "e8529113794a",
+      "label": "Inference Cost Optimization Stack",
+      "type": "concept",
+      "description": "The layered set of complementary optimization techniques for reducing LLM inference costs: hardware selection (custom chips vs GPU tier), model optimization (quantization at 4-8 bit reducing costs 50-75%), serving engine improvements (continuous batching, PagedAttention, speculative decoding), infrastructure patterns (spot instances, auto-scaling), and routing strategies (directing queries to cheapest capable model). These techniques compound multiplicatively.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "28ebc3e519a9",
+      "label": "vLLM Quantization Benchmarks Guide (Jarvislabs)",
+      "type": "source",
+      "description": "Comprehensive benchmark guide comparing INT4 quantization methods (GPTQ, AWQ, GGUF, BitsandBytes) on vLLM, with throughput, perplexity, and code generation accuracy data. Published 2024\u20132025.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://docs.jarvislabs.ai/blog/vllm-quantization-complete-guide-benchmarks",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "413f399ebde4",
+      "label": "AWQ: Activation-aware Weight Quantization (MLSys 2024 Best Paper)",
+      "type": "source",
+      "description": "MIT Han Lab's AWQ paper and GitHub repository, winner of MLSys 2024 Best Paper Award. Demonstrates 2.7\u20132.9x speedup over FP16 on LLaMA-3-8B with 4-bit quantization, adopted by Google Vertex AI and Amazon SageMaker.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://github.com/mit-han-lab/llm-awq",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "e7e842dc6b48",
+      "label": "Microsoft Azure AI Distillation Engineering Blog",
+      "type": "source",
+      "description": "Microsoft Azure AI Foundry blog post on knowledge distillation for LLMs, reporting ~21\u201331% performance improvement for distilled student models (Llama 3.1 8B, Phi-3 Mini) over direct prompting, with 2\u20138x faster inference vs teacher.",
+      "confidence": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/distillation-turning-smaller-models-into-high-performance-cost-effective-solutio/4355029",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "bdd087ca1494",
+      "label": "GGUF & llama.cpp Quantization (LocalLLM / OreateAI 2024-2025)",
+      "type": "source",
+      "description": "Engineering blogs covering GGUF format and llama.cpp framework for CPU-based LLM inference, documenting Q4_K_M yielding ~70% file size reduction, 1.5\u20132x inference speedup, and 90\u201395% quality retention vs full precision.",
+      "confidence": 0.82,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://www.oreateai.com/blog/practical-quantization-of-llama-models-detailed-explanation-of-gguf-and-llamacpp-technologies/883cbae0bac3a4644816ec51066c3876",
+        "source_type": "blog",
+        "user_added": false
+      }
+    },
+    {
+      "id": "b54a2ecbbcf8",
+      "label": "Post-Training Quantization (PTQ)",
+      "type": "concept",
+      "description": "Technique of compressing LLM weights after training by reducing numerical precision (e.g., FP16 to INT8/INT4). Key methods include GPTQ (layer-wise Hessian-based optimization), AWQ (activation-aware weight scaling), and GGUF (flexible multi-bit format for CPU inference). Requires no full model retraining.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "cab883c6992d",
+      "label": "Knowledge Distillation for LLMs",
+      "type": "concept",
+      "description": "Training paradigm where a large teacher model transfers learned representations to a smaller student model through soft labels, intermediate feature matching, or chain-of-thought supervision. Enables compact models to approach teacher performance at a fraction of inference cost.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "25a72add3257",
+      "label": "Structured vs. Unstructured Pruning",
+      "type": "concept",
+      "description": "Model compression by removing redundant weights. Structured pruning removes entire neurons, heads, or layers (hardware-friendly, preferred in production), while unstructured pruning removes individual weights producing sparse models. Structured pruning is dominant in enterprise deployment (82% preference per Forrester 2024).",
+      "confidence": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "a18835c75a7b",
+      "label": "INT4 quantization delivers 2.7\u20132.9x GPU speedup with minimal accuracy loss",
+      "type": "claim",
+      "description": "AWQ 4-bit quantization achieves 2.7x faster inference than FP16 on RTX 4090 and 2.9x on Jetson Orin for LLaMA-3-8B, while keeping perplexity within ~4% of baseline and code generation accuracy within 7.6% of FP16. Marlin-AWQ kernel further boosts throughput to 741 tok/s vs 461 tok/s for FP16.",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "159be44c765b",
+      "label": "INT4 quantization reduces GPU memory requirements by 75%, enabling 8x hardware cost reduction",
+      "type": "claim",
+      "description": "Converting FP16 weights to INT4 reduces memory from 0.5 bytes/param, dropping a 70B model from 280 GB to 35 GB GPU RAM. This allows running a 70B model on hardware previously adequate only for a 7B model, reducing GPU cost from ~$24,000 to ~$4,000. INT8 halves memory usage.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "f0ad26ab9026",
+      "label": "GGUF/llama.cpp enables CPU-based LLM inference with 70% model size reduction",
+      "type": "claim",
+      "description": "Q4_K_M quantization in GGUF format reduces model file size by ~70%, achieves 1.5\u20132x faster inference, and retains 90\u201395% of original quality. GGUF has become the de facto standard for local/CPU LLM deployment. ARM Armv9 optimizations achieve up to 24x decoding speedup.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "d56d856be7eb",
+      "label": "Knowledge distillation yields 2\u20138x inference speedup with 21\u201331% task improvement over direct prompting",
+      "type": "claim",
+      "description": "Distilled student models (e.g., Llama 3.1 8B Instruct, Phi-3 Mini) show 21\u201331% improvement over directly prompting the same student model with CoT. Distillation achieves 2\u20138x faster inference vs teacher depending on architecture. DeepSeek's integration of CoT and RL further extends distillation capabilities.",
+      "confidence": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "137519c08b3e",
+      "label": "Kernel optimization (Marlin) amplifies quantization speedup by up to 10.9x",
+      "type": "claim",
+      "description": "The Marlin kernel transforms quantization throughput dramatically: Marlin-AWQ achieves 741 tok/s vs standard AWQ's 68 tok/s (10.9x speedup), and Marlin-GPTQ achieves 712 tok/s vs GPTQ's 276 tok/s (2.6x). This shows inference kernel design is equally critical as quantization algorithm selection.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "3f397c818598",
+      "label": "Structured pruning preferred in production; FASP can prune LLaMA-30B in 20 min on single GPU",
+      "type": "claim",
+      "description": "82% of enterprises (Forrester 2024) prefer structured pruning for production deployment due to hardware compatibility. FASP (ICLR 2025) enables joint layer pruning of LLaMA-30B in 20 minutes on a single RTX 4090, 15x faster than prior methods. NVIDIA TensorRT 9.2 and Apple Core ML 7.0 support pruning + quantization together.",
+      "confidence": 0.78,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "aa064d5dc242",
+      "label": "SYNTHESIS: Five Pillars of LLM Inference Cost Reduction",
+      "type": "decision",
+      "description": "The research identifies five mutually reinforcing pillars for reducing LLM inference cost in production: (1) Model Compression & Quantization, (2) Efficient Serving & Batching, (3) Prompt & Context Optimization, (4) Model Routing & Cascading, and (5) Hardware & Cloud Cost Strategy. Maximum savings require combining techniques across pillars rather than treating them as alternatives.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "b72913b26ee6",
+      "label": "SYNTHESIS: Quantization Is the Highest-ROI Single Intervention",
+      "type": "decision",
+      "description": "INT4 quantization (AWQ/GPTQ + Marlin kernel) delivers the strongest single-step cost reduction: 75% GPU memory reduction, 2.7\u20132.9x GPU speedup, up to 8x hardware cost reduction, with accuracy loss below practical detection thresholds (&lt;4% perplexity, &lt;8% code accuracy). Kernel choice (Marlin) is as important as quantization algorithm \u2014 wrong kernel selection can forfeit up to 10.9x of potential speedup. Zero model retraining required.",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "6bb461f31e03",
+      "label": "SYNTHESIS: Serving Infrastructure Is a Hidden Cost Multiplier",
+      "type": "decision",
+      "description": "Serving framework choices have multiplicative effects on cost independent of model compression. Continuous batching (up to 23x throughput vs. static), PagedAttention (KV memory waste from 60\u201380% to &lt;4%), and advanced kernels (FlashAttention-3 at 85% H100 utilization) together can reduce effective per-token cost by an order of magnitude. SGLang now leads vLLM on throughput benchmarks (3.1x on Llama-70B); TGI entered maintenance mode in 2025 and should not be chosen for new deployments.",
+      "confidence": 0.91,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "9eb93c0140a0",
+      "label": "SYNTHESIS: Routing & Cascading Are Under-Exploited Cost Levers",
+      "type": "decision",
+      "description": "LLM routing (RouteLLM: 40\u201385% cost reduction at 95% GPT-4 quality) and model cascading (FrugalGPT / AutoMix) are among the highest-leverage interventions for organizations using frontier API models, requiring no model changes. MoE architectures (Mixtral: 1/5 compute of Llama-2-70B at equivalent quality) internalize routing at the architecture level. Unified cascade routing is theoretically optimal and outperforms routing or cascading alone; quality estimators are the critical bottleneck.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "3e1ef610e117",
+      "label": "SYNTHESIS: Key Tension \u2014 Quantization Speedup vs. Task-Specific Accuracy",
+      "type": "concept",
+      "description": "A fundamental tension exists between quantization's impressive throughput/memory gains and its task-specific accuracy risks. Perplexity-based evaluations (showing &lt;4% degradation) may understate accuracy loss on downstream tasks like code generation (7.6% accuracy drop), mathematical reasoning, or low-resource language generation. The gap between benchmark-level confidence (0.92) and real-world applicability depends heavily on task type \u2014 this is a primary research gap.",
+      "confidence": 0.8,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "50c8a9babe36",
+      "label": "SYNTHESIS: Distillation and Pruning Are High-Reward but High-Cost Interventions",
+      "type": "decision",
+      "description": "Knowledge distillation (2\u20138x speedup, 21\u201331% task improvement over direct prompting of the same small model) and structured pruning (FASP: 30B model in 20 min on one GPU) offer transformative gains but require training infrastructure and domain expertise. These are best suited to organizations with high-volume, stable task distributions. Unlike quantization (post-training, zero-shot), distillation/pruning create new model artifacts requiring full MLOps pipelines. Pruning data (Forrester 2024 enterprise preferences) carries lower confidence (0.78) than quantization benchmarks.",
+      "confidence": 0.84,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "671f4dc686e6",
+      "label": "SYNTHESIS: Research Gaps Identified Post-Review",
+      "type": "concept",
+      "description": "Five gaps remain underexplored: (1) Compound stacking \u2014 quantitative evidence for combining all five pillars simultaneously is sparse; (2) Task-specific quantization accuracy degradation taxonomy beyond perplexity; (3) Router training data requirements and cold-start behavior in real deployments; (4) Total Cost of Ownership (TCO) models for distillation/pruning including engineering labor; (5) Prompt compression and prefix caching impact data are absent from this review's evidence base despite being named research areas.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "470156d5f75a",
+      "label": "Re-investigate: Frontier AI Safety Frameworks (Industry)",
+      "type": "question",
+      "description": "User flagged 'Frontier AI Safety Frameworks (Industry)' for re-investigation.",
+      "confidence": 0.0,
+      "provenance": {
+        "session_id": "user",
+        "subagent": "mind_map_ui",
+        "mode": "direction",
+        "timestamp": "2026-03-24T13:49:35.639433+00:00"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": true
+      }
+    },
+    {
+      "id": "38d554fb77b3",
+      "label": "hi",
+      "type": "question",
+      "description": "",
+      "confidence": 0.5,
+      "provenance": {
+        "session_id": "user",
+        "subagent": "mind_map_ui",
+        "mode": "direction",
+        "timestamp": "2026-03-24T13:49:48.196258+00:00"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": true
+      }
+    },
+    {
+      "id": "85ef4a29be8e",
+      "label": "How does agent environment affect token efficiency?",
+      "type": "question",
+      "description": "The central research question: how does the environment an agent operates in (context window size, tool availability, task structure, feedback loops, multi-agent setup, etc.) affect its ability to use tokens efficiently?",
+      "confidence": 1.0,
+      "provenance": {
+        "session_id": "1bf391cd",
+        "subagent": "lead",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "29ce0de0cd78",
+      "label": "Context window constraints and token budget management",
+      "type": "question",
+      "description": "How do context window limits, context compression, and token budget allocation strategies affect efficient token use in agents?",
+      "confidence": 0.5,
+      "provenance": {
+        "session_id": "1bf391cd",
+        "subagent": "lead",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "fee3ae260ff6",
+      "label": "Tool availability and action space design for token efficiency",
+      "type": "question",
+      "description": "How does the set of tools available to an agent (APIs, retrievers, code executors) and how action spaces are designed affect how many tokens are needed to complete tasks?",
+      "confidence": 0.5,
+      "provenance": {
+        "session_id": "1bf391cd",
+        "subagent": "lead",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "9b3aa96a38f2",
+      "label": "Task structure, feedback loops, and prompt design efficiency",
+      "type": "question",
+      "description": "How do task decomposition, prompt engineering, chain-of-thought depth, and feedback loop design impact the number of tokens agents consume per unit of useful output?",
+      "confidence": 0.5,
+      "provenance": {
+        "session_id": "1bf391cd",
+        "subagent": "lead",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "2053e4d8b696",
+      "label": "Multi-agent and memory architecture effects on token efficiency",
+      "type": "question",
+      "description": "How do multi-agent setups, external memory, retrieval-augmented generation, and agent orchestration patterns influence cumulative token usage across an agent system?",
+      "confidence": 0.5,
+      "provenance": {
+        "session_id": "1bf391cd",
+        "subagent": "lead",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "284f155b4572",
+      "label": "Observation and state representation efficiency in agent environments",
+      "type": "question",
+      "description": "How does the way an agent's environment exposes state and observations (raw vs. structured, verbose vs. compact, grounded vs. abstract) affect token consumption and reasoning quality?",
+      "confidence": 0.5,
+      "provenance": {
+        "session_id": "1bf391cd",
+        "subagent": "lead",
         "mode": "survey"
       },
       "metadata": {
@@ -4370,6 +5800,1411 @@
       "provenance": {
         "session_id": "52988714",
         "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "ea36b5b173fd",
+      "source": "b9a32cf250b7",
+      "target": "1bc191d48fad",
+      "relationship": "subtopic_of",
+      "weight": 1.0,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "229ae2cce664",
+      "source": "fddaca0850fa",
+      "target": "1bc191d48fad",
+      "relationship": "subtopic_of",
+      "weight": 1.0,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "69b8b8b3d9a4",
+      "source": "a6538d936481",
+      "target": "1bc191d48fad",
+      "relationship": "subtopic_of",
+      "weight": 1.0,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "e39f8ad7f3d0",
+      "source": "5b6b13e1990e",
+      "target": "1bc191d48fad",
+      "relationship": "subtopic_of",
+      "weight": 1.0,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "f3303e87e1fb",
+      "source": "ac23edd4deb5",
+      "target": "1bc191d48fad",
+      "relationship": "subtopic_of",
+      "weight": 1.0,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "b19c51cb7c04",
+      "source": "31a1630eb8fd",
+      "target": "a6538d936481",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "99069c494cc8",
+      "source": "e1286690d779",
+      "target": "a6538d936481",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "eafb6b7a7455",
+      "source": "9da7ef742edd",
+      "target": "fddaca0850fa",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "5e649ae94cde",
+      "source": "10d73accd2ca",
+      "target": "fddaca0850fa",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "0402ca578612",
+      "source": "67719acc1e73",
+      "target": "a6538d936481",
+      "relationship": "subtopic_of",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "05920738916e",
+      "source": "eec2f1080e82",
+      "target": "a6538d936481",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "c265838d3fe1",
+      "source": "1d848f638368",
+      "target": "fddaca0850fa",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "15c853a1fe7b",
+      "source": "1cd1c31f24fc",
+      "target": "fddaca0850fa",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "15992b6cc120",
+      "source": "084bb89ed041",
+      "target": "a6538d936481",
+      "relationship": "supports",
+      "weight": 0.92,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "2b49b2221040",
+      "source": "11cc1b2f34de",
+      "target": "5b6b13e1990e",
+      "relationship": "subtopic_of",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4a2c9160e314",
+      "source": "0a6f03b7b7bc",
+      "target": "a6538d936481",
+      "relationship": "supports",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "86ef56681ef5",
+      "source": "ff88360bd067",
+      "target": "5b6b13e1990e",
+      "relationship": "subtopic_of",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "80e0b420e778",
+      "source": "e5e430d71059",
+      "target": "5b6b13e1990e",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "1cf3a8847548",
+      "source": "50747edce59e",
+      "target": "fddaca0850fa",
+      "relationship": "supports",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "8ad91e74907f",
+      "source": "0704020d0ff7",
+      "target": "a6538d936481",
+      "relationship": "supports",
+      "weight": 0.8,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "0f95f9e2472d",
+      "source": "cf05b5084100",
+      "target": "fddaca0850fa",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "bac1147dacab",
+      "source": "84605411d92e",
+      "target": "a6538d936481",
+      "relationship": "supports",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "07bf17186421",
+      "source": "259477a75dbc",
+      "target": "5b6b13e1990e",
+      "relationship": "supports",
+      "weight": 0.93,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "88f48aee9a26",
+      "source": "e6fdc46355f7",
+      "target": "fddaca0850fa",
+      "relationship": "supports",
+      "weight": 0.93,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "3bb0a38dc6b3",
+      "source": "3dca2f4be955",
+      "target": "5b6b13e1990e",
+      "relationship": "supports",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "0f56fdbf6fef",
+      "source": "cd6f4ff22f51",
+      "target": "5b6b13e1990e",
+      "relationship": "supports",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "d28db940305a",
+      "source": "992cd1a10190",
+      "target": "eec2f1080e82",
+      "relationship": "supports",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "0cbb124e4bac",
+      "source": "2cdff2c3396d",
+      "target": "fddaca0850fa",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4c444f337da8",
+      "source": "0b249b21f901",
+      "target": "5b6b13e1990e",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "cc42214bdf71",
+      "source": "992cd1a10190",
+      "target": "31a1630eb8fd",
+      "relationship": "example_of",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "5179fe51a0b2",
+      "source": "9554ea4ebc04",
+      "target": "5b6b13e1990e",
+      "relationship": "supports",
+      "weight": 0.82,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "a952ad9b65a2",
+      "source": "0ae9d6dfc479",
+      "target": "5b6b13e1990e",
+      "relationship": "supports",
+      "weight": 0.87,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "1d750044901b",
+      "source": "028efffabe7e",
+      "target": "084bb89ed041",
+      "relationship": "supports",
+      "weight": 0.92,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "707cdbe02b2b",
+      "source": "028efffabe7e",
+      "target": "e1286690d779",
+      "relationship": "example_of",
+      "weight": 0.92,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "59497417b325",
+      "source": "4c6a671647af",
+      "target": "11cc1b2f34de",
+      "relationship": "example_of",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "87bad203b6a1",
+      "source": "1cd1c31f24fc",
+      "target": "9da7ef742edd",
+      "relationship": "example_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "7cea42ec8c7e",
+      "source": "907c3832753d",
+      "target": "0a6f03b7b7bc",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "8641ec7d620a",
+      "source": "50747edce59e",
+      "target": "10d73accd2ca",
+      "relationship": "example_of",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "533fa073374e",
+      "source": "4c6a671647af",
+      "target": "259477a75dbc",
+      "relationship": "supports",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "cb3e229e2f08",
+      "source": "907c3832753d",
+      "target": "67719acc1e73",
+      "relationship": "related_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "956903c7308b",
+      "source": "565d9f91604b",
+      "target": "9554ea4ebc04",
+      "relationship": "supports",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "75406b25f8f7",
+      "source": "c3015517c9cd",
+      "target": "0b249b21f901",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "657d5e4cdfe6",
+      "source": "2cdff2c3396d",
+      "target": "1d848f638368",
+      "relationship": "example_of",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "1613d18f21ec",
+      "source": "c3015517c9cd",
+      "target": "ff88360bd067",
+      "relationship": "related_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "1f63b1341d16",
+      "source": "6e6668751c81",
+      "target": "31a1630eb8fd",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "91493ea70ffa",
+      "source": "f10a55a8c80b",
+      "target": "10d73accd2ca",
+      "relationship": "supports",
+      "weight": 0.97,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "9cd1995e86ab",
+      "source": "5c78a8f0e2b8",
+      "target": "0ae9d6dfc479",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "17f637cfe195",
+      "source": "84605411d92e",
+      "target": "67719acc1e73",
+      "relationship": "related_to",
+      "weight": 0.7,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "e143247c1edb",
+      "source": "5c78a8f0e2b8",
+      "target": "ff88360bd067",
+      "relationship": "example_of",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "5c384f29361b",
+      "source": "ff88360bd067",
+      "target": "11cc1b2f34de",
+      "relationship": "related_to",
+      "weight": 0.8,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "b6eb0431380e",
+      "source": "a49a56f19ad1",
+      "target": "cf05b5084100",
+      "relationship": "supports",
+      "weight": 0.92,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "a41769b3bcc9",
+      "source": "e5e430d71059",
+      "target": "cd6f4ff22f51",
+      "relationship": "supports",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "20f009eea060",
+      "source": "dde440ae5bd7",
+      "target": "e6fdc46355f7",
+      "relationship": "supports",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "7390d8aba79c",
+      "source": "8591bef828ad",
+      "target": "2cdff2c3396d",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "f06aebafe929",
+      "source": "10d73accd2ca",
+      "target": "9da7ef742edd",
+      "relationship": "related_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "a8a9e53b9113",
+      "source": "ea83f1d84b42",
+      "target": "5f418428c8f9",
+      "relationship": "supports",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "44b1a3c6c440",
+      "source": "a1a0845207fa",
+      "target": "53b27ad62ea8",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "737b4f8d8713",
+      "source": "7e475417cfec",
+      "target": "0e86d3a08c3a",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "167b3c2d14b2",
+      "source": "393e38474a17",
+      "target": "53fe54de4f83",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "884e908f98a8",
+      "source": "7541718a414f",
+      "target": "ac23edd4deb5",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "c19a2947efcf",
+      "source": "53b27ad62ea8",
+      "target": "ac23edd4deb5",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "806e8ff03c8f",
+      "source": "5f418428c8f9",
+      "target": "ac23edd4deb5",
+      "relationship": "subtopic_of",
+      "weight": 0.92,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "65cd70faea69",
+      "source": "0e86d3a08c3a",
+      "target": "ac23edd4deb5",
+      "relationship": "subtopic_of",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "085b79b1009d",
+      "source": "53fe54de4f83",
+      "target": "ac23edd4deb5",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "0822de738c7f",
+      "source": "189512103c2d",
+      "target": "ac23edd4deb5",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "35656a227fb5",
+      "source": "bce5906b83cd",
+      "target": "ac23edd4deb5",
+      "relationship": "subtopic_of",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "601c0702ecc6",
+      "source": "ad34267d3d3f",
+      "target": "ac23edd4deb5",
+      "relationship": "subtopic_of",
+      "weight": 0.87,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "86d394151df1",
+      "source": "e8529113794a",
+      "target": "ac23edd4deb5",
+      "relationship": "subtopic_of",
+      "weight": 0.92,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "3f05b984b6bd",
+      "source": "ad34267d3d3f",
+      "target": "5f418428c8f9",
+      "relationship": "example_of",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "0be463fcb947",
+      "source": "bce5906b83cd",
+      "target": "53b27ad62ea8",
+      "relationship": "related_to",
+      "weight": 0.8,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "a820ac228569",
+      "source": "e8529113794a",
+      "target": "189512103c2d",
+      "relationship": "related_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "9a29f18ab1cd",
+      "source": "7541718a414f",
+      "target": "53b27ad62ea8",
+      "relationship": "related_to",
+      "weight": 0.82,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "2c2c7e3756be",
+      "source": "53fe54de4f83",
+      "target": "0e86d3a08c3a",
+      "relationship": "supports",
+      "weight": 0.8,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "bdb88005de39",
+      "source": "b54a2ecbbcf8",
+      "target": "b9a32cf250b7",
+      "relationship": "subtopic_of",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "faeff144908e",
+      "source": "cab883c6992d",
+      "target": "b9a32cf250b7",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "6dbc0a7dce47",
+      "source": "25a72add3257",
+      "target": "b9a32cf250b7",
+      "relationship": "subtopic_of",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "c4e31c91fc2d",
+      "source": "a18835c75a7b",
+      "target": "b9a32cf250b7",
+      "relationship": "supports",
+      "weight": 0.92,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "5ad5c5c0f538",
+      "source": "159be44c765b",
+      "target": "b9a32cf250b7",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "606f41f793ca",
+      "source": "f0ad26ab9026",
+      "target": "b9a32cf250b7",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "da00ccc54587",
+      "source": "d56d856be7eb",
+      "target": "b9a32cf250b7",
+      "relationship": "supports",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "e1918e58f89d",
+      "source": "137519c08b3e",
+      "target": "b9a32cf250b7",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "77e7ac2d94c3",
+      "source": "3f397c818598",
+      "target": "b9a32cf250b7",
+      "relationship": "supports",
+      "weight": 0.78,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "a8d41122d9bb",
+      "source": "a18835c75a7b",
+      "target": "b54a2ecbbcf8",
+      "relationship": "example_of",
+      "weight": 0.92,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "c0ef5e9ace69",
+      "source": "159be44c765b",
+      "target": "b54a2ecbbcf8",
+      "relationship": "example_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "afd8bdfc021e",
+      "source": "137519c08b3e",
+      "target": "b54a2ecbbcf8",
+      "relationship": "related_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "2de216150ca3",
+      "source": "f0ad26ab9026",
+      "target": "b54a2ecbbcf8",
+      "relationship": "related_to",
+      "weight": 0.75,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "63701f431975",
+      "source": "d56d856be7eb",
+      "target": "cab883c6992d",
+      "relationship": "example_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "18647304cb79",
+      "source": "3f397c818598",
+      "target": "25a72add3257",
+      "relationship": "example_of",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "37d323eeaa29",
+      "source": "28ebc3e519a9",
+      "target": "a18835c75a7b",
+      "relationship": "supports",
+      "weight": 0.92,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "24b89e24c319",
+      "source": "28ebc3e519a9",
+      "target": "137519c08b3e",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "de4ea272f413",
+      "source": "413f399ebde4",
+      "target": "a18835c75a7b",
+      "relationship": "supports",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "6b77ed9d75c5",
+      "source": "413f399ebde4",
+      "target": "159be44c765b",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "04d512bdc459",
+      "source": "e7e842dc6b48",
+      "target": "d56d856be7eb",
+      "relationship": "supports",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4d3402a6d64a",
+      "source": "bdd087ca1494",
+      "target": "f0ad26ab9026",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "325b96873752",
+      "source": "aa064d5dc242",
+      "target": "1bc191d48fad",
+      "relationship": "subtopic_of",
+      "weight": 1.0,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      }
+    },
+    {
+      "id": "675c987991c5",
+      "source": "b72913b26ee6",
+      "target": "aa064d5dc242",
+      "relationship": "subtopic_of",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      }
+    },
+    {
+      "id": "83f263abc68b",
+      "source": "6bb461f31e03",
+      "target": "aa064d5dc242",
+      "relationship": "subtopic_of",
+      "weight": 0.92,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      }
+    },
+    {
+      "id": "18b6ecb06710",
+      "source": "9eb93c0140a0",
+      "target": "aa064d5dc242",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      }
+    },
+    {
+      "id": "ab3f6d73c4d0",
+      "source": "50c8a9babe36",
+      "target": "aa064d5dc242",
+      "relationship": "subtopic_of",
+      "weight": 0.86,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      }
+    },
+    {
+      "id": "901b70a7ba90",
+      "source": "671f4dc686e6",
+      "target": "aa064d5dc242",
+      "relationship": "related_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      }
+    },
+    {
+      "id": "3f9af870ba61",
+      "source": "a18835c75a7b",
+      "target": "b72913b26ee6",
+      "relationship": "supports",
+      "weight": 0.92,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      }
+    },
+    {
+      "id": "be2ebfe27d17",
+      "source": "159be44c765b",
+      "target": "b72913b26ee6",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      }
+    },
+    {
+      "id": "0d254c36608c",
+      "source": "137519c08b3e",
+      "target": "b72913b26ee6",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      }
+    },
+    {
+      "id": "a2c18c8359d8",
+      "source": "50747edce59e",
+      "target": "6bb461f31e03",
+      "relationship": "supports",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      }
+    },
+    {
+      "id": "755f8a425c88",
+      "source": "1cd1c31f24fc",
+      "target": "6bb461f31e03",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      }
+    },
+    {
+      "id": "d9515fab19b2",
+      "source": "259477a75dbc",
+      "target": "9eb93c0140a0",
+      "relationship": "supports",
+      "weight": 0.93,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      }
+    },
+    {
+      "id": "c7e908eadb62",
+      "source": "cd6f4ff22f51",
+      "target": "9eb93c0140a0",
+      "relationship": "supports",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      }
+    },
+    {
+      "id": "02881ed74c37",
+      "source": "d56d856be7eb",
+      "target": "50c8a9babe36",
+      "relationship": "supports",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      }
+    },
+    {
+      "id": "7e8c80b6bc2c",
+      "source": "3f397c818598",
+      "target": "50c8a9babe36",
+      "relationship": "supports",
+      "weight": 0.78,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      }
+    },
+    {
+      "id": "b1f9a4b68069",
+      "source": "3e1ef610e117",
+      "target": "b72913b26ee6",
+      "relationship": "challenged_by",
+      "weight": 0.8,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      }
+    },
+    {
+      "id": "76438d042d0d",
+      "source": "671f4dc686e6",
+      "target": "50c8a9babe36",
+      "relationship": "related_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "93f8fbf5",
+        "subagent": "lead-synthesis",
+        "mode": "analysis"
+      }
+    },
+    {
+      "id": "c837e5497f38",
+      "source": "470156d5f75a",
+      "target": "2a0865406105",
+      "relationship": "challenged_by",
+      "weight": 1.0,
+      "provenance": {
+        "session_id": "user",
+        "subagent": "mind_map_ui",
+        "mode": "direction",
+        "timestamp": "2026-03-24T13:49:35.639433+00:00"
+      }
+    },
+    {
+      "id": "05d151f9b715",
+      "source": "29ce0de0cd78",
+      "target": "85ef4a29be8e",
+      "relationship": "subtopic_of",
+      "weight": 1.0,
+      "provenance": {
+        "session_id": "1bf391cd",
+        "subagent": "lead",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "00f3f705378a",
+      "source": "fee3ae260ff6",
+      "target": "85ef4a29be8e",
+      "relationship": "subtopic_of",
+      "weight": 1.0,
+      "provenance": {
+        "session_id": "1bf391cd",
+        "subagent": "lead",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "2f04a4f917f2",
+      "source": "9b3aa96a38f2",
+      "target": "85ef4a29be8e",
+      "relationship": "subtopic_of",
+      "weight": 1.0,
+      "provenance": {
+        "session_id": "1bf391cd",
+        "subagent": "lead",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "0e20bc2d24bc",
+      "source": "2053e4d8b696",
+      "target": "85ef4a29be8e",
+      "relationship": "subtopic_of",
+      "weight": 1.0,
+      "provenance": {
+        "session_id": "1bf391cd",
+        "subagent": "lead",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4864da94c87e",
+      "source": "284f155b4572",
+      "target": "85ef4a29be8e",
+      "relationship": "subtopic_of",
+      "weight": 1.0,
+      "provenance": {
+        "session_id": "1bf391cd",
+        "subagent": "lead",
         "mode": "survey"
       }
     }

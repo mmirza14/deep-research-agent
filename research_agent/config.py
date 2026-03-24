@@ -20,3 +20,7 @@ DEFENDER_MODEL = "sonnet"
 MAX_SOCRATIC_ROUNDS = 5
 CONFIDENCE_ESCALATION_THRESHOLD = 0.4  # Defender confidence below this triggers extra rounds
 SOCRATIC_MAX_TURNS_PER_ROUND = 10  # Max turns per critic/defender agent call
+
+# Visualization server
+WS_PORT = 8420
+WS_POLL_INTERVAL = 0.5  # seconds between graph.json change checks
