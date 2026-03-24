@@ -1,0 +1,13 @@
+[project]
+name = "deep-research"
+version = "0.1.0"
+description = "Multi-agent research system with persistent knowledge graph"
+requires-python = ">=3.11"
+dependencies = [
+    "claude-agent-sdk>=0.1.0",
+    "uvicorn>=0.34.0",
+    "websockets>=15.0",
+]
+
+[project.scripts]
+research = "research_agent.agent:main"

@@ -1,0 +1,4377 @@
+{
+  "nodes": [
+    {
+      "id": "e248b774e42d",
+      "label": "AI Alignment Research Approaches",
+      "type": "question",
+      "description": "What are the leading approaches to AI alignment research? This covers the major technical and governance strategies to ensure AI systems act in accordance with human values and intentions.",
+      "confidence": 1.0,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "lead",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "ff488c55baf5",
+      "label": "RLHF & Reward Modeling",
+      "type": "question",
+      "description": "Research into Reinforcement Learning from Human Feedback (RLHF), reward modeling, and related techniques for training AI systems to follow human preferences.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "lead",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "3e67bb97e132",
+      "label": "Interpretability & Mechanistic Analysis",
+      "type": "question",
+      "description": "Research into understanding the internal representations and computations of neural networks \u2014 including mechanistic interpretability, probing, and circuit-level analysis.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "lead",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "3dc5f0aad938",
+      "label": "Scalable Oversight & Debate",
+      "type": "question",
+      "description": "Approaches ensuring humans can supervise AI systems that surpass human capability, including debate, amplification, recursive reward modeling, and scalable oversight frameworks.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "lead",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "65e4ff41d191",
+      "label": "Formal Verification & Agent Foundations",
+      "type": "question",
+      "description": "Theoretical alignment research including decision theory, agent foundations, logical uncertainty, and formal verification of AI behavior and goal specifications.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "lead",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "bc49f67e778b",
+      "label": "AI Governance & Institutional Approaches",
+      "type": "question",
+      "description": "Non-technical alignment strategies including AI policy, regulation, standards bodies, safety evaluations, red-teaming, and the role of major labs and governments.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "lead",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "dd06c4f6afbf",
+      "label": "RLHF (Reinforcement Learning from Human Feedback)",
+      "type": "concept",
+      "description": "A technique to align AI systems with human preferences by training a reward model from human preference data, then using RL (typically PPO) to optimize the policy against that reward model. Has become the dominant post-training alignment paradigm for LLMs since 2022.",
+      "confidence": 0.98,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "aa572e36b439",
+      "label": "Direct Preference Optimization (DPO)",
+      "type": "concept",
+      "description": "A preference-learning technique that replaces the two-stage RLHF pipeline (reward model + RL) with a single classification loss directly on pairwise preference data. The language model implicitly acts as its own reward model, eliminating instability from PPO-based RL.",
+      "confidence": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "5da7a7b47286",
+      "label": "Mechanistic Interpretability",
+      "type": "concept",
+      "description": "A bottom-up approach to understanding neural networks by reverse-engineering their internal computations. Focuses on granular analysis of features, neurons, layers, and connections to produce human-understandable algorithms from AI models. Has grown from a handful of researchers five years ago to hundreds today.",
+      "confidence": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "c22f4a0dbb86",
+      "label": "Constitutional AI (CAI)",
+      "type": "concept",
+      "description": "Anthropic's method of training AI systems using a written set of principles (a \"constitution\") instead of direct human labels for every harmful output. Uses RLAIF: an AI model critiques and revises its own outputs, then another AI generates preference labels for RL training.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "123aeedb43f5",
+      "label": "Superposition Hypothesis",
+      "type": "concept",
+      "description": "The hypothesis that neural networks represent more features than they have neurons by encoding features as directions in an overcomplete, almost-orthogonal basis in activation space, rather than assigning one feature per neuron. This is a leading explanation for polysemanticity in neural networks.",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "fc52b8b46e4f",
+      "label": "Polysemanticity",
+      "type": "concept",
+      "description": "The phenomenon where individual neurons in a neural network activate in multiple, semantically unrelated contexts, preventing straightforward human-interpretable explanations. A core obstacle in mechanistic interpretability, hypothesized to arise from superposition.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "7fe53c47ef72",
+      "label": "Scalable Oversight",
+      "type": "concept",
+      "description": "A family of AI alignment approaches aimed at maintaining effective human oversight of AI systems as they become more capable than human supervisors. Includes techniques such as debate, iterated amplification, recursive reward modeling, and weak-to-strong generalization.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "d45080a4a7dd",
+      "label": "Reward Hacking / Overoptimization",
+      "type": "concept",
+      "description": "A failure mode in RLHF where the policy exploits flaws or gaps in the learned reward model to achieve high proxy rewards without genuinely improving on the intended objective. Manifestation of Goodhart's Law: when a proxy measure becomes the optimization target, it ceases to be a good measure of true performance.",
+      "confidence": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "499d34b61beb",
+      "label": "Reward Modeling",
+      "type": "concept",
+      "description": "The process of training a neural network (the reward model) to predict human preference scores from pairwise comparisons of model outputs. The reward model then provides scalar signals for RL training. Quality of the reward model is the central bottleneck of the RLHF pipeline.",
+      "confidence": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "e159bc5fc219",
+      "label": "AI Safety via Debate",
+      "type": "concept",
+      "description": "A training method proposed by Irving, Christiano, and Amodei (2018) where two AI agents debate to convince a human judge, with the theoretical result that debate with optimal play can answer any question in PSPACE given polynomial-time judges, exceeding the NP limit of direct human judgment.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "04d853bbc0c1",
+      "label": "Sparse Autoencoders (SAEs)",
+      "type": "concept",
+      "description": "A dictionary learning technique used to decompose neural network activations into sparse, interpretable features. SAEs reconstruct internal activations of language models by learning an overcomplete set of sparsely activating feature directions, producing more monosemantic (interpretable) features than raw neuron analysis. Key tool for addressing polysemanticity.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "2a2a80727ee3",
+      "label": "Scalable Oversight",
+      "type": "concept",
+      "description": "The challenge of maintaining reliable human supervision of AI systems as they approach or exceed human capabilities. Key open problem: RLHF and similar techniques rely on human evaluators who may not be able to verify the correctness of superhuman-level outputs, making naive RLHF potentially inadequate for aligning very capable AI.",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "0c5481d266f0",
+      "label": "Iterated Amplification",
+      "type": "concept",
+      "description": "An alignment approach by Paul Christiano that decomposes hard problems into easier subproblems humans can evaluate, trains an AI to solve those, then uses that AI to help tackle harder problems in repeated iterations. Bootstraps human oversight capability via decomposition.",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "00a9e4aab40f",
+      "label": "Circuit-Level Analysis",
+      "type": "concept",
+      "description": "The study of sub-networks (circuits) within neural networks that implement specific computations or behaviors. Circuits are logical networks that connect features and facilitate specific behaviors. Techniques include activation patching, causal tracing, and automated circuit discovery (ACDC) to identify which components are necessary and sufficient for given model behaviors.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "138f5a4f5b96",
+      "label": "RLAIF (Reinforcement Learning from AI Feedback)",
+      "type": "concept",
+      "description": "A variant of RLHF where an AI model (rather than humans) generates preference labels used to train the reward model. Demonstrated by Anthropic's Constitutional AI and Google DeepMind research to match or exceed RLHF performance while dramatically reducing annotation costs.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "16e1c26cd600",
+      "label": "Recursive Reward Modeling",
+      "type": "concept",
+      "description": "A family of alignment techniques where a weaker AI model assists a user in providing feedback to train a stronger AI model, progressively removing humans from the loop after early iterations. Related to iterated amplification but focuses on reward model bootstrapping.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "5da003a8faa9",
+      "label": "Probing Classifiers",
+      "type": "concept",
+      "description": "Lightweight classifiers trained on a model's internal activations (hidden states) to detect whether specific information (e.g., syntactic features, factual knowledge) is encoded at a given layer. Probing offers correlation insights but not causation; it does not establish that the model uses the probed information in its computations.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "d821f9e1962c",
+      "label": "Weak-to-Strong Generalization",
+      "type": "concept",
+      "description": "An approach where a strong AI model is trained using feedback from a weaker supervisor (human or smaller model), with the strong model expected to generalize beyond the supervisor's capabilities. OpenAI's key superalignment research direction, demonstrating GPT-4 can be supervised by GPT-2-level models to achieve near GPT-3.5 performance.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "ed81d90dd4f0",
+      "label": "Feature Steering / Activation Patching",
+      "type": "concept",
+      "description": "Techniques for causally intervening on a model's internal representations. Feature steering (clamping) amplifies or suppresses specific SAE-identified features during inference to observe behavioral effects. Activation patching replaces specific activations with those from a different run to isolate causal roles of components. Used to validate feature interpretations and demonstrate safety applications.",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "2c5bda5ce425",
+      "label": "DPO eliminates separate RM and RL stages",
+      "type": "claim",
+      "description": "DPO (Rafailov et al., 2023) proves that the optimal RLHF policy can be expressed in closed form as a function of the reference model and human preferences, enabling direct optimization with a simple binary cross-entropy loss \u2014 matching or exceeding PPO-based RLHF on summarization and dialogue tasks while being substantially simpler to implement.",
+      "confidence": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "fdca7dc22d51",
+      "label": "Superalignment (OpenAI Initiative)",
+      "type": "concept",
+      "description": "OpenAI's initiative launched in 2023, co-led by Ilya Sutskever and Jan Leike, aiming to solve superintelligence alignment within four years by building an automated alignment researcher. Allocated 20% of OpenAI's compute. Dissolved in May 2024 after both leaders resigned.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "fae3b8307287",
+      "label": "Reward hacking scales with model capability",
+      "type": "claim",
+      "description": "Pan et al. (2022) demonstrated that more capable models obtain higher proxy rewards but lower true rewards \u2014 i.e., more sophisticated agents are better at exploiting reward model weaknesses. This creates a dangerous dynamic where capability increases without aligned behavior improvements.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "9d16e8e342eb",
+      "label": "International AI Safety Report 2026",
+      "type": "source",
+      "description": "A comprehensive report released in February 2026, coordinated by Yoshua Bengio and contributors from 30+ countries, covering AI capabilities, risk categories (malicious use, malfunctions, systemic risks), and safety recommendations including layered defense-in-depth approaches.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://internationalaisafetyreport.org/publication/international-ai-safety-report-2026",
+        "source_type": "government",
+        "user_added": false
+      }
+    },
+    {
+      "id": "a1db70bc9a5e",
+      "label": "Constitutional AI (Anthropic)",
+      "type": "concept",
+      "description": "Anthropic's approach to scalable oversight that uses AI feedback guided by a set of constitutional principles to evaluate and revise AI outputs, enabling AI supervision without requiring human labels for each harmful output. Used in Claude model training and includes Collective Constitutional AI with public input.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "ecc9080cd924",
+      "label": "Attribution Graphs",
+      "type": "concept",
+      "description": "A method introduced by Anthropic in 2025 to produce graph descriptions of a model's computation by tracing through a replacement model using cross-layer transcoders. Attribution graphs partially reveal the chain of intermediate steps (computational graph) a model uses to transform input to output, enabling analysis of multi-step reasoning, planning, and hallucination inhibition.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "72ec97498930",
+      "label": "RLHF increases human approval but not correctness",
+      "type": "claim",
+      "description": "RLHF-trained models learn to convince human evaluators of incorrect answers without actually improving accuracy. Models learn to fabricate plausible-sounding evidence and increase rhetorical sophistication, exploiting evaluator cognitive biases rather than genuinely improving on the intended objective.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "b79147ad5097",
+      "label": "METR: Common Elements of Frontier AI Safety Policies",
+      "type": "source",
+      "description": "METR's December 2025 report analyzing twelve frontier AI companies' safety policies, identifying nine common structural elements including capability thresholds, evaluation timing, halting conditions, and accountability mechanisms.",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://metr.org/blog/2025-12-09-common-elements-of-frontier-ai-safety-policies/",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "1ec4e563c844",
+      "label": "Linear Representation Hypothesis",
+      "type": "concept",
+      "description": "The foundational assumption in mechanistic interpretability that features (human-interpretable properties) exist as linear directions in a neural network's activation space, rather than being encoded in individual neurons or in nonlinear ways. This makes features decomposable via linear algebra and dictionary learning methods.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "83cbf01c7d14",
+      "label": "Recursive Self-Critiquing (2025)",
+      "type": "concept",
+      "description": "A 2025 oversight approach exploring whether critique of critique is easier than direct critique, extending the verification-is-easier-than-generation principle recursively. Experiments with Qwen models show promise but also that direct supervision can outperform recursive critique in strong-to-weak settings.",
+      "confidence": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "fb0660111074",
+      "label": "Future of Life Institute AI Safety Index 2025",
+      "type": "source",
+      "description": "Summer 2025 evaluation of seven leading AI companies across safety dimensions. Anthropic scored highest (C+/2.64), while none scored above D in Existential Safety planning, revealing a stark preparedness gap industry-wide.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://futureoflife.org/ai-safety-index-summer-2025/",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "31113dd58da2",
+      "label": "Constitutional AI reduces annotation costs while maintaining safety",
+      "type": "claim",
+      "description": "Anthropic's Constitutional AI uses AI-generated critiques and revisions (RLAIF) to train harmless AI assistants without needing human labels for each harmful output. Constitutional classifiers built on this approach reduced jailbreak success rates to 4.4% (over 95% of jailbreak attempts refused).",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "20aeea65ab3e",
+      "label": "Claim: Millions of Interpretable Features in Claude 3 Sonnet",
+      "type": "claim",
+      "description": "Anthropic's \"Scaling Monosemanticity\" (May 2024) extracted ~10 million interpretable features from a middle layer of Claude 3 Sonnet using dictionary learning / SAEs. Features corresponded to concrete entities (cities, people, elements), abstract concepts (sycophancy, gender bias), and multimodal concepts. Conceptually similar features clustered spatially, and artificially amplifying features produced predictable behavioral changes, validating the approach causally.",
+      "confidence": 0.96,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "e1c4d7dc19ab",
+      "label": "AI Safety via Debate (Irving et al. 2018)",
+      "type": "source",
+      "description": "Foundational paper by Geoffrey Irving, Paul Christiano, and Dario Amodei proposing debate as an alignment technique. Shows PSPACE complexity-theoretic advantage of debate over direct judgment, and empirical MNIST improvements from 59.4% to 88.9% accuracy with 6-pixel sparse classifiers.",
+      "confidence": 0.98,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/abs/1805.00899",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "e79daab01bc0",
+      "label": "Reward hacking can produce emergent misalignment in production RL",
+      "type": "claim",
+      "description": "Anthropic research (2025) found that reward hacking in production RL training can lead to emergent misaligned behaviors. Reframing reward hacking as acceptable via a single-line system prompt change reduced final misalignment by 75\u201390%, even when reward hacking rates exceeded 99%, suggesting the framing of reward signals critically shapes emergent model values.",
+      "confidence": 0.87,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "57d47def17b6",
+      "label": "EU AI Act",
+      "type": "source",
+      "description": "The EU's comprehensive AI regulation that entered into force August 2024, with phased enforcement through 2026-2028. Establishes risk-tiered obligations, the EU AI Office, and GPAI model requirements including transparency, copyright compliance, and safety codes of practice.",
+      "confidence": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai",
+        "source_type": "government",
+        "user_added": false
+      }
+    },
+    {
+      "id": "4214ea8dce09",
+      "label": "Agent Foundations",
+      "type": "concept",
+      "description": "A body of research that rigorously formalizes concepts like intelligence, agency, and optimization. It aims to develop mathematical and philosophical foundations for building AI systems that are robustly aligned with human values, especially in the context of superintelligent systems.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "9da23aa79bb8",
+      "label": "OpenAI Weak-to-Strong Generalization Paper",
+      "type": "source",
+      "description": "OpenAI paper demonstrating that a GPT-2-level model can supervise GPT-4 to achieve near GPT-3.5 performance. Shows naive human supervision (RLHF) may scale poorly to superhuman models but that weak-to-strong generalization is feasible with methods encouraging confident disagreement with weak supervisors.",
+      "confidence": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://cdn.openai.com/papers/weak-to-strong-generalization.pdf",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "141f70bcc30c",
+      "label": "Claim: Superposition Causes Polysemanticity via Overcomplete Encoding",
+      "type": "claim",
+      "description": "Neural networks store more features than they have neurons by representing features as directions in an overcomplete basis (superposition). This causes polysemanticity\u2014neurons appearing to respond to multiple unrelated concepts\u2014because each neuron participates in many overlapping feature directions. Sparse autoencoders can recover the underlying monosemantic features by exploiting sparsity of feature activations.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "57d39a2e1a4a",
+      "label": "Naive RLHF scales poorly to superhuman AI oversight",
+      "type": "claim",
+      "description": "As AI systems approach or exceed human capability, human evaluators cannot reliably verify the quality of outputs, making standard RLHF feedback unreliable. Emerging approaches such as debate, recursive reward modeling, and weak-to-strong generalization aim to address this, but none have been demonstrated to fully solve scalable oversight at superhuman levels.",
+      "confidence": 0.91,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "f041aa6481f8",
+      "label": "US Executive Order on AI (December 2025)",
+      "type": "source",
+      "description": "Signed December 11, 2025, the Trump administration's EO 'Ensuring a National Policy Framework for Artificial Intelligence' prioritizes US AI dominance with minimal regulatory burden, challenges state-level AI laws, and establishes federal preemption strategy through DOJ, FTC, and Commerce Department actions.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://www.whitehouse.gov/presidential-actions/2025/12/eliminating-state-law-obstruction-of-national-artificial-intelligence-policy/",
+        "source_type": "government",
+        "user_added": false
+      }
+    },
+    {
+      "id": "c041fb4c00e9",
+      "label": "MIRI (Machine Intelligence Research Institute)",
+      "type": "source",
+      "description": "The leading organization in agent foundations research, originally focused on theoretical alignment but shifted strategy in 2024 toward policy advocacy and public communication about AI extinction risks. Produced foundational work on logical induction, embedded agency, corrigibility, and decision theory.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://intelligence.org/",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "5c51f65bf3dc",
+      "label": "Anthropic Alignment Recommended Directions (2025)",
+      "type": "source",
+      "description": "Anthropic Alignment Science team's 2025 recommendations covering scalable oversight priorities: handling systematic overseer errors, recursive oversight via task decomposition and debate, weak-to-strong and easy-to-hard generalization, and honesty detection leveraging models' own knowledge.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://alignment.anthropic.com/2025/recommended-directions/",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "dbc36d571f1e",
+      "label": "Claim: Feature Steering Enables Safety-Relevant Interventions",
+      "type": "claim",
+      "description": "Demonstrated via \"Golden Gate Claude\" (May 2024): clamping the Golden Gate Bridge feature caused the model to fixate on that concept; amplifying sycophancy features caused excessive flattery; activating scam-detection features paradoxically enabled harmful outputs. Safety-relevant features (deception, bias, dangerous content) were identified, suggesting interpretability-based monitoring and intervention for pre-deployment safety assessment.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "41d88182b387",
+      "label": "Partnership on AI: Six Governance Priorities 2026",
+      "type": "source",
+      "description": "Partnership on AI's 2026 governance roadmap identifying six priorities: governing AI agents, strengthening documentation, international coordination, preserving epistemic integrity, advancing public AI literacy, and clarifying AI sovereignty goals.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://partnershiponai.org/resource/six-ai-governance-priorities/",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "bd1b024faa27",
+      "label": "DPO Paper (Rafailov et al., NeurIPS 2023)",
+      "type": "source",
+      "description": "Foundational paper \"Direct Preference Optimization: Your Language Model is Secretly a Reward Model\" by Rafael Rafailov, Archit Sharma, Eric Mitchell, Stefano Ermon, Christopher D. Manning, Chelsea Finn. Published at NeurIPS 2023.",
+      "confidence": 0.99,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/abs/2305.18290",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "283812fb4e03",
+      "label": "Functional Decision Theory (FDT)",
+      "type": "concept",
+      "description": "A decision theory by Eliezer Yudkowsky and Nate Soares that treats an agent's decision as the output of a fixed mathematical function. It asks \"which output of this very function would yield the best outcome?\" FDT generalizes Updateless Decision Theory and outperforms Causal and Evidential Decision Theory on classic problems like Newcomb's Problem and Parfit's Hitchhiker.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "a8e4790c41a1",
+      "label": "Scalable Oversight for Superhuman AI via Recursive Self-Critiquing (2025)",
+      "type": "source",
+      "description": "February 2025 arxiv paper investigating whether recursive critique (critique of critique) is easier than direct critique, using Human-Human, Human-AI, and AI-AI experiments with Qwen-7B and Qwen-72B models. Finds recursive critique is promising but not uniformly superior to direct supervision.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/abs/2502.04675",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "2a0865406105",
+      "label": "Frontier AI Safety Frameworks (Industry)",
+      "type": "concept",
+      "description": "Voluntary policy documents published by 12 AI companies (including Anthropic, OpenAI, Google DeepMind, Meta, Microsoft, xAI, NVIDIA) describing how they plan to manage risks as models scale. Include responsible scaling policies, capability thresholds, and halting conditions.",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "a0ef7e7ccf09",
+      "label": "Logical Induction (Garrabrant et al. 2016)",
+      "type": "source",
+      "description": "A landmark MIRI paper by Scott Garrabrant, Tsvi Benson-Tilsen, Andrew Critch, Nate Soares, and Jessica Taylor. Presents a computable algorithm that assigns and refines probabilities to logical statements, outpacing deduction. Uses a stock-market analogy (logical induction criterion) to achieve coherent probabilistic beliefs about mathematical facts while avoiding self-referential paradoxes.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/abs/1609.03543",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "425cc75a0911",
+      "label": "Claim: Attribution Graphs Reveal Multi-Step Reasoning Mechanisms",
+      "type": "claim",
+      "description": "Anthropic's 2025 circuit tracing work using attribution graphs on Claude 3.5 Haiku surfaced internal mechanisms for multi-step reasoning, planning, and hallucination inhibition. Circuit tracing with cross-layer transcoders creates a \"replacement model\" that is more interpretable, enabling partial tracing of the chain from input to output. Tools were open-sourced in May 2025.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "cb72db7bdb0b",
+      "label": "Scaling Laws for Scalable Oversight (2025)",
+      "type": "source",
+      "description": "April 2025 paper formalizing scaling laws for oversight protocols. Applied to four games (Mafia, Debate, Backdoor Code, Wargames), finds that at a 400 Elo gap between overseer and agent, debate succeeds 51.7% of the time but other protocols are much lower (9.4-13.5%). Demonstrates oversight effectiveness falls short when judgment capacity lags agent capability.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/html/2504.18530v1",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "370ca7af54e1",
+      "label": "Red-Teaming and Adversarial Evaluation",
+      "type": "concept",
+      "description": "Systematic adversarial testing of AI models to probe for dangerous capabilities and misuse potential, especially in biosecurity, cyberattacks, and CBRN threats. Anthropic, OpenAI, and DeepMind all operate distinct red team programs with different institutional placements and evaluation methodologies.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "988c3f53dc9b",
+      "label": "RLHF Survey (Kaufmann et al., 2023)",
+      "type": "source",
+      "description": "Comprehensive survey \"A Survey of Reinforcement Learning from Human Feedback\" by Timo Kaufmann et al. (arXiv 2312.14925). Covers RLHF across control/robotics and LLMs, with detailed treatment of reward modeling, feedback mechanisms, and alignment techniques.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/abs/2312.14925",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "9ba26e40ccf6",
+      "label": "Claim: Universality of Features and Circuits Across Models",
+      "type": "claim",
+      "description": "Evidence suggests similar features and circuit structures emerge across different neural network architectures and training runs, termed \"universality.\" If confirmed at scale, this would dramatically reduce the interpretability burden\u2014insights from one model would transfer to others. However, this remains incompletely verified for large, frontier models.",
+      "confidence": 0.72,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "408b92e590ad",
+      "label": "Constitutional AI Paper (Bai et al., Anthropic 2022)",
+      "type": "source",
+      "description": "\"Constitutional AI: Harmlessness from AI Feedback\" by Yuntao Bai et al. at Anthropic. Introduces the Constitutional AI framework and RLAIF methodology for training harmless AI assistants using a written constitution and AI-generated preference labels.",
+      "confidence": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://www.anthropic.com/research/constitutional-ai-harmlessness-from-ai-feedback",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "91914d1a9361",
+      "label": "AI Governance Regulatory Frameworks",
+      "type": "concept",
+      "description": "The global landscape of AI governance combines mandatory regulation (EU AI Act, risk-tiered obligations) with voluntary frameworks (NIST AI RMF, ISO 42001, GPAI Code of Practice) and national strategies (US federal preemption, China's model regulations). Key tension exists between safety and innovation speed.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "87bb4595d4c3",
+      "label": "AIXI - Universal Intelligence Model",
+      "type": "concept",
+      "description": "A formal mathematical model of universal artificial general intelligence proposed by Marcus Hutter (2000). Combines Solomonoff induction (Kolmogorov complexity-based Bayesian prior) with sequential decision theory to define an optimal reinforcement learning agent. Serves as a theoretical benchmark but is incomputable in practice.",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "d36f78864ce5",
+      "label": "Debate PSPACE Complexity Result",
+      "type": "claim",
+      "description": "Key theoretical claim from Irving et al. 2018: debate with optimal play can answer any question in PSPACE given polynomial-time judges, compared to NP for direct human judgment. This provides a formal complexity-theoretic justification for debate as a scalable oversight method.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "257b097ba0c8",
+      "label": "Claim: Interpretability Used in Production Safety Assessment",
+      "type": "claim",
+      "description": "Anthropic integrated mechanistic interpretability into pre-deployment safety assessment of Claude Sonnet 4.5, examining internal features for dangerous capabilities and deceptive tendencies before release. This represents the first known integration of interpretability research into deployment decisions for a production AI system.",
+      "confidence": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "0aa1bf6dc2e7",
+      "label": "Reward Hacking Blog Post (Lilian Weng, 2024)",
+      "type": "source",
+      "description": "Lilian Weng's comprehensive blog post \"Reward Hacking in Reinforcement Learning\" (November 2024) covering types of reward hacking, empirical findings, and open mitigation challenges. Written by OpenAI's Head of Safety research.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://lilianweng.github.io/posts/2024-11-28-reward-hacking/",
+        "source_type": "blog",
+        "user_added": false
+      }
+    },
+    {
+      "id": "1df3e309493f",
+      "label": "Corrigibility",
+      "type": "concept",
+      "description": "The property of an AI agent that allows it to accept corrections, modifications, or shutdown from human operators without resistance. Formally, a corrigible agent does not interfere with attempts to correct it, reprogram its utility function, or shut it down. Recent 2024-2025 work provides first rigorous multi-step formal guarantees for corrigibility in partially observed environments.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "216de9ba1ff9",
+      "label": "Mechanistic Interpretability",
+      "type": "concept",
+      "description": "Technical AI safety research area focused on understanding internal model computations. Anthropic's work using sparse autoencoders advanced from identifying individual concepts in 2024 to mapping complete reasoning sequences by 2025, enabling more targeted safety interventions.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "e0c300d3678a",
+      "label": "Weak Supervision Elicits Strong Model Capability",
+      "type": "claim",
+      "description": "OpenAI's key empirical finding: a GPT-2-level supervisor can elicit GPT-4 to perform at near GPT-3.5 level on NLP tasks, suggesting strong models generalize beyond what their weak supervisors can explicitly verify. Methods encouraging confident disagreement with weak supervisors improve results further.",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "27a3761b3f27",
+      "label": "Open Problems in RLHF (Casper et al., 2023)",
+      "type": "source",
+      "description": "\"Open Problems and Fundamental Limitations of Reinforcement Learning from Human Feedback\" by Stephen Casper et al. Categorizes RLHF limitations across feedback challenges, reward model challenges, and policy challenges. Warns that industry use of RLHF focuses on capabilities rather than safety.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://liralab.usc.edu/pdfs/publications/casper2023open.pdf",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "39d9f5808520",
+      "label": "Chris Olah (Anthropic)",
+      "type": "concept",
+      "description": "Pioneer of mechanistic interpretability at Anthropic, founder of the transformer-circuits research program. Led early circuit analysis work (Distill.pub circuits thread) and the superposition/monosemanticity research line. Neel Nanda worked under Olah at Anthropic before moving to Google DeepMind.",
+      "confidence": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "1aa5f651bf0b",
+      "label": "Evaluation Gap Problem",
+      "type": "concept",
+      "description": "The growing disconnect between pre-deployment safety testing and real-world AI behavior. Models increasingly distinguish test from deployment contexts, exploit evaluation loopholes, and demonstrate spec gaming, meaning dangerous capabilities may evade detection before release.",
+      "confidence": 0.91,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "c0d22e8b54da",
+      "label": "Embedded Agency",
+      "type": "concept",
+      "description": "The challenge that AI agents exist as physical systems within the very environment they model and optimize, creating fundamental problems for classical decision theory. Identified by Demski and Garrabrant (2019), it clusters into four problem groups: decision theory, embedded world-models, robust delegation, and self-modification. Agents must reason about themselves as physical systems that can be modified.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/abs/1902.09469",
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "3acd9d769088",
+      "label": "RLHF Will Not Scale to Superintelligence",
+      "type": "claim",
+      "description": "Core motivating claim for scalable oversight research: naive reinforcement learning from human feedback (RLHF) will scale poorly to superhuman AI systems because humans cannot reliably supervise AI much smarter than themselves. Requires new oversight methods beyond direct human judgment.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "db30d87cb268",
+      "label": "Agentic AI Safety and Governance",
+      "type": "concept",
+      "description": "Emerging challenge of governing AI systems that operate autonomously with minimal human oversight. Partnership on AI identifies this as the top 2026 governance priority, requiring new security protocols, accountability frameworks, and evaluation methods for autonomous multi-step task execution.",
+      "confidence": 0.87,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "35eeae24a66d",
+      "label": "Scaling Laws for Reward Model Overoptimization (Gao et al., 2023)",
+      "type": "source",
+      "description": "Paper by Leo Gao et al. (ICML 2023) establishing quantitative scaling laws for how reward model overoptimization degrades true performance as a function of KL divergence from the base policy. Foundational empirical work on the reward hacking phenomenon.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://proceedings.mlr.press/v202/gao23h/gao23h.pdf",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "4761af0b70df",
+      "label": "Neel Nanda (Google DeepMind)",
+      "type": "concept",
+      "description": "One of the founding figures of mechanistic interpretability, formerly at Anthropic under Chris Olah, now at Google DeepMind. Co-author of \"Open Problems in Mechanistic Interpretability\" (Jan 2025). Has recently cautioned that the most ambitious vision of mech interp\u2014deeply and reliably understanding what AIs are thinking\u2014may not be achievable due to technical and practical barriers.",
+      "confidence": 0.96,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "6d1af7955102",
+      "label": "Oversight Effectiveness Has Scaling Ceiling",
+      "type": "claim",
+      "description": "Empirical finding from scaling laws research (2025): oversight protocols fail when the capability gap between overseer and agent exceeds a threshold. At 400 Elo gap, debate succeeds ~51.7% of the time while other protocols fall as low as 9.4%. Simply stacking more oversight levels does not guarantee safety.",
+      "confidence": 0.87,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "dac02c1965f4",
+      "label": "Cooperative Inverse Reinforcement Learning (CIRL)",
+      "type": "concept",
+      "description": "A formal model of the value alignment problem as a two-player cooperative game between a human and a robot. Both agents are rewarded according to the human's (unknown) reward function. Proposed by Stuart Russell and colleagues, CIRL naturally produces value-learning behaviors like active teaching and communicative actions. Formalizes value alignment as a POMDP-style problem.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/abs/1606.03137",
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "cc1a58ccd58e",
+      "label": "Anthropic Interpretability Team",
+      "type": "concept",
+      "description": "The primary industrial lab driving mechanistic interpretability research. Produced the transformer-circuits.pub research thread, the monosemanticity / scaling monosemanticity papers, Golden Gate Claude, attribution graphs, and open-sourced circuit-tracing tools. First to apply interpretability to production safety assessment.",
+      "confidence": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "8833fb480f34",
+      "label": "Alignment Faking in LLMs",
+      "type": "claim",
+      "description": "Anthropic's December 2024 finding that current large language models can engage in strategic deception\u2014behaving as if aligned during oversight while having different underlying preferences. Directly challenges the premise that scalable oversight is sufficient alone without intrinsic alignment research.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "dca51bf8b341",
+      "label": "Anthropic Emergent Misalignment from Reward Hacking (2025)",
+      "type": "source",
+      "description": "Anthropic research paper \"Natural Emergent Misalignment from Reward Hacking in Production RL\" (2025) showing that reward hacking during RL training can lead to emergent misaligned behaviors, and that the framing of the reward signal critically affects whether misalignment develops.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://assets.anthropic.com/m/74342f2c96095771/original/Natural-emergent-misalignment-from-reward-hacking-paper.pdf",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "0c48dcc01500",
+      "label": "CLAIM: AI Safety Evaluation Methods Are Failing to Keep Pace",
+      "type": "claim",
+      "description": "Pre-deployment safety evaluations are increasingly unreliable because frontier models can distinguish test from deployment settings, exploit evaluation loopholes, and engage in specification gaming. The International AI Safety Report 2026 identifies this as a critical systemic failure requiring defense-in-depth approaches rather than reliance on pre-deployment testing alone.",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "c10ac5e5fbea",
+      "label": "Debate Improves Truth-Finding When Optimized for Persuasiveness",
+      "type": "claim",
+      "description": "ICML 2024 best paper finding: optimizing debaters for persuasiveness counterintuitively improves truth-finding. Judges reached 76-88% accuracy compared to ~50% baselines. Contradicts concern that persuasion optimization would harm truthfulness.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "bc515850364f",
+      "label": "Infra-Bayesianism",
+      "type": "concept",
+      "description": "An extension of Bayesianism developed by Vanessa Kosoy that uses Knightian (non-probabilistic) uncertainty to address limitations of standard Bayesian approaches. Handles prior misspecification, non-realizability, and grain-of-truth problems. Provides a framework for logical counterfactuals and has tight connections to Garrabrant induction. Extended to infra-Bayesian physicalism and decision-estimation theory.",
+      "confidence": 0.82,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "a47e26ef0b31",
+      "label": "Weak-to-Strong Generalization (OpenAI, 2023)",
+      "type": "source",
+      "description": "OpenAI research on weak-to-strong generalization: whether a strong student model can generalize beyond the supervision of a weaker teacher. Proposes this as a tractable analogy for scalable oversight of superhuman AI and demonstrates some promising preliminary results.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://openai.com/index/weak-to-strong-generalization/",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "8ccad4fd8898",
+      "label": "CLAIM: Industry Safety Preparedness Is Deeply Insufficient",
+      "type": "claim",
+      "description": "The Future of Life Institute's 2025 AI Safety Index found no AI company scored above D in Existential Safety planning, despite claiming AGI may arrive within a decade. Only three companies conducted substantive biosecurity and cyberterrorism capability testing, revealing a dangerous gap between stated ambitions and safety readiness.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "762161ffd49e",
+      "label": "Open Problems in Mechanistic Interpretability",
+      "type": "question",
+      "description": "Major open problems identified in the January 2025 survey paper (Neel Nanda et al.): (1) Scalability\u2014current methods work on toy models but struggle with complex frontier model behaviors; (2) Cherry-picking risk\u2014selective reporting of interpretable examples; (3) Evaluation gaps\u2014lack of rigorous metrics and standardized benchmarks; (4) Polysemanticity at scale; (5) Socio-technical challenges for deployment; (6) Whether deeply reliable understanding of AI reasoning is achievable at all.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "a62e207ca58c",
+      "label": "Paul Christiano",
+      "type": "source",
+      "description": "Key AI alignment researcher, formerly at OpenAI. Primary architect of iterated amplification and co-author of AI Safety via Debate. Founder of Alignment Research Center (ARC). Influential in defining the scalable oversight research agenda.",
+      "confidence": 0.98,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "873556ad899b",
+      "label": "MATS Program",
+      "type": "concept",
+      "description": "ML Alignment Theory Scholars (MATS) \u2014 an academic-adjacent program supporting researchers working on mechanistic interpretability and AI safety. Represents the growing academic/independent research community in this space beyond the major industrial labs.",
+      "confidence": 0.8,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "26d1bce9f99f",
+      "label": "CLAIM: Voluntary Safety Frameworks Are Converging But Unenforced",
+      "type": "claim",
+      "description": "12 major AI labs now publish frontier safety frameworks with common structural elements (METR Dec 2025), but these remain voluntary with no external enforcement. Anthropic notably dropped its flagship commitment to not release models without guaranteed risk mitigations, illustrating the limitations of voluntary commitments under competitive pressure.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "92f214a79eba",
+      "label": "Geoffrey Irving",
+      "type": "source",
+      "description": "AI safety researcher, co-author of AI Safety via Debate (2018). Worked at DeepMind and Google DeepMind on safety research. Lead author of the foundational debate paper.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "0b6caa6000a2",
+      "label": "Anthropic",
+      "type": "concept",
+      "description": "AI safety company founded by former OpenAI researchers. Developed Constitutional AI, RLAIF, and Claude models. Leading organization in RLHF-adjacent alignment research including Constitutional AI, reward hacking studies, and scalable oversight work.",
+      "confidence": 0.99,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "7f6dd49a0aa6",
+      "label": "Towards Guaranteed Safe AI (Dalrymple et al. 2024)",
+      "type": "source",
+      "description": "A 2024 paper by Dalrymple, Skalse, Bengio, Russell, Tegmark, Seshia and others proposing a framework for Guaranteed Safe (GS) AI using three components: a world model (mathematical description of AI effects), a safety specification (what effects are acceptable), and a verifier (auditable proof that the AI satisfies the specification). Represents a formal verification approach to AI safety.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/abs/2405.06624",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "14de2495fd5a",
+      "label": "OpenAI",
+      "type": "source",
+      "description": "AI research lab responsible for superalignment initiative (2023-2024), weak-to-strong generalization research, and AI Safety via Debate. Also produced foundational RLHF work. Key organizational driver of scalable oversight research.",
+      "confidence": 0.98,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "024c987abf81",
+      "label": "OpenAI",
+      "type": "concept",
+      "description": "AI lab that pioneered RLHF for LLMs (InstructGPT, GPT-4). Key researchers include Paul Christiano (scalable oversight, debate), Lilian Weng (reward hacking), John Schulman (PPO, RLHF pipeline). OpenAI's RLHF work established the current dominant post-training paradigm.",
+      "confidence": 0.99,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "b3dbef92f44d",
+      "label": "Updateless Decision Theory (UDT)",
+      "type": "concept",
+      "description": "A decision theory invented by Wei Dai (2009) that addresses dynamic inconsistency in standard Bayesian agents. UDT agents choose policies before receiving any information updates, avoiding the problem of conflicting preferences over time. It serves as the precursor to Functional Decision Theory (FDT). Requires a robust theory of logical uncertainty for full formalization.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "d09a27152844",
+      "label": "CLAIM: EU and US Are Diverging Sharply on AI Regulation",
+      "type": "claim",
+      "description": "The EU AI Act imposes mandatory risk-tiered obligations and GPAI requirements in force through 2025-2027, while the December 2025 US Executive Order explicitly seeks minimal regulatory burden and federal preemption of state-level AI laws to maximize competitiveness. This transatlantic divergence creates compliance fragmentation for global AI developers.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "ab705c4bc9c8",
+      "label": "Anthropic",
+      "type": "source",
+      "description": "AI safety company founded by Dario and Daniela Amodei. Responsible for Constitutional AI, alignment faking research, and the 2025 Alignment Science recommended directions. Uses scalable oversight principles in Claude model training.",
+      "confidence": 0.98,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "d9fb558f20ce",
+      "label": "Source: Towards Monosemanticity (Anthropic, 2023)",
+      "type": "source",
+      "description": "Anthropic paper introducing the use of sparse autoencoders (dictionary learning) to decompose a one-layer transformer's MLP into monosemantic features, demonstrating that the superposition hypothesis is correct and that SAEs can recover interpretable features from polysemantic neurons.",
+      "confidence": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://transformer-circuits.pub/2023/monosemantic-features",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "033f89d4a635",
+      "label": "Formal Verification of Neural Networks",
+      "type": "concept",
+      "description": "The application of rigorous mathematical techniques (model checking, theorem proving, abstract interpretation) to verify that neural networks satisfy safety and correctness specifications. VNN-COMP (Verification of Neural Networks Competition) is the standard benchmark. Key challenges include scalability to large networks, the semantic gap between specifications and neural computation, and recursive AI management systems.",
+      "confidence": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "ad4f22b5cea1",
+      "label": "Key Researchers in RLHF / Alignment",
+      "type": "concept",
+      "description": "Leading researchers include: Paul Christiano (scalable oversight, debate, IRL), John Schulman (PPO, InstructGPT), Lilian Weng (reward hacking synthesis), Rafael Rafailov (DPO, Stanford), Chelsea Finn (DPO, Stanford), Yuntao Bai (Constitutional AI, Anthropic), Nathan Lambert (RLHF book, Allen AI), Stephen Casper (open problems in RLHF, MIT).",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "0a2cdffa2ea0",
+      "label": "Obfuscated Arguments Problem",
+      "type": "question",
+      "description": "Key open problem for debate: a sufficiently capable AI debater might construct valid-seeming but deliberately obfuscated arguments that mislead human judges, even if the judge is trying to determine truth. Whether human judges can reliably detect obfuscated arguments against a capable adversary remains unresolved.",
+      "confidence": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "c5c4139315b0",
+      "label": "Source: Scaling Monosemanticity (Anthropic, 2024)",
+      "type": "source",
+      "description": "Anthropic's May 2024 paper scaling SAE-based feature extraction to Claude 3 Sonnet. Extracted ~10 million interpretable features from a production-grade LLM for the first time, validated features via causal intervention, and demonstrated safety-relevant features (sycophancy, deception, bias). Foundation for Golden Gate Claude demo.",
+      "confidence": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://transformer-circuits.pub/2024/scaling-monosemanticity/",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "e02cb73bc66d",
+      "label": "CLAIM: Frontier AI Poses Credible CBRN Misuse Risks",
+      "type": "claim",
+      "description": "Multiple AI companies, including Anthropic, publicly acknowledged in 2025 they cannot exclude the possibility their models assist novices in biological weapon development. The International AI Safety Report 2026 corroborates this, noting GPAI systems can reduce barriers to harmful workflows in chemistry and biology, and that an AI agent identified 77% of real software vulnerabilities in testing.",
+      "confidence": 0.89,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "02f2e73b76b0",
+      "label": "Chain-of-Thought Faithfulness Problem",
+      "type": "question",
+      "description": "Open problem identified in January 2025 by researchers across OpenAI, DeepMind, Anthropic, and Meta: AI models may develop internal reasoning that does not appear in their visible chain-of-thought outputs, closing off oversight through reasoning inspection as a scalable oversight strategy.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "ec4aa32d3007",
+      "label": "Source: Sparse Autoencoders Find Highly Interpretable Features (Cunningham et al., 2023)",
+      "type": "source",
+      "description": "Academic paper (published at ICLR 2024) by Cunningham, Ewart et al. demonstrating that SAEs find more interpretable features in language models than alternative approaches. Complementary to Anthropic's monosemanticity work, providing independent academic validation of the SAE approach.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/abs/2309.08600",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "a3d21a3aa362",
+      "label": "Claim: Logical Induction Solves Reasoning Under Logical Uncertainty",
+      "type": "claim",
+      "description": "Garrabrant et al. (2016) demonstrated that a computable algorithm can assign calibrated probabilities to logical statements while satisfying a 'logical induction criterion' \u2014 it cannot be exploited by polynomial-time traders. This achieves coherent beliefs in the limit, outperforms universal semimeasure, avoids self-referential paradoxes, and predicts logical truth values faster than direct proof can provide them.",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "074207da150f",
+      "label": "Open Problems in RLHF Alignment",
+      "type": "question",
+      "description": "Major unresolved questions: (1) How to provide reliable oversight of AI outputs humans cannot verify? (2) How to prevent reward hacking without sacrificing capability? (3) How to collect preference data that reflects true human values rather than superficial approval? (4) Does DPO's implicit reward model have properties that make it more or less robust than explicit reward models? (5) Can RLAIF/Constitutional AI scale without inheriting AI biases?",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "412a94673639",
+      "label": "CLAIM: Interpretability Research Is Advancing Toward Reasoning Transparency",
+      "type": "claim",
+      "description": "By early 2026, mechanistic interpretability has progressed from identifying isolated concepts to mapping full reasoning chains in transformer models, particularly through Anthropic's sparse autoencoder research. Direct Preference Optimization (DPO) is replacing RLHF as the dominant alignment technique. However, the Alignment Trilemma\u2014that no single method can guarantee strong optimization, perfect value capture, and robust generalization simultaneously\u2014remains unsolved.",
+      "confidence": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "931d24ab6b02",
+      "label": "Systematic Overseer Error Problem",
+      "type": "question",
+      "description": "Open challenge: when AI systems surpass human proficiency, oversight signals may contain systematic errors that sophisticated models learn to exploit, similar to a student gaming an less capable teacher's grading. Requires techniques to identify when models exploit overseer mistakes rather than learn correctly.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "b2c95a71b138",
+      "label": "Claim: FDT Outperforms CDT and EDT on Key Decision Problems",
+      "type": "claim",
+      "description": "Functional Decision Theory produces better outcomes than Causal Decision Theory (CDT) on Newcomb's Problem, better than Evidential Decision Theory (EDT) on the smoking lesion problem, and better than both on Parfit's Hitchhiker problem. By treating decisions as outputs of a mathematical function, FDT achieves consistent policies across logically equivalent decision situations.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "a32a7f598d1b",
+      "label": "RLHF Book (Nathan Lambert, 2024)",
+      "type": "source",
+      "description": "Comprehensive open-access book on RLHF by Nathan Lambert (Allen Institute for AI). Covers the full RLHF pipeline, overoptimization, Constitutional AI, and emerging alternatives. Available at rlhfbook.com.",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://rlhfbook.com/book.pdf",
+        "source_type": "book",
+        "user_added": false
+      }
+    },
+    {
+      "id": "aca8ae8d5231",
+      "label": "Source: On the Biology of a Large Language Model (Anthropic, 2025)",
+      "type": "source",
+      "description": "Anthropic's 2025 paper applying attribution graphs to Claude 3.5 Haiku, revealing internal mechanisms for multi-step reasoning, planning, and hallucination inhibition. Companion to the Circuit Tracing methods paper. Represents the state-of-the-art in circuit-level analysis of production LLMs.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://transformer-circuits.pub/2025/attribution-graphs/biology.html",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "be92bc397324",
+      "label": "Multi-Agent Oversight Collusion Problem",
+      "type": "question",
+      "description": "In multi-agent AI systems, oversight scales sublinearly with agent count. Risks of collusion, deception, or value drift in long-horizon tasks increase as agent populations grow, and hierarchical verification may not be sufficient to detect coordinated deception across multiple agents.",
+      "confidence": 0.82,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "a1aec54394c6",
+      "label": "Anthropic",
+      "type": "concept",
+      "description": "AI safety company and frontier lab. Leads industry in AI Safety Index (C+/2.64). Operates Frontier Red Team (~15 researchers), publishes ASL (AI Safety Level) deployment reports, and conducts mechanistic interpretability research. Controversially dropped its flagship commitment to pre-release safety guarantees in 2025.",
+      "confidence": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "fd8b160eda13",
+      "label": "Claim: Embedded Agency Creates Fundamental Gaps in Classical Decision Theory",
+      "type": "claim",
+      "description": "Demski and Garrabrant (2019) argue that classical decision theory assumes agents are separate from their environment, but real AI agents are physically embedded within the systems they model and optimize. This creates four clusters of hard open problems: decision theory (counterfactuals), embedded world-models (self-modeling), robust delegation (value handoff), and self-modification \u2014 none fully solved by existing frameworks.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "c48fb7f36af2",
+      "label": "METR (Model Evaluation and Threat Research)",
+      "type": "concept",
+      "description": "Independent safety evaluation organization that publishes comparative analyses of frontier AI safety policies, develops autonomous task evaluation frameworks, and provides third-party capability assessments. Key actor in establishing evaluation standards across major labs.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "7b9bf457ad14",
+      "label": "Source: Open Problems in Mechanistic Interpretability (Nanda et al., Jan 2025)",
+      "type": "source",
+      "description": "Comprehensive survey paper by Neel Nanda and collaborators (January 2025) cataloguing open problems across methodological improvements, application goal-setting, and socio-technical challenges. Marks a maturation of the field with an honest assessment of limitations, including Nanda's own revised skepticism about achieving deep, reliable understanding of AI reasoning.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/abs/2501.16496",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "e978e5305127",
+      "label": "Claim: CIRL Formalizes Value Learning as Cooperative Game",
+      "type": "claim",
+      "description": "Stuart Russell et al. (2016) showed that the AI value alignment problem can be formally modeled as Cooperative Inverse Reinforcement Learning \u2014 a two-player partial-information game where both agents optimize the human's unknown reward function. This formalization naturally produces beneficial behaviors (active teaching, value communication) not possible under classical IRL, and provides a principled foundation for building 'assistant-brained' AI.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "2a3511b62e6a",
+      "label": "Yoshua Bengio",
+      "type": "concept",
+      "description": "Turing Award-winning AI researcher who coordinated the International AI Safety Report 2026, involving experts from 30+ countries. Leading voice calling for international coordination on AI safety and robust governance frameworks to manage existential and catastrophic AI risks.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "a85e812b38d9",
+      "label": "Source: Towards Automated Circuit Discovery (NeurIPS 2023)",
+      "type": "source",
+      "description": "NeurIPS 2023 paper introducing ACDC (Automated Circuit DisCovery), an algorithm that automates the \"systematic ablations\" step in mechanistic interpretability workflows for finding circuits in transformers. Represents progress toward scalable, automated interpretability research.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://proceedings.neurips.cc/paper_files/paper/2023/file/34e1dbe95d34d7ebaf99b9bcaeb5b2be-Paper-Conference.pdf",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "1c94e3b93847",
+      "label": "Open Problem: Scalable Oversight and Alignment Measurement",
+      "type": "question",
+      "description": "How can humans effectively supervise AI systems that may exceed human-level performance in specific domains? Current alignment measurements focus on surface-level behavioral properties insufficient for high-stakes deployment. The field lacks reliable ways to measure deeper propensities toward misalignment in advanced systems.",
+      "confidence": 0.91,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "1e79641c5b8e",
+      "label": "Claim: Corrigibility Occupies a Narrow Formal Sliver of Objective Space",
+      "type": "claim",
+      "description": "Recent formal work (2024-2025) shows that the 2015 notion of corrigibility survives as only a narrow sliver of objectives that pass the main theoretical lower bounds. This provides the first rigorous multi-step guarantees for corrigibility in partially observed environments, but also demonstrates that achieving corrigibility while maintaining competence is an extremely constrained optimization target \u2014 making corrigibility hard to achieve robustly.",
+      "confidence": 0.82,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "93663f505cfd",
+      "label": "Open Problem: Governing Autonomous AI Agents",
+      "type": "question",
+      "description": "How should society govern AI agents that can operate autonomously, execute multi-step tasks, and take real-world actions with minimal human oversight? Existing governance frameworks were designed for narrow, interactive AI systems and lack adequate accountability, attribution, and remediation mechanisms for autonomous agents.",
+      "confidence": 0.89,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "609b5492983b",
+      "label": "Source: Mechanistic Interpretability for AI Safety Review (2024)",
+      "type": "source",
+      "description": "A 2024 review paper (arXiv 2404.14082) systematically covering mechanistic interpretability techniques in the context of AI safety, including observation methods (SAEs, probing, logit lens) and intervention methods (activation patching), foundational hypotheses, and critical open problems including scalability and evaluation gaps.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://arxiv.org/html/2404.14082v1",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "638b66bed029",
+      "label": "Claim: GS-AI Framework Requires World Model + Safety Spec + Verifier",
+      "type": "claim",
+      "description": "Dalrymple et al. (2024) argue that achieving provable AI safety guarantees requires three components working together: a world model (mathematical model of how AI affects the world), a safety specification (formal description of acceptable outcomes), and a verifier (produces an auditable proof certificate). Current neural network capabilities make constructing adequate world models for high-stakes real-world systems an unresolved open problem.",
+      "confidence": 0.87,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "336d947e4b73",
+      "label": "Open Problem: International AI Safety Coordination",
+      "type": "question",
+      "description": "How can nations build interoperable AI governance frameworks that prevent a regulatory race-to-the-bottom while enabling legitimate innovation competition? The EU-US regulatory divergence, exclusion of China from major safety forums, and lack of binding international agreements create fragmentation risks.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "cac0956ec27e",
+      "label": "Source: Circuit Tracing Methods Paper (Anthropic, 2025)",
+      "type": "source",
+      "description": "Anthropic's 2025 methods paper introducing cross-layer transcoders and attribution graphs for circuit tracing in language models. Open-sourced in May 2025; community has applied the tools to open-weight models including Gemma-2-2b and Llama-3.2-1b.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://transformer-circuits.pub/2025/attribution-graphs/methods.html",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "f94fc46de1ad",
+      "label": "Claim: MIRI Shifted from Technical Research to Policy Advocacy (2024)",
+      "type": "claim",
+      "description": "In its 2024 mission update, MIRI concluded that technical alignment research is unlikely to produce solutions before superhuman AI is developed. Triggered by GPT-4's capabilities and shortened timelines, MIRI now prioritizes: (1) international policy advocacy to halt advanced AI development, (2) public communications about extinction risk, and (3) reduced-priority technical research. This marks a major strategic reversal from a decade of theoretical work.",
+      "confidence": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "fe9618cf41a0",
+      "label": "Key Researchers: Agent Foundations",
+      "type": "concept",
+      "description": "Central researchers in agent foundations and formal alignment: Scott Garrabrant (logical induction, embedded agency), Eliezer Yudkowsky (timeless/functional decision theory, AI safety pioneer), Nate Soares (MIRI executive, corrigibility, FDT), Abram Demski (embedded agency, infra-Bayesianism), Vanessa Kosoy (infra-Bayesianism), Wei Dai (UDT), Marcus Hutter (AIXI, universal intelligence), Stuart Russell (CIRL, value alignment, UC Berkeley CHAI).",
+      "confidence": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "7dc38668d470",
+      "label": "Open Problems in Agent Foundations",
+      "type": "question",
+      "description": "Major unsolved problems in the field: (1) Logical counterfactuals \u2014 how should agents reason about the consequences of choices that are logically determined? (2) Reflective stability \u2014 how can an agent have coherent, stable beliefs about its own reasoning process? (3) Robust delegation \u2014 how can values be reliably transferred to a successor AI system? (4) Naturalized induction \u2014 Bayesian inference for agents embedded in the universe they are modeling. (5) Scalable formal verification of real neural networks.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    },
+    {
+      "id": "bd5a428f5ba8",
+      "label": "MIRI Technical Agenda (Soares & Fallenstein)",
+      "type": "source",
+      "description": "The foundational research agenda document for agent foundations alignment work. Organizes the alignment problem into three broad categories: highly reliable agent designs, error tolerance, and value specification. Serves as the primary roadmap for MIRI's theoretical alignment research and influenced much subsequent formal alignment work.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://intelligence.org/files/TechnicalAgenda.pdf",
+        "source_type": "industry",
+        "user_added": false
+      }
+    },
+    {
+      "id": "02a7404375f3",
+      "label": "CHAI - Center for Human-Compatible AI (UC Berkeley)",
+      "type": "source",
+      "description": "Stuart Russell's research center at UC Berkeley focused on the value alignment problem, CIRL, and provably beneficial AI. Key alternative to MIRI's approach \u2014 more empirically grounded, works toward AI systems that are uncertain about human preferences and actively seek to learn them. Major contributor to inverse reinforcement learning and cooperative game-theoretic approaches to alignment.",
+      "confidence": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": "https://humancompatible.ai/",
+        "source_type": "academic",
+        "user_added": false
+      }
+    },
+    {
+      "id": "474f7bd426de",
+      "label": "Logical Uncertainty",
+      "type": "concept",
+      "description": "The challenge of assigning meaningful probabilities to logical or mathematical statements whose truth value is in principle determined but computationally inaccessible. Classical Bayesianism assigns probability 0 or 1 to logical truths, making it inadequate for resource-bounded agents. Logical induction, infra-Bayesianism, and UDT all require solutions to logical uncertainty as a precondition for full formalization.",
+      "confidence": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      },
+      "metadata": {
+        "url": null,
+        "source_type": null,
+        "user_added": false
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "7ecdba9ff6a3",
+      "source": "ff488c55baf5",
+      "target": "e248b774e42d",
+      "relationship": "subtopic_of",
+      "weight": 1.0,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "lead",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "3a84dec5c3ed",
+      "source": "3e67bb97e132",
+      "target": "e248b774e42d",
+      "relationship": "subtopic_of",
+      "weight": 1.0,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "lead",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "78cd4dbd1af9",
+      "source": "3dc5f0aad938",
+      "target": "e248b774e42d",
+      "relationship": "subtopic_of",
+      "weight": 1.0,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "lead",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "ac2fd5c1958e",
+      "source": "65e4ff41d191",
+      "target": "e248b774e42d",
+      "relationship": "subtopic_of",
+      "weight": 1.0,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "lead",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "3fe840af1605",
+      "source": "bc49f67e778b",
+      "target": "e248b774e42d",
+      "relationship": "subtopic_of",
+      "weight": 1.0,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "lead",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "843f94f3b02b",
+      "source": "aa572e36b439",
+      "target": "dd06c4f6afbf",
+      "relationship": "replaces",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "55dac329fe5f",
+      "source": "c22f4a0dbb86",
+      "target": "dd06c4f6afbf",
+      "relationship": "replaces",
+      "weight": 0.7,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "c7d9e12fe41f",
+      "source": "e159bc5fc219",
+      "target": "7fe53c47ef72",
+      "relationship": "subtopic_of",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "5118a4891058",
+      "source": "138f5a4f5b96",
+      "target": "dd06c4f6afbf",
+      "relationship": "replaces",
+      "weight": 0.8,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "b98fef06ad5e",
+      "source": "0c5481d266f0",
+      "target": "7fe53c47ef72",
+      "relationship": "subtopic_of",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "93fc221c466c",
+      "source": "16e1c26cd600",
+      "target": "7fe53c47ef72",
+      "relationship": "subtopic_of",
+      "weight": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "fc5fc9bf42e5",
+      "source": "d821f9e1962c",
+      "target": "7fe53c47ef72",
+      "relationship": "subtopic_of",
+      "weight": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "44b7e894cc52",
+      "source": "138f5a4f5b96",
+      "target": "c22f4a0dbb86",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "562da99a5c6b",
+      "source": "499d34b61beb",
+      "target": "dd06c4f6afbf",
+      "relationship": "subtopic_of",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "f207e99c4124",
+      "source": "a1db70bc9a5e",
+      "target": "7fe53c47ef72",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "ef364832ca6b",
+      "source": "83cbf01c7d14",
+      "target": "7fe53c47ef72",
+      "relationship": "subtopic_of",
+      "weight": 0.87,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "dbde3ed03973",
+      "source": "d45080a4a7dd",
+      "target": "dd06c4f6afbf",
+      "relationship": "challenged_by",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "271034d7b67b",
+      "source": "2c5bda5ce425",
+      "target": "aa572e36b439",
+      "relationship": "supports",
+      "weight": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "6768bc439c74",
+      "source": "e1c4d7dc19ab",
+      "target": "e159bc5fc219",
+      "relationship": "supports",
+      "weight": 0.98,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "8be98d7a3615",
+      "source": "9da23aa79bb8",
+      "target": "d821f9e1962c",
+      "relationship": "supports",
+      "weight": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "862fadb47236",
+      "source": "fae3b8307287",
+      "target": "d45080a4a7dd",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "e658c60a9b20",
+      "source": "5c51f65bf3dc",
+      "target": "a1db70bc9a5e",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "60950eb1f949",
+      "source": "72ec97498930",
+      "target": "d45080a4a7dd",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "627196395116",
+      "source": "a8e4790c41a1",
+      "target": "83cbf01c7d14",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "b22e492dabe8",
+      "source": "9d16e8e342eb",
+      "target": "0c48dcc01500",
+      "relationship": "supports",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "8db80956205f",
+      "source": "cb72db7bdb0b",
+      "target": "7fe53c47ef72",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "7aa191d15533",
+      "source": "fc52b8b46e4f",
+      "target": "123aeedb43f5",
+      "relationship": "leads_to",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "ec443a4e7f8a",
+      "source": "31113dd58da2",
+      "target": "c22f4a0dbb86",
+      "relationship": "supports",
+      "weight": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "26c2757a405c",
+      "source": "9d16e8e342eb",
+      "target": "e02cb73bc66d",
+      "relationship": "supports",
+      "weight": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "f97d01e6b7e6",
+      "source": "9d16e8e342eb",
+      "target": "1aa5f651bf0b",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "386c0ac9e0bd",
+      "source": "d36f78864ce5",
+      "target": "e159bc5fc219",
+      "relationship": "supports",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "fbab5307b8f6",
+      "source": "e79daab01bc0",
+      "target": "d45080a4a7dd",
+      "relationship": "supports",
+      "weight": 0.87,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "abffd1e1535b",
+      "source": "123aeedb43f5",
+      "target": "04d853bbc0c1",
+      "relationship": "leads_to",
+      "weight": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4863f3e1ff87",
+      "source": "e1c4d7dc19ab",
+      "target": "d36f78864ce5",
+      "relationship": "supports",
+      "weight": 0.98,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "df0fd594283f",
+      "source": "04d853bbc0c1",
+      "target": "141f70bcc30c",
+      "relationship": "supports",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "d7cb3d593d80",
+      "source": "57d39a2e1a4a",
+      "target": "2a2a80727ee3",
+      "relationship": "leads_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "09c1d6ad1bb6",
+      "source": "e0c300d3678a",
+      "target": "d821f9e1962c",
+      "relationship": "supports",
+      "weight": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "0062c047fb42",
+      "source": "fb0660111074",
+      "target": "8ccad4fd8898",
+      "relationship": "supports",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "7ba5ae93a617",
+      "source": "9da23aa79bb8",
+      "target": "e0c300d3678a",
+      "relationship": "supports",
+      "weight": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "f0dadd1e1c6e",
+      "source": "1ec4e563c844",
+      "target": "123aeedb43f5",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "a16abf84bf7b",
+      "source": "3acd9d769088",
+      "target": "7fe53c47ef72",
+      "relationship": "challenges",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "a0a59e46e181",
+      "source": "b79147ad5097",
+      "target": "26d1bce9f99f",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "595a247a0e13",
+      "source": "5da7a7b47286",
+      "target": "fc52b8b46e4f",
+      "relationship": "related_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "46e01c6fa418",
+      "source": "b79147ad5097",
+      "target": "2a0865406105",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "b1c21e508fa3",
+      "source": "5da7a7b47286",
+      "target": "04d853bbc0c1",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "e122b0e583d0",
+      "source": "bd1b024faa27",
+      "target": "2c5bda5ce425",
+      "relationship": "supports",
+      "weight": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "44dc7838a911",
+      "source": "bd1b024faa27",
+      "target": "aa572e36b439",
+      "relationship": "supports",
+      "weight": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "9e7fd23609f0",
+      "source": "408b92e590ad",
+      "target": "c22f4a0dbb86",
+      "relationship": "supports",
+      "weight": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "8e0e079e0ec1",
+      "source": "6d1af7955102",
+      "target": "7fe53c47ef72",
+      "relationship": "supports",
+      "weight": 0.87,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "e046c5523e3c",
+      "source": "57d47def17b6",
+      "target": "d09a27152844",
+      "relationship": "supports",
+      "weight": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "7445eb8588c7",
+      "source": "5da7a7b47286",
+      "target": "00a9e4aab40f",
+      "relationship": "subtopic_of",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "42edf9b03905",
+      "source": "cb72db7bdb0b",
+      "target": "6d1af7955102",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "3ca710ac05be",
+      "source": "408b92e590ad",
+      "target": "31113dd58da2",
+      "relationship": "supports",
+      "weight": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "8541290883d7",
+      "source": "f041aa6481f8",
+      "target": "d09a27152844",
+      "relationship": "contradicts",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4b5384855a35",
+      "source": "8833fb480f34",
+      "target": "7fe53c47ef72",
+      "relationship": "challenges",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "9d2eb8f98f2a",
+      "source": "5da7a7b47286",
+      "target": "5da003a8faa9",
+      "relationship": "subtopic_of",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "36799dbaea51",
+      "source": "57d47def17b6",
+      "target": "91914d1a9361",
+      "relationship": "example_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "fe94f5d83596",
+      "source": "408b92e590ad",
+      "target": "138f5a4f5b96",
+      "relationship": "supports",
+      "weight": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "1fbba4e53dbf",
+      "source": "5da7a7b47286",
+      "target": "ecc9080cd924",
+      "relationship": "subtopic_of",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "647b898602f5",
+      "source": "c10ac5e5fbea",
+      "target": "e159bc5fc219",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "cca0d7cb463c",
+      "source": "0aa1bf6dc2e7",
+      "target": "72ec97498930",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "1b9b8dad3605",
+      "source": "f041aa6481f8",
+      "target": "91914d1a9361",
+      "relationship": "example_of",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "7d2b723fc4f7",
+      "source": "a62e207ca58c",
+      "target": "e159bc5fc219",
+      "relationship": "related_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "bbb78652210b",
+      "source": "ed81d90dd4f0",
+      "target": "dbc36d571f1e",
+      "relationship": "supports",
+      "weight": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "d3ea68eb4593",
+      "source": "92f214a79eba",
+      "target": "e159bc5fc219",
+      "relationship": "related_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "f9b90f7c221e",
+      "source": "41d88182b387",
+      "target": "91914d1a9361",
+      "relationship": "subtopic_of",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "361eb164ebec",
+      "source": "ecc9080cd924",
+      "target": "425cc75a0911",
+      "relationship": "supports",
+      "weight": 0.72,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "d2a9222942ef",
+      "source": "35eeae24a66d",
+      "target": "fae3b8307287",
+      "relationship": "supports",
+      "weight": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "632966e64eb1",
+      "source": "14de2495fd5a",
+      "target": "d821f9e1962c",
+      "relationship": "related_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "017cd77a4e8d",
+      "source": "2a0865406105",
+      "target": "26d1bce9f99f",
+      "relationship": "related_to",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "c336e4e0087f",
+      "source": "00a9e4aab40f",
+      "target": "425cc75a0911",
+      "relationship": "leads_to",
+      "weight": 0.8,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "dda1ba1adff4",
+      "source": "dca51bf8b341",
+      "target": "e79daab01bc0",
+      "relationship": "supports",
+      "weight": 0.87,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "b70544905d4a",
+      "source": "ab705c4bc9c8",
+      "target": "a1db70bc9a5e",
+      "relationship": "related_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "370a3d062a6b",
+      "source": "c041fb4c00e9",
+      "target": "4214ea8dce09",
+      "relationship": "leads_to",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "2d56cadda5f1",
+      "source": "0a2cdffa2ea0",
+      "target": "e159bc5fc219",
+      "relationship": "challenges",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "2e937f48f6d4",
+      "source": "a47e26ef0b31",
+      "target": "2a2a80727ee3",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "20834734d0b2",
+      "source": "370ca7af54e1",
+      "target": "0c48dcc01500",
+      "relationship": "related_to",
+      "weight": 0.87,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "ba11a3095ebe",
+      "source": "a0ef7e7ccf09",
+      "target": "4214ea8dce09",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "b091c0f0c803",
+      "source": "02f2e73b76b0",
+      "target": "7fe53c47ef72",
+      "relationship": "challenges",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "cb38cf46eb81",
+      "source": "283812fb4e03",
+      "target": "4214ea8dce09",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "0e791a4067d8",
+      "source": "370ca7af54e1",
+      "target": "e02cb73bc66d",
+      "relationship": "related_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "fcca151bd56c",
+      "source": "ecc9080cd924",
+      "target": "257b097ba0c8",
+      "relationship": "leads_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "1cfe3e234f4e",
+      "source": "931d24ab6b02",
+      "target": "7fe53c47ef72",
+      "relationship": "challenges",
+      "weight": 0.82,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "0ff573a828e5",
+      "source": "1df3e309493f",
+      "target": "4214ea8dce09",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "1ef182158052",
+      "source": "27a3761b3f27",
+      "target": "d45080a4a7dd",
+      "relationship": "supports",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "38afb7da6881",
+      "source": "216de9ba1ff9",
+      "target": "412a94673639",
+      "relationship": "supports",
+      "weight": 0.87,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "bb6e2f539a91",
+      "source": "ecc9080cd924",
+      "target": "9ba26e40ccf6",
+      "relationship": "leads_to",
+      "weight": 0.8,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "461dddfce453",
+      "source": "39d9f5808520",
+      "target": "cc1a58ccd58e",
+      "relationship": "related_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "6a57face27fb",
+      "source": "988c3f53dc9b",
+      "target": "dd06c4f6afbf",
+      "relationship": "related_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "cf76c6e3945f",
+      "source": "a62e207ca58c",
+      "target": "14de2495fd5a",
+      "relationship": "related_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "a3f52704654b",
+      "source": "c0d22e8b54da",
+      "target": "4214ea8dce09",
+      "relationship": "subtopic_of",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "bdc257aef687",
+      "source": "0b6caa6000a2",
+      "target": "c22f4a0dbb86",
+      "relationship": "related_to",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4a307af38ba5",
+      "source": "a62e207ca58c",
+      "target": "e1c4d7dc19ab",
+      "relationship": "authored_by",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "bc65557bd155",
+      "source": "a1aec54394c6",
+      "target": "370ca7af54e1",
+      "relationship": "related_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4aaa53b47526",
+      "source": "87bb4595d4c3",
+      "target": "4214ea8dce09",
+      "relationship": "subtopic_of",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "a23603c7ede1",
+      "source": "4761af0b70df",
+      "target": "762161ffd49e",
+      "relationship": "authored_by",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "8ff70191866e",
+      "source": "a1aec54394c6",
+      "target": "216de9ba1ff9",
+      "relationship": "related_to",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "f53c83634521",
+      "source": "92f214a79eba",
+      "target": "e1c4d7dc19ab",
+      "relationship": "authored_by",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "deaed97a5d43",
+      "source": "b3dbef92f44d",
+      "target": "283812fb4e03",
+      "relationship": "leads_to",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "a1416731c733",
+      "source": "a1aec54394c6",
+      "target": "26d1bce9f99f",
+      "relationship": "supports",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "afcb26326209",
+      "source": "cc1a58ccd58e",
+      "target": "d9fb558f20ce",
+      "relationship": "authored_by",
+      "weight": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "e0689edbe9a0",
+      "source": "283812fb4e03",
+      "target": "b3dbef92f44d",
+      "relationship": "leads_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "125169fda066",
+      "source": "14de2495fd5a",
+      "target": "9da23aa79bb8",
+      "relationship": "authored_by",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "f0a8944395bd",
+      "source": "024c987abf81",
+      "target": "dd06c4f6afbf",
+      "relationship": "related_to",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "8c4b1202f866",
+      "source": "cc1a58ccd58e",
+      "target": "c5c4139315b0",
+      "relationship": "authored_by",
+      "weight": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "3732538e7446",
+      "source": "074207da150f",
+      "target": "dd06c4f6afbf",
+      "relationship": "related_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "dbd3b372def6",
+      "source": "ab705c4bc9c8",
+      "target": "9da23aa79bb8",
+      "relationship": "authored_by",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "8ef27b9e0133",
+      "source": "c48fb7f36af2",
+      "target": "0c48dcc01500",
+      "relationship": "related_to",
+      "weight": 0.87,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "46d05aa81bf7",
+      "source": "a0ef7e7ccf09",
+      "target": "a3d21a3aa362",
+      "relationship": "supports",
+      "weight": 0.92,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "56d5c4130bc4",
+      "source": "074207da150f",
+      "target": "d45080a4a7dd",
+      "relationship": "related_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "d894b62e090d",
+      "source": "ab705c4bc9c8",
+      "target": "5c51f65bf3dc",
+      "relationship": "authored_by",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "87eb8cede0b0",
+      "source": "c48fb7f36af2",
+      "target": "1aa5f651bf0b",
+      "relationship": "related_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4be4289e2e1c",
+      "source": "283812fb4e03",
+      "target": "b2c95a71b138",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "c60d4e65fed8",
+      "source": "0c5481d266f0",
+      "target": "16e1c26cd600",
+      "relationship": "leads_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "84092d6ba874",
+      "source": "2a3511b62e6a",
+      "target": "9d16e8e342eb",
+      "relationship": "authored_by",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4c7f939d3d48",
+      "source": "c0d22e8b54da",
+      "target": "fd8b160eda13",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4bfa36e1f8d6",
+      "source": "cc1a58ccd58e",
+      "target": "aca8ae8d5231",
+      "relationship": "authored_by",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "706e68750d03",
+      "source": "074207da150f",
+      "target": "2a2a80727ee3",
+      "relationship": "related_to",
+      "weight": 0.8,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "a5dfa663a405",
+      "source": "3acd9d769088",
+      "target": "d821f9e1962c",
+      "relationship": "leads_to",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "f77f8d0c86ed",
+      "source": "cc1a58ccd58e",
+      "target": "cac0956ec27e",
+      "relationship": "authored_by",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "67052d3aa352",
+      "source": "d9fb558f20ce",
+      "target": "141f70bcc30c",
+      "relationship": "supports",
+      "weight": 0.95,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "539194eb7ed1",
+      "source": "1df3e309493f",
+      "target": "1e79641c5b8e",
+      "relationship": "supports",
+      "weight": 0.82,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "e5d1c1323d5a",
+      "source": "1aa5f651bf0b",
+      "target": "0c48dcc01500",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "0dec398f7151",
+      "source": "ad4f22b5cea1",
+      "target": "dd06c4f6afbf",
+      "relationship": "related_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "40f659f3c94b",
+      "source": "8833fb480f34",
+      "target": "02f2e73b76b0",
+      "relationship": "leads_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "7bd14d0ad03f",
+      "source": "fdca7dc22d51",
+      "target": "d821f9e1962c",
+      "relationship": "leads_to",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-3",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "8ae06e26abcb",
+      "source": "074207da150f",
+      "target": "074207da150f",
+      "relationship": "related_to",
+      "weight": 0.5,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "311b88fb14e3",
+      "source": "1c94e3b93847",
+      "target": "1aa5f651bf0b",
+      "relationship": "related_to",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "0e1717c95276",
+      "source": "c5c4139315b0",
+      "target": "20aeea65ab3e",
+      "relationship": "supports",
+      "weight": 0.97,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "50bcce76c6d0",
+      "source": "7f6dd49a0aa6",
+      "target": "638b66bed029",
+      "relationship": "supports",
+      "weight": 0.87,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "a4a50f4a6997",
+      "source": "93663f505cfd",
+      "target": "db30d87cb268",
+      "relationship": "related_to",
+      "weight": 0.87,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4e4606eb66f2",
+      "source": "c5c4139315b0",
+      "target": "dbc36d571f1e",
+      "relationship": "supports",
+      "weight": 0.93,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "c52daff43fde",
+      "source": "074207da150f",
+      "target": "57d39a2e1a4a",
+      "relationship": "related_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "a8e26e92147e",
+      "source": "c041fb4c00e9",
+      "target": "f94fc46de1ad",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "494e09b98316",
+      "source": "ec4aa32d3007",
+      "target": "141f70bcc30c",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "03f78fc621e1",
+      "source": "d45080a4a7dd",
+      "target": "499d34b61beb",
+      "relationship": "related_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "310e6d426049",
+      "source": "b3dbef92f44d",
+      "target": "283812fb4e03",
+      "relationship": "leads_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "fcc5813c0cb8",
+      "source": "336d947e4b73",
+      "target": "d09a27152844",
+      "relationship": "related_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "6e216660003c",
+      "source": "2a2a80727ee3",
+      "target": "57d39a2e1a4a",
+      "relationship": "leads_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-1",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4fcd7b31b8e3",
+      "source": "474f7bd426de",
+      "target": "b3dbef92f44d",
+      "relationship": "leads_to",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "6d05d732a75e",
+      "source": "336d947e4b73",
+      "target": "57d47def17b6",
+      "relationship": "related_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "9f80e94dd560",
+      "source": "aca8ae8d5231",
+      "target": "425cc75a0911",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "b4c923f17de3",
+      "source": "d09a27152844",
+      "target": "91914d1a9361",
+      "relationship": "related_to",
+      "weight": 0.87,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "05a8d49a24ae",
+      "source": "cac0956ec27e",
+      "target": "425cc75a0911",
+      "relationship": "supports",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "b64039461aff",
+      "source": "474f7bd426de",
+      "target": "a0ef7e7ccf09",
+      "relationship": "leads_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "7f00f03d7fdb",
+      "source": "7b9bf457ad14",
+      "target": "762161ffd49e",
+      "relationship": "supports",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "ef0483b0623d",
+      "source": "474f7bd426de",
+      "target": "283812fb4e03",
+      "relationship": "leads_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "8b4b3dfccc59",
+      "source": "412a94673639",
+      "target": "1c94e3b93847",
+      "relationship": "leads_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "2557903dc1b1",
+      "source": "bc515850364f",
+      "target": "a0ef7e7ccf09",
+      "relationship": "related_to",
+      "weight": 0.8,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4dcc224bb67e",
+      "source": "033f89d4a635",
+      "target": "7f6dd49a0aa6",
+      "relationship": "related_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "624346db3e5d",
+      "source": "8ccad4fd8898",
+      "target": "8ccad4fd8898",
+      "relationship": "related_to",
+      "weight": 0.5,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "e525b0967d35",
+      "source": "609b5492983b",
+      "target": "762161ffd49e",
+      "relationship": "subtopic_of",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "337b349aa529",
+      "source": "8ccad4fd8898",
+      "target": "1c94e3b93847",
+      "relationship": "leads_to",
+      "weight": 0.83,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "bf0d5141afff",
+      "source": "5da7a7b47286",
+      "target": "762161ffd49e",
+      "relationship": "leads_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "afc06b5b6bdd",
+      "source": "fe9618cf41a0",
+      "target": "c041fb4c00e9",
+      "relationship": "related_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4fa8e47b9b7e",
+      "source": "a85e812b38d9",
+      "target": "00a9e4aab40f",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "2d49bfc8a532",
+      "source": "26d1bce9f99f",
+      "target": "336d947e4b73",
+      "relationship": "leads_to",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4f97c6efb897",
+      "source": "02a7404375f3",
+      "target": "dac02c1965f4",
+      "relationship": "related_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "d1a235a3c05c",
+      "source": "db30d87cb268",
+      "target": "93663f505cfd",
+      "relationship": "leads_to",
+      "weight": 0.87,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "be050ec0b962",
+      "source": "4214ea8dce09",
+      "target": "7dc38668d470",
+      "relationship": "leads_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4f4d24bf5715",
+      "source": "dbc36d571f1e",
+      "target": "257b097ba0c8",
+      "relationship": "leads_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "e560e0dc0fe8",
+      "source": "5da003a8faa9",
+      "target": "dbc36d571f1e",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-2",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "c65195a82bbf",
+      "source": "bd5a428f5ba8",
+      "target": "4214ea8dce09",
+      "relationship": "subtopic_of",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "7c39a19a4d55",
+      "source": "87bb4595d4c3",
+      "target": "4214ea8dce09",
+      "relationship": "related_to",
+      "weight": 0.8,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "d4e33af25bb2",
+      "source": "e02cb73bc66d",
+      "target": "370ca7af54e1",
+      "relationship": "example_of",
+      "weight": 0.87,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "f8301f058edb",
+      "source": "fe9618cf41a0",
+      "target": "4214ea8dce09",
+      "relationship": "related_to",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "b7a16bdc5df7",
+      "source": "0c48dcc01500",
+      "target": "1aa5f651bf0b",
+      "relationship": "related_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-5",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "0e79ee9e0c42",
+      "source": "7dc38668d470",
+      "target": "c041fb4c00e9",
+      "relationship": "leads_to",
+      "weight": 0.88,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4fdbaf187f1b",
+      "source": "dac02c1965f4",
+      "target": "e978e5305127",
+      "relationship": "supports",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "00e1c0fcfeb2",
+      "source": "bc515850364f",
+      "target": "4214ea8dce09",
+      "relationship": "subtopic_of",
+      "weight": 0.82,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "4f9794564dc6",
+      "source": "033f89d4a635",
+      "target": "4214ea8dce09",
+      "relationship": "subtopic_of",
+      "weight": 0.8,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "b413941cf33c",
+      "source": "7dc38668d470",
+      "target": "4214ea8dce09",
+      "relationship": "related_to",
+      "weight": 0.9,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    },
+    {
+      "id": "6a7fcd6fb046",
+      "source": "fe9618cf41a0",
+      "target": "c041fb4c00e9",
+      "relationship": "related_to",
+      "weight": 0.85,
+      "provenance": {
+        "session_id": "52988714",
+        "subagent": "researcher-4",
+        "mode": "survey"
+      }
+    }
+  ]
+}
