@@ -236,6 +236,16 @@ async def run_research(question: str, session_id: str) -> None:
         print(f"\n{review_summary}")
         print(f"Transcript saved: {transcript_1.save()}")
         print(f"Changelog saved: {changelog_1.save()}")
+
+        # --- Report: Literature Review ---
+        from research_agent.report_writer import write_literature_review
+
+        print("\n\n" + "=" * 60)
+        print("PHASE: Report — Literature Review")
+        print("=" * 60 + "\n")
+
+        lit_review_path = await write_literature_review(session_id, question)
+        print(f"\nLiterature review saved: {lit_review_path}")
     else:
         review_summary = "No findings to review."
         print("\nNo researcher findings found — skipping Socratic review.")
@@ -280,6 +290,18 @@ async def run_research(question: str, session_id: str) -> None:
         )
         print(f"Transcript saved: {transcript_2.save()}")
         print(f"Changelog saved: {changelog_2.save()}")
+
+        # --- Report: Insights & Discussion ---
+        from research_agent.report_writer import write_insights_report
+
+        print("\n\n" + "=" * 60)
+        print("PHASE: Report — Insights & Discussion")
+        print("=" * 60 + "\n")
+
+        insights_path = await write_insights_report(
+            session_id, question, synthesis_output
+        )
+        print(f"\nInsights report saved: {insights_path}")
 
     print("\n\n" + "=" * 60)
     print("Research session complete.")
