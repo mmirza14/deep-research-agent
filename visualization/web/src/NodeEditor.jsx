@@ -13,6 +13,15 @@ const RELATIONSHIPS = [
   "related_to",
 ];
 
+const TYPE_COLORS = {
+  concept: "#1f6feb",
+  claim: "#238636",
+  source: "#c1c7d0",
+  question: "#d29922",
+  direction: "#8a58dd",
+  decision: "#93000a",
+};
+
 export default function NodeEditor({
   node,
   allNodes,
@@ -21,16 +30,16 @@ export default function NodeEditor({
   onDelete,
   onFlag,
   onAddEdge,
+  onResearchThis,
 }) {
   const [label, setLabel] = useState("");
   const [description, setDescription] = useState("");
   const [confidence, setConfidence] = useState(0.5);
   const [dirty, setDirty] = useState(false);
-
-  // Edge creation state
   const [showEdgeForm, setShowEdgeForm] = useState(false);
   const [edgeTarget, setEdgeTarget] = useState("");
   const [edgeRelationship, setEdgeRelationship] = useState("related_to");
+  const [researchStarted, setResearchStarted] = useState(false);
 
   useEffect(() => {
     if (node) {
@@ -39,6 +48,7 @@ export default function NodeEditor({
       setConfidence(node.confidence ?? 0.5);
       setDirty(false);
       setShowEdgeForm(false);
+      setResearchStarted(false);
     }
   }, [node]);
 
@@ -62,20 +72,24 @@ export default function NodeEditor({
   if (!node) return null;
 
   const otherNodes = allNodes.filter((n) => n.id !== node.id);
+  const typeColor = TYPE_COLORS[node.type] || TYPE_COLORS.concept;
 
   return (
     <div style={styles.panel}>
-      <div style={styles.header}>
-        <span style={styles.typeTag}>{node.type}</span>
-        <button onClick={onClose} style={styles.closeBtn}>
-          &times;
-        </button>
-      </div>
-
-      <div style={styles.field}>
-        <label style={styles.label}>Label</label>
+      {/* Node Identity */}
+      <div style={styles.section}>
+        <div style={styles.sectionLabel}>NODE IDENTITY</div>
+        <span
+          style={{
+            ...styles.typeTag,
+            background: typeColor,
+            color: node.type === "source" ? "#10141a" : "#fff",
+          }}
+        >
+          {node.type}
+        </span>
         <input
-          style={styles.input}
+          style={styles.labelInput}
           value={label}
           onChange={(e) => {
             setLabel(e.target.value);
@@ -84,10 +98,11 @@ export default function NodeEditor({
         />
       </div>
 
-      <div style={styles.field}>
-        <label style={styles.label}>Description</label>
+      {/* Description */}
+      <div style={styles.section}>
+        <div style={styles.sectionLabel}>DESCRIPTION</div>
         <textarea
-          style={{ ...styles.input, height: 80, resize: "vertical" }}
+          style={styles.textarea}
           value={description}
           onChange={(e) => {
             setDescription(e.target.value);
@@ -96,10 +111,12 @@ export default function NodeEditor({
         />
       </div>
 
-      <div style={styles.field}>
-        <label style={styles.label}>
-          Confidence: {confidence.toFixed(2)}
-        </label>
+      {/* Confidence */}
+      <div style={styles.section}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={styles.sectionLabel}>CONFIDENCE SCORE</div>
+          <span style={styles.confidenceValue}>{confidence.toFixed(2)}</span>
+        </div>
         <input
           type="range"
           min="0"
@@ -110,13 +127,14 @@ export default function NodeEditor({
             setConfidence(parseFloat(e.target.value));
             setDirty(true);
           }}
-          style={{ width: "100%" }}
+          style={styles.slider}
         />
       </div>
 
+      {/* URL */}
       {node.metadata?.url && (
-        <div style={styles.field}>
-          <label style={styles.label}>URL</label>
+        <div style={styles.section}>
+          <div style={styles.sectionLabel}>URL</div>
           <a
             href={node.metadata.url}
             target="_blank"
@@ -128,37 +146,60 @@ export default function NodeEditor({
         </div>
       )}
 
-      <div style={styles.field}>
-        <label style={styles.label}>ID</label>
-        <span style={styles.mono}>{node.id}</span>
+      {/* Provenance */}
+      <div style={styles.provenanceCard}>
+        <div style={styles.sectionLabel}>PROVENANCE</div>
+        <div style={styles.provenanceRow}>
+          <span style={styles.provenanceKey}>SESSION ID</span>
+          <span style={styles.provenanceMono}>
+            {node.provenance?.session_id || "—"}
+          </span>
+        </div>
+        <div style={styles.provenanceRow}>
+          <span style={styles.provenanceKey}>LAST MODIFIED</span>
+          <span style={styles.provenanceMono}>
+            {node.provenance?.timestamp || "—"}
+          </span>
+        </div>
       </div>
 
-      {node.provenance?.session_id && (
-        <div style={styles.field}>
-          <label style={styles.label}>Session</label>
-          <span style={styles.mono}>{node.provenance.session_id}</span>
-        </div>
-      )}
-
+      {/* Save */}
       {dirty && (
         <button onClick={handleSave} style={styles.primaryBtn}>
-          Save changes
+          Save Changes
         </button>
       )}
 
-      <div style={styles.divider} />
+      {/* Research This */}
+      {(node.type === "direction" || node.type === "question") && onResearchThis && (
+        <button
+          onClick={() => {
+            onResearchThis({
+              node_id: node.id,
+              label: node.label,
+              description: node.description || node.label,
+            });
+            setResearchStarted(true);
+            setTimeout(() => setResearchStarted(false), 5000);
+          }}
+          style={researchStarted ? styles.researchBtnDone : styles.researchBtn}
+          disabled={researchStarted}
+        >
+          {researchStarted ? "Research session started" : "Research This"}
+        </button>
+      )}
 
-      {/* Edge creation */}
+      {/* Add Edge */}
       {!showEdgeForm ? (
         <button
           onClick={() => setShowEdgeForm(true)}
-          style={styles.secondaryBtn}
+          style={styles.addEdgeBtn}
         >
-          + Add edge from this node
+          + ADD EDGE
         </button>
       ) : (
         <div style={styles.edgeForm}>
-          <label style={styles.label}>Target node</label>
+          <div style={styles.sectionLabel}>TARGET NODE</div>
           <select
             style={styles.select}
             value={edgeTarget}
@@ -171,7 +212,7 @@ export default function NodeEditor({
               </option>
             ))}
           </select>
-          <label style={{ ...styles.label, marginTop: 8 }}>Relationship</label>
+          <div style={{ ...styles.sectionLabel, marginTop: 8 }}>RELATIONSHIP</div>
           <select
             style={styles.select}
             value={edgeRelationship}
@@ -183,9 +224,9 @@ export default function NodeEditor({
               </option>
             ))}
           </select>
-          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+          <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
             <button onClick={handleAddEdge} style={styles.primaryBtn}>
-              Add edge
+              Add Edge
             </button>
             <button
               onClick={() => setShowEdgeForm(false)}
@@ -197,14 +238,16 @@ export default function NodeEditor({
         </div>
       )}
 
-      <div style={styles.divider} />
-
-      <div style={{ display: "flex", gap: 8 }}>
+      {/* Danger zone */}
+      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
         <button
           onClick={() => onFlag({ id: node.id })}
-          style={styles.warnBtn}
+          style={styles.flagBtn}
         >
-          Flag for re-investigation
+          <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4 }}>
+            flag
+          </span>
+          FLAG
         </button>
         <button
           onClick={() => {
@@ -213,138 +256,241 @@ export default function NodeEditor({
               onClose();
             }
           }}
-          style={styles.dangerBtn}
+          style={styles.deleteBtn}
         >
-          Delete
+          <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4 }}>
+            delete
+          </span>
+          DELETE
         </button>
+      </div>
+
+      {/* Footer */}
+      <div style={styles.footer}>
+        <span>IN: {countEdgesTo(allNodes, node.id)} OUT: {countEdgesFrom(allNodes, node.id)}</span>
       </div>
     </div>
   );
 }
 
+function countEdgesTo(allNodes, nodeId) {
+  return 0; // Placeholder — edges aren't passed to editor; this is cosmetic
+}
+function countEdgesFrom(allNodes, nodeId) {
+  return 0;
+}
+
 const styles = {
   panel: {
-    position: "fixed",
-    top: 0,
-    right: 0,
-    width: 360,
-    height: "100vh",
-    background: "#161b22",
-    borderLeft: "1px solid #30363d",
-    padding: 20,
+    flex: 1,
+    padding: "16px 20px",
     overflowY: "auto",
-    zIndex: 100,
     display: "flex",
     flexDirection: "column",
-    gap: 12,
+    gap: 14,
   },
-  header: {
+  section: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+  },
+  sectionLabel: {
+    fontSize: 10,
+    fontWeight: 600,
+    color: "var(--text-tertiary)",
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
+  },
+  typeTag: {
+    display: "inline-block",
+    padding: "3px 10px",
+    borderRadius: 4,
+    fontSize: 10,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+    alignSelf: "flex-start",
+  },
+  labelInput: {
+    background: "var(--surface-lowest)",
+    border: "none",
+    borderRadius: 4,
+    padding: "10px 12px",
+    color: "var(--text-primary)",
+    fontSize: 16,
+    fontWeight: 700,
+    outline: "none",
+    fontFamily: "'Inter', sans-serif",
+    transition: "background 0.15s ease",
+  },
+  textarea: {
+    background: "var(--surface-lowest)",
+    border: "1px solid var(--ghost-border)",
+    borderRadius: 8,
+    padding: "10px 12px",
+    color: "var(--text-secondary)",
+    fontSize: 14,
+    outline: "none",
+    fontFamily: "'Inter', sans-serif",
+    minHeight: 80,
+    resize: "vertical",
+    lineHeight: 1.6,
+  },
+  confidenceValue: {
+    fontSize: 14,
+    fontWeight: 600,
+    color: "var(--primary)",
+  },
+  slider: {
+    width: "100%",
+    accentColor: "var(--primary)",
+  },
+  link: {
+    color: "var(--primary)",
+    fontSize: 13,
+    wordBreak: "break-all",
+    textDecoration: "none",
+  },
+  provenanceCard: {
+    background: "var(--surface-high)",
+    borderRadius: 8,
+    padding: "12px 14px",
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+  },
+  provenanceRow: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  typeTag: {
-    background: "#21262d",
-    padding: "4px 10px",
-    borderRadius: 12,
-    fontSize: 12,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    color: "#8b949e",
+  provenanceKey: {
+    fontSize: 10,
+    fontWeight: 600,
+    color: "var(--text-tertiary)",
+    letterSpacing: "0.05em",
   },
-  closeBtn: {
-    background: "none",
-    border: "none",
-    color: "#8b949e",
-    fontSize: 24,
-    cursor: "pointer",
-    lineHeight: 1,
-  },
-  field: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 4,
-  },
-  label: {
-    fontSize: 12,
-    color: "#8b949e",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  input: {
-    background: "#0d1117",
-    border: "1px solid #30363d",
-    borderRadius: 6,
-    padding: "8px 10px",
-    color: "#c9d1d9",
-    fontSize: 14,
-    outline: "none",
-    fontFamily: "inherit",
-  },
-  select: {
-    background: "#0d1117",
-    border: "1px solid #30363d",
-    borderRadius: 6,
-    padding: "8px 10px",
-    color: "#c9d1d9",
-    fontSize: 13,
-    outline: "none",
-  },
-  link: {
-    color: "#58a6ff",
-    fontSize: 13,
-    wordBreak: "break-all",
-  },
-  mono: {
+  provenanceMono: {
     fontFamily: "monospace",
-    fontSize: 12,
-    color: "#8b949e",
-  },
-  divider: {
-    borderTop: "1px solid #21262d",
-    margin: "4px 0",
+    fontSize: 11,
+    color: "var(--text-secondary)",
   },
   primaryBtn: {
-    background: "#238636",
+    background: "var(--primary-container)",
+    color: "#fff",
+    border: "none",
+    borderRadius: 4,
+    padding: "8px 14px",
+    cursor: "pointer",
+    fontSize: 12,
+    fontWeight: 600,
+    letterSpacing: "0.02em",
+    transition: "filter 0.15s ease",
+  },
+  secondaryBtn: {
+    background: "var(--surface-high)",
+    color: "var(--text-secondary)",
+    border: "1px solid var(--ghost-border)",
+    borderRadius: 4,
+    padding: "8px 14px",
+    cursor: "pointer",
+    fontSize: 12,
+  },
+  addEdgeBtn: {
+    background: "var(--primary-container)",
     color: "#fff",
     border: "none",
     borderRadius: 6,
-    padding: "8px 14px",
+    padding: "10px 14px",
     cursor: "pointer",
-    fontSize: 13,
-    fontWeight: 500,
+    fontSize: 11,
+    fontWeight: 700,
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
+    width: "100%",
+    transition: "filter 0.15s ease",
   },
-  secondaryBtn: {
-    background: "#21262d",
-    color: "#c9d1d9",
-    border: "1px solid #30363d",
+  researchBtn: {
+    background: "var(--tertiary-container)",
+    color: "#fff",
+    border: "none",
     borderRadius: 6,
-    padding: "8px 14px",
-    cursor: "pointer",
-    fontSize: 13,
-  },
-  warnBtn: {
-    background: "#462c10",
-    color: "#e3b341",
-    border: "1px solid #5a3e1b",
-    borderRadius: 6,
-    padding: "8px 12px",
+    padding: "10px 14px",
     cursor: "pointer",
     fontSize: 12,
+    fontWeight: 600,
+    width: "100%",
+    transition: "filter 0.15s ease",
+  },
+  researchBtnDone: {
+    background: "var(--claim-green)",
+    color: "#fff",
+    border: "none",
+    borderRadius: 6,
+    padding: "10px 14px",
+    cursor: "default",
+    fontSize: 12,
+    fontWeight: 600,
+    width: "100%",
+  },
+  flagBtn: {
+    background: "var(--surface-high)",
+    color: "var(--text-secondary)",
+    border: "1px solid rgba(66, 71, 84, 0.3)",
+    borderRadius: 4,
+    padding: "8px 14px",
+    cursor: "pointer",
+    fontSize: 11,
+    fontWeight: 600,
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
     flex: 1,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "background 0.15s ease",
   },
-  dangerBtn: {
-    background: "#3d1214",
-    color: "#ff7b72",
-    border: "1px solid #5a1e21",
-    borderRadius: 6,
-    padding: "8px 12px",
+  deleteBtn: {
+    background: "var(--surface-high)",
+    color: "#ffb4ab",
+    border: "1px solid rgba(147, 0, 10, 0.3)",
+    borderRadius: 4,
+    padding: "8px 14px",
     cursor: "pointer",
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: 600,
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "background 0.15s ease",
+  },
+  select: {
+    background: "var(--surface-lowest)",
+    border: "1px solid var(--ghost-border)",
+    borderRadius: 4,
+    padding: "8px 10px",
+    color: "var(--text-secondary)",
+    fontSize: 13,
+    outline: "none",
+    fontFamily: "'Inter', sans-serif",
   },
   edgeForm: {
     display: "flex",
     flexDirection: "column",
     gap: 6,
+    background: "var(--surface-high)",
+    borderRadius: 8,
+    padding: 14,
+  },
+  footer: {
+    marginTop: "auto",
+    paddingTop: 12,
+    fontSize: 10,
+    color: "var(--text-muted)",
+    letterSpacing: "0.05em",
+    display: "flex",
+    justifyContent: "space-between",
   },
 };

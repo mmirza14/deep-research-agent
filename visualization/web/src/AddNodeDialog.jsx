@@ -2,6 +2,15 @@ import { useCallback, useState } from "react";
 
 const NODE_TYPES = ["question", "concept", "direction", "claim", "decision"];
 
+const TYPE_COLORS = {
+  concept: "#1f6feb",
+  claim: "#238636",
+  source: "#c1c7d0",
+  question: "#d29922",
+  direction: "#8a58dd",
+  decision: "#93000a",
+};
+
 export default function AddNodeDialog({ onAdd, onClose }) {
   const [label, setLabel] = useState("");
   const [type, setType] = useState("question");
@@ -20,6 +29,7 @@ export default function AddNodeDialog({ onAdd, onClose }) {
   return (
     <div style={styles.overlay} onClick={onClose}>
       <form
+        className="glass-panel"
         style={styles.dialog}
         onClick={(e) => e.stopPropagation()}
         onSubmit={handleSubmit}
@@ -27,7 +37,7 @@ export default function AddNodeDialog({ onAdd, onClose }) {
         <h3 style={styles.title}>Add Node</h3>
 
         <div style={styles.field}>
-          <label style={styles.label}>Label</label>
+          <label style={styles.label}>LABEL</label>
           <input
             style={styles.input}
             value={label}
@@ -38,28 +48,38 @@ export default function AddNodeDialog({ onAdd, onClose }) {
         </div>
 
         <div style={styles.field}>
-          <label style={styles.label}>Type</label>
+          <label style={styles.label}>TYPE</label>
           <div style={styles.typeGrid}>
-            {NODE_TYPES.map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setType(t)}
-                style={{
-                  ...styles.typeBtn,
-                  ...(type === t ? styles.typeBtnActive : {}),
-                }}
-              >
-                {t}
-              </button>
-            ))}
+            {NODE_TYPES.map((t) => {
+              const isActive = type === t;
+              const color = TYPE_COLORS[t];
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setType(t)}
+                  style={{
+                    ...styles.typeBtn,
+                    ...(isActive
+                      ? {
+                          background: color,
+                          color: t === "source" ? "#10141a" : "#fff",
+                          borderColor: color,
+                        }
+                      : {}),
+                  }}
+                >
+                  {t}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         <div style={styles.field}>
-          <label style={styles.label}>Description (optional)</label>
+          <label style={styles.label}>DESCRIPTION (OPTIONAL)</label>
           <textarea
-            style={{ ...styles.input, height: 60, resize: "vertical" }}
+            style={{ ...styles.input, minHeight: 60, resize: "vertical" }}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="A brief description..."
@@ -72,10 +92,13 @@ export default function AddNodeDialog({ onAdd, onClose }) {
           </button>
           <button
             type="submit"
-            style={styles.submitBtn}
+            style={{
+              ...styles.submitBtn,
+              opacity: label.trim() ? 1 : 0.4,
+            }}
             disabled={!label.trim()}
           >
-            Add to graph
+            Add to Graph
           </button>
         </div>
       </form>
@@ -87,27 +110,25 @@ const styles = {
   overlay: {
     position: "fixed",
     inset: 0,
-    background: "rgba(0,0,0,0.6)",
+    background: "rgba(0, 0, 0, 0.5)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 200,
   },
   dialog: {
-    background: "#161b22",
-    border: "1px solid #30363d",
     borderRadius: 12,
     padding: 24,
     width: 420,
     maxWidth: "90vw",
     display: "flex",
     flexDirection: "column",
-    gap: 16,
+    gap: 18,
   },
   title: {
     fontSize: 18,
-    color: "#c9d1d9",
-    fontWeight: 600,
+    fontWeight: 700,
+    color: "var(--text-primary)",
   },
   field: {
     display: "flex",
@@ -115,20 +136,23 @@ const styles = {
     gap: 6,
   },
   label: {
-    fontSize: 12,
-    color: "#8b949e",
+    fontSize: 10,
+    fontWeight: 600,
+    color: "var(--text-tertiary)",
+    letterSpacing: "0.05em",
     textTransform: "uppercase",
-    letterSpacing: 0.5,
   },
   input: {
-    background: "#0d1117",
-    border: "1px solid #30363d",
+    background: "var(--surface-lowest)",
+    border: "1px solid var(--ghost-border)",
     borderRadius: 6,
-    padding: "8px 10px",
-    color: "#c9d1d9",
+    padding: "10px 12px",
+    color: "var(--text-secondary)",
     fontSize: 14,
     outline: "none",
-    fontFamily: "inherit",
+    fontFamily: "'Inter', sans-serif",
+    lineHeight: 1.5,
+    transition: "background 0.15s ease, border-color 0.15s ease",
   },
   typeGrid: {
     display: "flex",
@@ -136,19 +160,17 @@ const styles = {
     flexWrap: "wrap",
   },
   typeBtn: {
-    background: "#21262d",
-    color: "#8b949e",
-    border: "1px solid #30363d",
-    borderRadius: 16,
-    padding: "5px 12px",
+    background: "var(--surface-high)",
+    color: "var(--text-tertiary)",
+    border: "1px solid var(--ghost-border)",
+    borderRadius: 4,
+    padding: "6px 14px",
     cursor: "pointer",
-    fontSize: 12,
-    textTransform: "capitalize",
-  },
-  typeBtnActive: {
-    background: "#1f6feb",
-    color: "#fff",
-    borderColor: "#388bfd",
+    fontSize: 11,
+    fontWeight: 600,
+    textTransform: "uppercase",
+    letterSpacing: "0.03em",
+    transition: "all 0.15s ease",
   },
   actions: {
     display: "flex",
@@ -157,22 +179,24 @@ const styles = {
     marginTop: 4,
   },
   cancelBtn: {
-    background: "#21262d",
-    color: "#c9d1d9",
-    border: "1px solid #30363d",
-    borderRadius: 6,
-    padding: "8px 16px",
-    cursor: "pointer",
-    fontSize: 13,
-  },
-  submitBtn: {
-    background: "#238636",
-    color: "#fff",
+    background: "transparent",
+    color: "var(--text-tertiary)",
     border: "none",
-    borderRadius: 6,
+    borderRadius: 4,
     padding: "8px 16px",
     cursor: "pointer",
     fontSize: 13,
     fontWeight: 500,
+  },
+  submitBtn: {
+    background: "var(--primary-container)",
+    color: "#fff",
+    border: "none",
+    borderRadius: 4,
+    padding: "8px 20px",
+    cursor: "pointer",
+    fontSize: 13,
+    fontWeight: 600,
+    transition: "filter 0.15s ease, opacity 0.15s ease",
   },
 };

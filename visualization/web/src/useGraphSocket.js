@@ -11,6 +11,7 @@ export default function useGraphSocket() {
   const [graph, setGraph] = useState({ nodes: [], edges: [] });
   const [connected, setConnected] = useState(false);
   const [sessionState, setSessionState] = useState(null);
+  const [chatState, setChatState] = useState(null); // { chatId, messages: [{role, text}], waiting }
   const wsRef = useRef(null);
   const reconnectTimer = useRef(null);
 
@@ -32,6 +33,24 @@ export default function useGraphSocket() {
           setGraph(msg.data);
         } else if (msg.type === "session_state") {
           setSessionState(msg.data);
+        } else if (msg.type === "chat_ready") {
+          setChatState((prev) => ({
+            chatId: msg.data.chat_id,
+            messages: prev?.messages || [],
+            waiting: false,
+          }));
+        } else if (msg.type === "chat_response") {
+          setChatState((prev) => prev ? {
+            ...prev,
+            messages: [...prev.messages, { role: "assistant", text: msg.data.text }],
+            waiting: false,
+          } : prev);
+        } else if (msg.type === "chat_error") {
+          setChatState((prev) => prev ? {
+            ...prev,
+            messages: [...prev.messages, { role: "assistant", text: `Error: ${msg.data.error}` }],
+            waiting: false,
+          } : prev);
         }
       } catch {
         // ignore parse errors
@@ -93,6 +112,39 @@ export default function useGraphSocket() {
     [send]
   );
 
+  const startResearch = useCallback(
+    (data) => send("start_research", data),
+    [send]
+  );
+
+  const startChat = useCallback(
+    (nodeId) => {
+      setChatState({ chatId: null, messages: [], waiting: false });
+      send("chat_start", { node_id: nodeId });
+    },
+    [send]
+  );
+
+  const sendChatMessage = useCallback(
+    (chatId, text) => {
+      setChatState((prev) => prev ? {
+        ...prev,
+        messages: [...prev.messages, { role: "user", text }],
+        waiting: true,
+      } : prev);
+      send("chat_message", { chat_id: chatId, text });
+    },
+    [send]
+  );
+
+  const endChat = useCallback(
+    (chatId) => {
+      send("chat_end", { chat_id: chatId });
+      setChatState(null);
+    },
+    [send]
+  );
+
   return {
     graph,
     connected,
@@ -103,5 +155,10 @@ export default function useGraphSocket() {
     deleteNode,
     flagNode,
     resumeSession,
+    startResearch,
+    chatState,
+    startChat,
+    sendChatMessage,
+    endChat,
   };
 }
