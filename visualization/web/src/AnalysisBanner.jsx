@@ -10,13 +10,14 @@ export default function AnalysisBanner({ sessionId, pausedAt, onResume }) {
   return (
     <div style={styles.banner}>
       <div style={styles.bannerLeft}>
-        <span style={styles.modeTag}>ANALYSIS MODE</span>
+        <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#fff" }}>
+          science
+        </span>
         <span style={styles.bannerText}>
-          Agent paused. Review the graph, add questions, flag nodes, then
-          proceed.
+          ANALYSIS MODE: AGENT PAUSED FOR USER REVIEW
         </span>
         {elapsed !== null && (
-          <span style={styles.elapsed}>Paused {elapsed}m ago</span>
+          <span style={styles.elapsed}>({elapsed}m ago)</span>
         )}
       </div>
       <div style={styles.bannerRight}>
@@ -25,7 +26,7 @@ export default function AnalysisBanner({ sessionId, pausedAt, onResume }) {
             style={styles.proceedBtn}
             onClick={() => setConfirming(true)}
           >
-            Proceed to Synthesis
+            PROCEED TO SYNTHESIS
           </button>
         ) : (
           <>
@@ -51,70 +52,66 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "10px 20px",
-    background: "linear-gradient(90deg, #2d1b4e 0%, #1b2838 100%)",
-    borderBottom: "1px solid #6e40c9",
+    height: 40,
+    padding: "0 16px",
+    background: "#a371f7",
     zIndex: 50,
+    flexShrink: 0,
   },
   bannerLeft: {
     display: "flex",
     alignItems: "center",
-    gap: 12,
+    gap: 10,
   },
   bannerRight: {
     display: "flex",
     alignItems: "center",
     gap: 10,
   },
-  modeTag: {
-    background: "#6e40c9",
+  bannerText: {
     color: "#fff",
     fontSize: 11,
     fontWeight: 700,
-    padding: "3px 8px",
-    borderRadius: 4,
     letterSpacing: "0.05em",
   },
-  bannerText: {
-    color: "#c9d1d9",
-    fontSize: 13,
-  },
   elapsed: {
-    color: "#8b949e",
-    fontSize: 12,
+    color: "rgba(255, 255, 255, 0.7)",
+    fontSize: 11,
   },
   proceedBtn: {
-    background: "#238636",
+    background: "transparent",
     color: "#fff",
-    border: "none",
-    borderRadius: 6,
-    padding: "7px 16px",
+    border: "1px solid rgba(255, 255, 255, 0.6)",
+    borderRadius: 4,
+    padding: "5px 16px",
     cursor: "pointer",
-    fontSize: 13,
-    fontWeight: 600,
+    fontSize: 10,
+    fontWeight: 700,
+    letterSpacing: "0.05em",
+    transition: "background 0.15s ease",
   },
   confirmText: {
-    color: "#d29922",
-    fontSize: 13,
-    fontWeight: 500,
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: 600,
   },
   confirmBtn: {
-    background: "#238636",
-    color: "#fff",
+    background: "#fff",
+    color: "#a371f7",
     border: "none",
-    borderRadius: 6,
-    padding: "6px 14px",
+    borderRadius: 4,
+    padding: "5px 14px",
     cursor: "pointer",
-    fontSize: 13,
-    fontWeight: 500,
+    fontSize: 11,
+    fontWeight: 700,
   },
   cancelBtn: {
     background: "transparent",
-    color: "#8b949e",
-    border: "1px solid #30363d",
-    borderRadius: 6,
-    padding: "6px 14px",
+    color: "rgba(255, 255, 255, 0.8)",
+    border: "none",
+    borderRadius: 4,
+    padding: "5px 14px",
     cursor: "pointer",
-    fontSize: 13,
+    fontSize: 11,
   },
 };

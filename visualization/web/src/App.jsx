@@ -1,9 +1,18 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import GraphView from "./GraphView";
 import NodeEditor from "./NodeEditor";
+import NodeChat from "./NodeChat";
 import AddNodeDialog from "./AddNodeDialog";
 import AnalysisBanner from "./AnalysisBanner";
+import DirectionsPanel from "./DirectionsPanel";
 import useGraphSocket from "./useGraphSocket";
+
+const SIDEBAR_ICONS = [
+  { icon: "sync", label: "Status", action: null },
+  { icon: "help_outline", label: "Help", action: null },
+  { icon: "send", label: "Directions", action: "directions" },
+  { icon: "history", label: "History", action: null },
+];
 
 export default function App() {
   const {
@@ -16,16 +25,32 @@ export default function App() {
     deleteNode,
     flagNode,
     resumeSession,
+    startResearch,
+    chatState,
+    startChat,
+    sendChatMessage,
+    endChat,
   } = useGraphSocket();
 
   const [selectedNode, setSelectedNode] = useState(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showDirections, setShowDirections] = useState(false);
+  const [rightTab, setRightTab] = useState("editor");
+  const graphRef = useRef(null);
 
-  const handleNodeSelect = useCallback(
-    (nodeData) => {
-      setSelectedNode(nodeData);
+  const handleNodeSelect = useCallback((nodeData) => {
+    setSelectedNode(nodeData);
+  }, []);
+
+  const handleDirectionSelect = useCallback(
+    (nodeId) => {
+      const nodeData = graph.nodes.find((n) => n.id === nodeId);
+      if (nodeData) {
+        setSelectedNode(nodeData);
+        graphRef.current?.panToNode(nodeId);
+      }
     },
-    []
+    [graph]
   );
 
   const handleEdgeConnect = useCallback(
@@ -39,35 +64,57 @@ export default function App() {
     [addEdge]
   );
 
+  const hasBanner = sessionState?.phase === "awaiting_user_input";
+
   return (
     <>
-      {/* Toolbar */}
-      <div style={styles.toolbar}>
-        <div style={styles.toolbarLeft}>
-          <span style={styles.title}>Research Mind Map</span>
+      {/* Header Bar */}
+      <div style={styles.header}>
+        <div style={styles.headerLeft}>
+          <span style={styles.brandName}>Kinetic Intellect</span>
           <span style={styles.stats}>
-            {graph.nodes.length} nodes, {graph.edges.length} edges
+            <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4 }}>
+              auto_awesome
+            </span>
+            Nodes: {graph.nodes.length}
+          </span>
+          <span style={styles.stats}>
+            <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4 }}>
+              hub
+            </span>
+            Edges: {graph.edges.length}
           </span>
         </div>
-        <div style={styles.toolbarRight}>
-          <button
-            style={styles.addBtn}
-            onClick={() => setShowAddDialog(true)}
-          >
+        <div style={styles.headerRight}>
+          <div style={styles.agentStatus}>
+            <span
+              style={{
+                ...styles.statusDot,
+                background: connected ? "var(--claim-green)" : "var(--error-container)",
+                boxShadow: connected
+                  ? "0 0 8px rgba(35,134,54,0.6)"
+                  : "0 0 8px rgba(147,0,10,0.4)",
+              }}
+            />
+            <span style={styles.statusLabel}>
+              AGENT STATUS: {connected ? "ACTIVE" : "OFFLINE"}
+            </span>
+          </div>
+          <button style={styles.addNodeBtn} onClick={() => setShowAddDialog(true)}>
             + Add Node
           </button>
-          <span
-            style={{
-              ...styles.connIndicator,
-              background: connected ? "#238636" : "#f85149",
-            }}
-            title={connected ? "Connected" : "Disconnected"}
-          />
+          <button style={styles.directionsBtn} onClick={() => setShowDirections((v) => !v)}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 4 }}>
+              send
+            </span>
+            Directions
+          </button>
+          <div style={styles.avatar} />
         </div>
       </div>
 
-      {/* Analysis mode banner (Phase 4) */}
-      {sessionState?.phase === "awaiting_user_input" && (
+      {/* Analysis banner */}
+      {hasBanner && (
         <AnalysisBanner
           sessionId={sessionState.session_id}
           pausedAt={sessionState.paused_at}
@@ -75,25 +122,150 @@ export default function App() {
         />
       )}
 
-      {/* Graph */}
-      <GraphView
-        graph={graph}
-        onNodeSelect={handleNodeSelect}
-        onEdgeConnect={handleEdgeConnect}
-      />
+      <div style={styles.body}>
+        {/* Left Sidebar (collapsed) */}
+        <div style={styles.sidebar}>
+          {SIDEBAR_ICONS.map(({ icon, label, action }) => (
+            <button
+              key={icon}
+              style={{
+                ...styles.sidebarIcon,
+                color:
+                  action === "directions" && showDirections
+                    ? "var(--primary)"
+                    : icon === "sync"
+                    ? connected
+                      ? "var(--claim-green)"
+                      : "var(--error-container)"
+                    : "var(--text-tertiary)",
+              }}
+              title={label}
+              onClick={action === "directions" ? () => setShowDirections((v) => !v) : undefined}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+                {icon}
+              </span>
+            </button>
+          ))}
+        </div>
 
-      {/* Node detail/editor panel */}
-      {selectedNode && (
-        <NodeEditor
-          node={selectedNode}
-          allNodes={graph.nodes}
-          onClose={() => setSelectedNode(null)}
-          onUpdate={updateNode}
-          onDelete={deleteNode}
-          onFlag={flagNode}
-          onAddEdge={addEdge}
+        {/* Directions Panel */}
+        <DirectionsPanel
+          graph={graph}
+          onSelectNode={handleDirectionSelect}
+          onResearchThis={startResearch}
+          visible={showDirections}
+          onToggle={() => setShowDirections((v) => !v)}
         />
-      )}
+
+        {/* Graph Canvas */}
+        <div
+          style={{
+            ...styles.canvas,
+            marginLeft: showDirections ? 320 + 56 : 56,
+            marginRight: selectedNode ? 360 : 0,
+          }}
+        >
+          <GraphView
+            ref={graphRef}
+            graph={graph}
+            onNodeSelect={handleNodeSelect}
+            onEdgeConnect={handleEdgeConnect}
+            selectedNodeId={selectedNode?.id}
+          />
+
+          {/* Legend (bottom-left) */}
+          <div className="glass-panel" style={styles.legend}>
+            <div style={styles.legendTitle}>ONTOLOGY LEGEND</div>
+            {Object.entries(LEGEND_ITEMS).map(([type, { color, shape }]) => (
+              <div key={type} style={styles.legendItem}>
+                <span
+                  style={{
+                    width: 8,
+                    height: 8,
+                    display: "inline-block",
+                    background: color,
+                    borderRadius: shape === "circle" ? "50%" : 0,
+                    clipPath:
+                      shape === "diamond"
+                        ? "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)"
+                        : shape === "triangle"
+                        ? "polygon(50% 0%, 100% 100%, 0% 100%)"
+                        : undefined,
+                  }}
+                />
+                <span>{type}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Panel */}
+        {selectedNode && (
+          <div style={styles.rightPanel}>
+            <div style={styles.rightPanelHeader}>
+              <span style={styles.panelTitle}>Analysis Panel</span>
+              <button
+                onClick={() => {
+                  setSelectedNode(null);
+                  setRightTab("editor");
+                  if (chatState?.chatId) endChat(chatState.chatId);
+                }}
+                style={styles.panelCloseBtn}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                  close
+                </span>
+              </button>
+            </div>
+            <div style={styles.tabBar}>
+              <button
+                style={rightTab === "editor" ? styles.tabActive : styles.tabInactive}
+                onClick={() => setRightTab("editor")}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 6 }}>
+                  tune
+                </span>
+                EDITOR
+              </button>
+              <button
+                style={rightTab === "chat" ? styles.tabActive : styles.tabInactive}
+                onClick={() => setRightTab("chat")}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 6 }}>
+                  chat
+                </span>
+                CHAT
+              </button>
+            </div>
+            <div style={styles.rightPanelContent}>
+              {rightTab === "editor" ? (
+                <NodeEditor
+                  node={selectedNode}
+                  allNodes={graph.nodes}
+                  onClose={() => {
+                    setSelectedNode(null);
+                    setRightTab("editor");
+                  }}
+                  onUpdate={updateNode}
+                  onDelete={deleteNode}
+                  onFlag={flagNode}
+                  onAddEdge={addEdge}
+                  onResearchThis={startResearch}
+                />
+              ) : (
+                <NodeChat
+                  node={selectedNode}
+                  chatState={chatState}
+                  onStartChat={startChat}
+                  onSendMessage={sendChatMessage}
+                  onEndChat={endChat}
+                />
+              )}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Add node dialog */}
       {showAddDialog && (
@@ -102,100 +274,237 @@ export default function App() {
           onClose={() => setShowAddDialog(false)}
         />
       )}
-
-      {/* Legend */}
-      <div style={styles.legend}>
-        {Object.entries(LEGEND_ITEMS).map(([type, color]) => (
-          <div key={type} style={styles.legendItem}>
-            <span
-              style={{ ...styles.legendDot, background: color }}
-            />
-            <span>{type}</span>
-          </div>
-        ))}
-      </div>
     </>
   );
 }
 
 const LEGEND_ITEMS = {
-  concept: "#1f6feb",
-  claim: "#238636",
-  source: "#8b949e",
-  question: "#d29922",
-  direction: "#a371f7",
-  decision: "#f85149",
+  concept: { color: "var(--node-concept)", shape: "circle" },
+  claim: { color: "var(--node-claim)", shape: "circle" },
+  source: { color: "var(--node-source)", shape: "circle" },
+  question: { color: "var(--node-question)", shape: "triangle" },
+  direction: { color: "var(--node-direction)", shape: "diamond" },
+  decision: { color: "var(--node-decision)", shape: "circle" },
 };
 
 const styles = {
-  toolbar: {
+  header: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "10px 20px",
-    background: "#161b22",
-    borderBottom: "1px solid #30363d",
+    height: 40,
+    padding: "0 16px",
+    background: "var(--surface-base)",
+    borderBottom: "1px solid var(--ghost-border)",
     zIndex: 50,
+    flexShrink: 0,
   },
-  toolbarLeft: {
+  headerLeft: {
     display: "flex",
     alignItems: "center",
     gap: 16,
   },
-  toolbarRight: {
+  headerRight: {
     display: "flex",
     alignItems: "center",
     gap: 12,
   },
-  title: {
-    fontSize: 15,
-    fontWeight: 600,
-    color: "#c9d1d9",
+  brandName: {
+    fontSize: 14,
+    fontWeight: 700,
+    color: "var(--text-primary)",
+    letterSpacing: "-0.02em",
   },
   stats: {
-    fontSize: 13,
-    color: "#8b949e",
-  },
-  addBtn: {
-    background: "#238636",
-    color: "#fff",
-    border: "none",
-    borderRadius: 6,
-    padding: "6px 14px",
-    cursor: "pointer",
-    fontSize: 13,
-    fontWeight: 500,
-  },
-  connIndicator: {
-    width: 10,
-    height: 10,
-    borderRadius: "50%",
-    display: "inline-block",
-  },
-  legend: {
-    position: "fixed",
-    bottom: 16,
-    left: 16,
-    display: "flex",
-    gap: 12,
-    background: "rgba(22, 27, 34, 0.9)",
-    border: "1px solid #30363d",
-    borderRadius: 8,
-    padding: "8px 14px",
-    zIndex: 50,
-  },
-  legendItem: {
+    fontSize: 12,
+    color: "var(--text-tertiary)",
     display: "flex",
     alignItems: "center",
-    gap: 5,
-    fontSize: 11,
-    color: "#8b949e",
-    textTransform: "capitalize",
+    fontWeight: 500,
+    letterSpacing: "0.02em",
   },
-  legendDot: {
+  agentStatus: {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+  },
+  statusDot: {
     width: 8,
     height: 8,
     borderRadius: "50%",
     display: "inline-block",
+  },
+  statusLabel: {
+    fontSize: 10,
+    fontWeight: 600,
+    color: "var(--text-tertiary)",
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
+  },
+  addNodeBtn: {
+    background: "var(--primary-container)",
+    color: "#fff",
+    border: "none",
+    borderRadius: 4,
+    padding: "5px 14px",
+    cursor: "pointer",
+    fontSize: 12,
+    fontWeight: 600,
+    letterSpacing: "0.02em",
+    transition: "filter 0.15s ease",
+  },
+  directionsBtn: {
+    background: "var(--tertiary-container)",
+    color: "#fff",
+    border: "none",
+    borderRadius: 4,
+    padding: "5px 14px",
+    cursor: "pointer",
+    fontSize: 12,
+    fontWeight: 600,
+    letterSpacing: "0.02em",
+    display: "flex",
+    alignItems: "center",
+    transition: "filter 0.15s ease",
+  },
+  avatar: {
+    width: 28,
+    height: 28,
+    borderRadius: "50%",
+    background: "var(--surface-high)",
+    border: "1px solid var(--ghost-border)",
+  },
+  body: {
+    display: "flex",
+    flex: 1,
+    position: "relative",
+    overflow: "hidden",
+  },
+  sidebar: {
+    width: 56,
+    background: "var(--surface-low)",
+    borderRight: "1px solid var(--ghost-border)",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    paddingTop: 16,
+    gap: 24,
+    zIndex: 40,
+    flexShrink: 0,
+  },
+  sidebarIcon: {
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    padding: 8,
+    borderRadius: 8,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "background 0.15s ease, color 0.15s ease",
+  },
+  canvas: {
+    flex: 1,
+    position: "relative",
+    transition: "margin 0.2s ease",
+    overflow: "hidden",
+  },
+  rightPanel: {
+    width: 360,
+    background: "var(--surface-container)",
+    borderLeft: "1px solid var(--ghost-border)",
+    boxShadow: "-20px 0 40px rgba(0, 0, 0, 0.4)",
+    display: "flex",
+    flexDirection: "column",
+    flexShrink: 0,
+    zIndex: 40,
+  },
+  rightPanelHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "12px 16px",
+  },
+  panelTitle: {
+    fontSize: 16,
+    fontWeight: 700,
+    color: "var(--text-primary)",
+  },
+  panelCloseBtn: {
+    background: "none",
+    border: "none",
+    color: "var(--text-tertiary)",
+    cursor: "pointer",
+    padding: 4,
+    borderRadius: 4,
+    display: "flex",
+    alignItems: "center",
+    transition: "color 0.15s ease",
+  },
+  tabBar: {
+    display: "flex",
+    gap: 0,
+    padding: "0 16px",
+  },
+  tabActive: {
+    background: "none",
+    border: "none",
+    borderBottom: "2px solid var(--primary)",
+    color: "var(--text-primary)",
+    padding: "8px 16px",
+    fontSize: 11,
+    fontWeight: 600,
+    cursor: "pointer",
+    letterSpacing: "0.05em",
+    display: "flex",
+    alignItems: "center",
+  },
+  tabInactive: {
+    background: "none",
+    border: "none",
+    borderBottom: "2px solid transparent",
+    color: "var(--text-tertiary)",
+    padding: "8px 16px",
+    fontSize: 11,
+    fontWeight: 600,
+    cursor: "pointer",
+    letterSpacing: "0.05em",
+    display: "flex",
+    alignItems: "center",
+  },
+  rightPanelContent: {
+    flex: 1,
+    overflow: "hidden",
+    display: "flex",
+    flexDirection: "column",
+  },
+  legend: {
+    position: "absolute",
+    bottom: 24,
+    left: 24,
+    borderRadius: 12,
+    padding: "12px 16px",
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+    zIndex: 30,
+    width: 192,
+  },
+  legendTitle: {
+    fontSize: 10,
+    fontWeight: 600,
+    color: "var(--text-tertiary)",
+    letterSpacing: "0.15em",
+    marginBottom: 4,
+    textTransform: "uppercase",
+  },
+  legendItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    fontSize: 11,
+    fontWeight: 500,
+    color: "var(--text-secondary)",
+    textTransform: "capitalize",
   },
 };

@@ -20,6 +20,7 @@ import json
 import mimetypes
 import sys
 import uuid
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -211,6 +212,44 @@ def handle_resume_session(data: dict) -> dict:
     return {"ok": True, "session_id": session_id}
 
 
+def handle_start_research(data: dict) -> dict:
+    """Start a new L1 research session from a direction/question node."""
+    import subprocess
+
+    node_id = data.get("node_id")
+    description = data.get("description", "")
+    label = data.get("label", "")
+    if not description:
+        return {"error": "description required"}
+
+    session_id = uuid.uuid4().hex[:8]
+    session_dir = DATA_DIR / "sessions" / f"session_{session_id}"
+    session_dir.mkdir(parents=True, exist_ok=True)
+
+    # Write pending research metadata
+    pending = {
+        "research_question": description,
+        "origin_node_id": node_id,
+        "origin_label": label,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    (session_dir / "pending_research.json").write_text(json.dumps(pending, indent=2))
+
+    # Spawn research agent as background process, logging to session dir
+    log_path = session_dir / "agent.log"
+    log_file = open(log_path, "w")
+    subprocess.Popen(
+        ["python3", "-m", "research_agent.agent", description, "--session", session_id],
+        cwd=str(PROJECT_ROOT),
+        stdout=log_file,
+        stderr=subprocess.STDOUT,
+    )
+
+    print(f"Started research session {session_id} from node {node_id}: {label}")
+    return {"ok": True, "session_id": session_id}
+
+
 HANDLERS = {
     "add_node": handle_add_node,
     "update_node": handle_update_node,
@@ -218,7 +257,222 @@ HANDLERS = {
     "delete_node": handle_delete_node,
     "flag_node": handle_flag_node,
     "resume_session": handle_resume_session,
+    "start_research": handle_start_research,
 }
+
+
+# ---------------------------------------------------------------------------
+# Single-node chat (Phase 5)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class ChatSession:
+    chat_id: str
+    node_id: str
+    context: str  # Pre-built context: node data + 2-hop neighborhood + graph summary
+    history: list = field(default_factory=list)  # [{"role": "user"/"assistant", "text": "..."}]
+
+active_chats: dict[str, ChatSession] = {}
+
+MAX_CHAT_HISTORY = 10  # Max exchanges to keep (20 messages)
+
+
+def _build_chat_context(node_id: str) -> tuple[dict | None, str]:
+    """Build context string for a chat session. Returns (node_data, context_text)."""
+    graph = _load_graph()
+    node_data = None
+    for n in graph["nodes"]:
+        if n["id"] == node_id:
+            node_data = n
+            break
+
+    if not node_data:
+        return None, ""
+
+    # 2-hop neighborhood
+    visited = {node_id}
+    frontier = {node_id}
+    for _ in range(2):
+        next_frontier = set()
+        for e in graph["edges"]:
+            if e["source"] in frontier:
+                next_frontier.add(e["target"])
+            if e["target"] in frontier:
+                next_frontier.add(e["source"])
+        next_frontier -= visited
+        visited |= next_frontier
+        frontier = next_frontier
+
+    neighborhood_nodes = [n for n in graph["nodes"] if n["id"] in visited]
+    neighborhood_edges = [
+        e for e in graph["edges"]
+        if e["source"] in visited and e["target"] in visited
+    ]
+
+    # Graph summary (simple version — avoid importing agent code in server)
+    from collections import Counter
+    active = [n for n in graph["nodes"] if not n.get("withdrawn")]
+    type_counts = Counter(n["type"] for n in active)
+    summary_lines = [f"Graph: {len(active)} nodes, {len(graph['edges'])} edges."]
+    for t, c in type_counts.most_common():
+        summary_lines.append(f"  {t}: {c}")
+
+    context = json.dumps({
+        "node": node_data,
+        "neighborhood": {"nodes": neighborhood_nodes, "edges": neighborhood_edges},
+        "graph_summary": "\n".join(summary_lines),
+    }, indent=2)
+
+    return node_data, context
+
+
+def handle_chat_start(data: dict) -> dict:
+    """Initialize a chat session for a node."""
+    node_id = data.get("node_id")
+    if not node_id:
+        return {"error": "node_id required"}
+
+    node_data, context = _build_chat_context(node_id)
+    if not node_data:
+        return {"error": f"Node {node_id} not found"}
+
+    chat_id = uuid.uuid4().hex[:8]
+    active_chats[chat_id] = ChatSession(
+        chat_id=chat_id,
+        node_id=node_id,
+        context=context,
+        history=[],
+    )
+
+    print(f"Chat started: {chat_id} for node {node_id} ({node_data.get('label', '')})")
+    return {"chat_id": chat_id, "node": node_data}
+
+
+def handle_chat_end(data: dict) -> dict:
+    """End a chat session."""
+    chat_id = data.get("chat_id")
+    if chat_id in active_chats:
+        del active_chats[chat_id]
+        print(f"Chat ended: {chat_id}")
+        return {"ok": True}
+    return {"error": "chat not found"}
+
+
+async def handle_chat_message(data: dict, websocket) -> None:
+    """Handle a chat message — runs agent and streams response back."""
+    chat_id = data.get("chat_id")
+    text = data.get("text", "").strip()
+
+    if not chat_id or chat_id not in active_chats:
+        await websocket.send(json.dumps({
+            "type": "chat_error",
+            "data": {"chat_id": chat_id, "error": "Chat session not found"},
+        }))
+        return
+
+    if not text:
+        return
+
+    session = active_chats[chat_id]
+    session.history.append({"role": "user", "text": text})
+
+    # Trim history to last N exchanges
+    if len(session.history) > MAX_CHAT_HISTORY * 2:
+        session.history = session.history[-(MAX_CHAT_HISTORY * 2):]
+
+    # Build the prompt
+    history_text = ""
+    if session.history[:-1]:  # exclude the current message
+        lines = []
+        for msg in session.history[:-1]:
+            prefix = "User" if msg["role"] == "user" else "Assistant"
+            lines.append(f"{prefix}: {msg['text']}")
+        history_text = "\n".join(lines)
+
+    # Parse context JSON for prompt injection
+    try:
+        ctx = json.loads(session.context)
+    except json.JSONDecodeError:
+        ctx = {"node": {}, "neighborhood": {}, "graph_summary": ""}
+
+    from research_agent.prompts import NODE_CHAT_PROMPT
+    system_prompt = NODE_CHAT_PROMPT.format(
+        node_json=json.dumps(ctx.get("node", {}), indent=2),
+        neighborhood_json=json.dumps(ctx.get("neighborhood", {}), indent=2),
+        graph_summary=ctx.get("graph_summary", ""),
+        history_text=history_text or "(No prior conversation)",
+    )
+
+    # Run the agent in a thread to avoid blocking the event loop
+    try:
+        full_response = await asyncio.get_event_loop().run_in_executor(
+            None, _run_chat_agent, system_prompt, text
+        )
+    except Exception as e:
+        await websocket.send(json.dumps({
+            "type": "chat_error",
+            "data": {"chat_id": chat_id, "error": str(e)},
+        }))
+        return
+
+    # Send response back to client
+    await websocket.send(json.dumps({
+        "type": "chat_response",
+        "data": {"chat_id": chat_id, "text": full_response or "(No response)"},
+    }))
+
+    # Store response in history
+    if full_response:
+        session.history.append({"role": "assistant", "text": full_response})
+
+
+def _run_chat_agent(system_prompt: str, user_text: str) -> str:
+    """Run the chat agent synchronously (called via run_in_executor).
+
+    Since claude_agent_sdk.query() is async, we need to run it in a new event loop.
+    We collect all output and send it as a single response (no streaming to avoid
+    cross-thread WebSocket issues).
+    """
+    import asyncio as _asyncio
+
+    from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+    from research_agent.config import CHAT_MODEL, CHAT_MAX_TURNS
+
+    mcp_server_script = str(Path(__file__).resolve().parent.parent / "research_agent" / "mcp_server.py")
+    mcp_server_config = {
+        "type": "stdio",
+        "command": "python3",
+        "args": [mcp_server_script],
+    }
+
+    options = ClaudeAgentOptions(
+        model=CHAT_MODEL,
+        system_prompt=system_prompt,
+        tools=[],
+        allowed_tools=[
+            "mcp__research-graph__get_graph_summary",
+            "mcp__research-graph__get_neighborhood",
+            "mcp__research-graph__query_graph",
+        ],
+        mcp_servers={"research-graph": mcp_server_config},
+        max_turns=CHAT_MAX_TURNS,
+        permission_mode="bypassPermissions",
+    )
+
+    result_parts = []
+
+    async def _run():
+        async for message in query(prompt=user_text, options=options):
+            if isinstance(message, ResultMessage):
+                if hasattr(message, "result") and message.result:
+                    result_parts.append(message.result)
+            elif hasattr(message, "content"):
+                for block in getattr(message, "content", []):
+                    if hasattr(block, "text"):
+                        result_parts.append(block.text)
+
+    _asyncio.run(_run())
+    return "\n".join(result_parts)
 
 
 # ---------------------------------------------------------------------------
@@ -283,9 +537,25 @@ async def ws_handler(websocket: websockets.asyncio.server.ServerConnection) -> N
                 continue
 
             msg_type = msg.get("type")
+            msg_data = msg.get("data", {})
+
+            # Chat messages need special handling (async, per-client)
+            if msg_type == "chat_message":
+                await handle_chat_message(msg_data, websocket)
+                continue
+
+            if msg_type == "chat_start":
+                result = handle_chat_start(msg_data)
+                await websocket.send(json.dumps({"type": "chat_ready", "data": result}))
+                continue
+
+            if msg_type == "chat_end":
+                result = handle_chat_end(msg_data)
+                continue
+
             handler = HANDLERS.get(msg_type)
             if handler:
-                result = handler(msg.get("data", {}))
+                result = handler(msg_data)
                 # Broadcast updated graph to ALL clients (including sender)
                 await broadcast_graph()
             else:
@@ -398,17 +668,16 @@ async def http_handler(
 # ---------------------------------------------------------------------------
 
 async def main(dev: bool = False) -> None:
-    origins: list | None = None
     if dev:
-        origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
         print("Dev mode: allowing CORS from Vite dev server")
 
+    # Allow all origins — this is a localhost-only server
     server = await ws_serve(
         ws_handler,
         "localhost",
         PORT,
         process_request=http_handler if not dev else None,
-        origins=origins if dev else None,
+        origins=None,
     )
 
     print(f"WebSocket server: ws://localhost:{PORT}")

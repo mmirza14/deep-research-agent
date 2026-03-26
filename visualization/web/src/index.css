@@ -1,14 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap');
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+:root {
+  /* Surface hierarchy */
+  --surface-base: #10141a;
+  --surface-lowest: #0a0e14;
+  --surface-low: #181c22;
+  --surface-container: #1c2026;
+  --surface-high: #262a31;
+  --surface-highest: #31353c;
+
+  /* Text */
+  --text-primary: #dfe2eb;
+  --text-secondary: #c2c6d6;
+  --text-tertiary: #8c90a0;
+  --text-muted: #424754;
+
+  /* Interactive */
+  --primary: #afc6ff;
+  --primary-container: #1f6feb;
+  --tertiary-container: #8a58dd;
+  --error-container: #93000a;
+  --claim-green: #238636;
+  --question-amber: #d29922;
+  --analysis-purple: #a371f7;
+
+  /* Node types */
+  --node-concept: #1f6feb;
+  --node-claim: #238636;
+  --node-source: #c1c7d0;
+  --node-question: #d29922;
+  --node-direction: #8a58dd;
+  --node-decision: #93000a;
+
+  /* Ghost border */
+  --ghost-border: rgba(66, 71, 84, 0.15);
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #0d1117;
-  color: #c9d1d9;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--surface-base);
+  color: var(--text-secondary);
   overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
@@ -16,4 +57,58 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* Material Symbols */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-base);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 10px;
+}
+
+/* Glass panel utility */
+.glass-panel {
+  background: rgba(38, 42, 49, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--ghost-border);
+}
+
+/* Dot grid background for canvas */
+.dot-grid {
+  background-image: radial-gradient(var(--text-muted) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.15;
+}
+
+/* Node pulse animation */
+@keyframes node-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* Edge dash animation */
+@keyframes dash-offset {
+  to { stroke-dashoffset: -20; }
 }

@@ -401,15 +401,59 @@ async def run_research(question: str, session_id: str) -> None:
     print("=" * 60)
 
 
+def _link_origin_node(session_id: str, question_node_id: str) -> None:
+    """If this session was spawned from a direction node, link them."""
+    pending_path = SESSIONS_DIR / f"session_{session_id}" / "pending_research.json"
+    if not pending_path.exists():
+        return
+    try:
+        pending = json.loads(pending_path.read_text())
+        origin_id = pending.get("origin_node_id")
+        if origin_id:
+            from research_agent.graph.store import load_graph, save_graph
+            from research_agent.graph.schema import Edge
+            graph = load_graph()
+            edge = Edge(
+                source=origin_id,
+                target=question_node_id,
+                relationship="leads_to",
+                weight=1.0,
+                provenance={
+                    "session_id": session_id,
+                    "subagent": "agent",
+                    "mode": "survey",
+                },
+            )
+            graph.add_edge(edge)
+            save_graph(graph)
+            print(f"Linked origin node {origin_id} → {question_node_id} via leads_to")
+        # Mark as started
+        pending["status"] = "running"
+        pending_path.write_text(json.dumps(pending, indent=2))
+    except (json.JSONDecodeError, OSError):
+        pass
+
+
 def main() -> None:
     """Entry point — run the lead agent with a research question."""
-    session_id = uuid.uuid4().hex[:8]
+    args = sys.argv[1:]
+
+    # Parse --session flag
+    session_id = None
+    if "--session" in args:
+        idx = args.index("--session")
+        if idx + 1 < len(args):
+            session_id = args[idx + 1]
+            args = args[:idx] + args[idx + 2:]  # remove --session and its value
+
+    if session_id is None:
+        session_id = uuid.uuid4().hex[:8]
 
     # Snapshot existing graph before this session modifies it
     snapshot_graph(session_id)
 
-    if len(sys.argv) > 1:
-        question = " ".join(sys.argv[1:])
+    if args:
+        question = " ".join(args)
     else:
         question = input("Enter your research question: ").strip()
         if not question:

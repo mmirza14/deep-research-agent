@@ -21,3 +21,4 @@ testpaths = ["tests"]
 
 [project.scripts]
 research = "research_agent.agent:main"
+direction = "research_agent.direction:main"

@@ -28,6 +28,14 @@ REPORT_WRITER_MAX_TURNS = 15
 # Collaborative analysis (Phase 4)
 PAUSE_POLL_INTERVAL = 1.0  # seconds between state.json checks during analysis pause
 
+# Direction finding (Phase 5)
+DIRECTION_MODEL = "sonnet"
+DIRECTION_MAX_TURNS = 20
+
+# Single-node chat (Phase 5)
+CHAT_MODEL = "haiku"
+CHAT_MAX_TURNS = 5
+
 # Visualization server
 WS_PORT = 8420
 WS_POLL_INTERVAL = 0.5  # seconds between graph.json change checks

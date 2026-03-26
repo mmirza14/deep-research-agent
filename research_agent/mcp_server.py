@@ -371,6 +371,57 @@ def validate_claims(session_id: str = "") -> str:
 
 
 @mcp.tool()
+def query_graph(query: str) -> str:
+    """Search the knowledge graph by keyword.
+
+    Scores each node by keyword overlap between the query and the node's
+    label + description. Returns top 10 matches with their 1-hop edges.
+
+    Args:
+        query: A natural language search query.
+    """
+    from research_agent.graph.analysis import tokenize
+
+    graph = _load()
+    query_tokens = tokenize(query)
+    if not query_tokens:
+        return json.dumps({"results": [], "message": "No searchable terms in query."})
+
+    scored: list[tuple[int, dict]] = []
+    for node in graph["nodes"]:
+        if node.get("withdrawn"):
+            continue
+        text = f"{node.get('label', '')} {node.get('description', '')}"
+        node_tokens = tokenize(text)
+        overlap = len(query_tokens & node_tokens)
+        if overlap > 0:
+            scored.append((overlap, node))
+
+    scored.sort(key=lambda x: x[0], reverse=True)
+    top = scored[:10]
+
+    if not top:
+        return json.dumps({"results": [], "message": "No matching nodes found."})
+
+    # Collect 1-hop edges for result nodes
+    result_ids = {n["id"] for _, n in top}
+    result_edges = [
+        e for e in graph["edges"]
+        if e["source"] in result_ids or e["target"] in result_ids
+    ]
+
+    results = [
+        {"node": node, "score": score, "edges": [
+            e for e in result_edges
+            if e["source"] == node["id"] or e["target"] == node["id"]
+        ]}
+        for score, node in top
+    ]
+
+    return json.dumps({"results": results}, indent=2)
+
+
+@mcp.tool()
 def get_neighborhood(node_id: str, depth: int = 1) -> str:
     """Get all nodes and edges within N hops of a given node.
 
