@@ -328,8 +328,13 @@ async def run_research(question: str, session_id: str) -> None:
         print("PHASE: Report — Literature Review")
         print("=" * 60 + "\n")
 
-        lit_review_path = await write_literature_review(session_id, question)
-        print(f"\nLiterature review saved: {lit_review_path}")
+        try:
+            lit_review_path = await write_literature_review(session_id, question)
+            print(f"\nLiterature review saved: {lit_review_path}")
+        except Exception as exc:
+            print(f"\n⚠ Literature review failed (non-fatal): {exc}")
+            print("Continuing to interactive pause and synthesis phases.")
+            lit_review_path = None
     else:
         review_summary = "No findings to review."
         lit_review_path = None

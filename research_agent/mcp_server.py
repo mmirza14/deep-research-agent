@@ -422,6 +422,27 @@ def query_graph(query: str) -> str:
 
 
 @mcp.tool()
+def get_session_findings(session_id: str) -> str:
+    """Get all researcher findings for a given session.
+
+    Returns every node added by researcher subagents in this session,
+    with their full metadata (label, description, confidence, sources, etc.).
+    Much more efficient than crawling the graph node-by-node.
+
+    Args:
+        session_id: The research session ID.
+    """
+    graph = _load()
+    findings = [
+        n for n in graph["nodes"]
+        if not n.get("withdrawn", False)
+        and n.get("provenance", {}).get("session_id") == session_id
+        and n.get("provenance", {}).get("subagent", "").startswith("researcher")
+    ]
+    return json.dumps({"count": len(findings), "findings": findings}, indent=2)
+
+
+@mcp.tool()
 def get_neighborhood(node_id: str, depth: int = 1) -> str:
     """Get all nodes and edges within N hops of a given node.
 
