@@ -23,7 +23,7 @@ SOCRATIC_MAX_TURNS_PER_ROUND = 10  # Max turns per critic/defender agent call
 
 # Report writer
 REPORT_WRITER_MODEL = "sonnet"
-REPORT_WRITER_MAX_TURNS = 15
+REPORT_WRITER_MAX_TURNS = 25
 
 # Collaborative analysis (Phase 4)
 PAUSE_POLL_INTERVAL = 1.0  # seconds between state.json checks during analysis pause

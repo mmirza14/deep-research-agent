@@ -222,16 +222,18 @@ Session ID: {session_id}
 Research question: {research_question}
 
 You have read-only access to the knowledge graph via MCP tools:
-- mcp__research-graph__get_graph_summary: overview of the full graph
-- mcp__research-graph__get_neighborhood: explore nodes within N hops of a given node
+- mcp__research-graph__get_graph_summary: overview of the full graph (node counts, types, \
+most connected nodes, low-confidence areas)
+- mcp__research-graph__get_session_findings: retrieve ALL researcher findings for a session \
+in one call — use this instead of crawling node-by-node
+- mcp__research-graph__get_neighborhood: explore nodes and edges within N hops of a given node
 
-Use these tools to explore the graph for additional detail beyond what is provided below. \
+Your primary source of truth is the graph. Start by calling get_graph_summary and \
+get_session_findings, then use get_neighborhood to drill into specific nodes as needed. \
+The context below is a partial snapshot to orient you — the graph contains the complete data. \
 Do NOT attempt to add, edit, or delete any nodes or edges.
 
-## Context provided
-
-### Graph summary (post-review)
-{graph_summary}
+## Context snapshot
 
 ### Findings (researcher nodes this session)
 {findings_text}
@@ -289,16 +291,18 @@ Session ID: {session_id}
 Research question: {research_question}
 
 You have read-only access to the knowledge graph via MCP tools:
-- mcp__research-graph__get_graph_summary: overview of the full graph
-- mcp__research-graph__get_neighborhood: explore nodes within N hops of a given node
+- mcp__research-graph__get_graph_summary: overview of the full graph (node counts, types, \
+most connected nodes, low-confidence areas)
+- mcp__research-graph__get_session_findings: retrieve ALL researcher findings for a session \
+in one call — use this instead of crawling node-by-node
+- mcp__research-graph__get_neighborhood: explore nodes and edges within N hops of a given node
 
-Use these tools to explore the graph for additional detail beyond what is provided below. \
+Your primary source of truth is the graph. Start by calling get_graph_summary and \
+get_session_findings, then use get_neighborhood to drill into specific nodes as needed. \
+The context below is a partial snapshot to orient you — the graph contains the complete data. \
 Do NOT attempt to add, edit, or delete any nodes or edges.
 
-## Context provided
-
-### Graph summary (post-review)
-{graph_summary}
+## Context snapshot
 
 ### Findings (researcher nodes this session)
 {findings_text}

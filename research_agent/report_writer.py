@@ -10,7 +10,9 @@ build context → build ClaudeAgentOptions → run agent → collect output → 
 
 from __future__ import annotations
 
+import asyncio
 import json
+import logging
 from pathlib import Path
 
 from claude_agent_sdk import (
@@ -19,13 +21,19 @@ from claude_agent_sdk import (
     query,
 )
 
+logger = logging.getLogger(__name__)
+
+# Limits for system prompt context to avoid timeout on large graphs
+MAX_FINDINGS_IN_PROMPT = 30  # Show top-N findings; rest available via MCP tools
+MAX_CHANGELOG_OUTCOMES_IN_PROMPT = 20
+COLLECT_OUTPUT_MAX_RETRIES = 2
+COLLECT_OUTPUT_TIMEOUT = 600  # seconds per attempt
+
 from research_agent.config import (
     REPORT_WRITER_MODEL,
     REPORT_WRITER_MAX_TURNS,
     SESSIONS_DIR,
 )
-from research_agent.graph.store import load_graph
-from research_agent.graph.summarizer import summarize_graph
 from research_agent.prompts import (
     REPORT_WRITER_LIT_REVIEW,
     REPORT_WRITER_INSIGHTS,
@@ -85,8 +93,25 @@ def _format_changelog_for_report(changelog_data: dict | None) -> str:
 
 
 async def _collect_output(options: ClaudeAgentOptions, prompt: str) -> str:
-    """Run an agent and collect all text output."""
-    result_text = []
+    """Run an agent and collect all text output, with timeout and retry."""
+    for attempt in range(1, COLLECT_OUTPUT_MAX_RETRIES + 1):
+        try:
+            return await asyncio.wait_for(
+                _run_query(prompt, options), timeout=COLLECT_OUTPUT_TIMEOUT
+            )
+        except (asyncio.TimeoutError, Exception) as exc:
+            logger.warning(
+                "Report writer attempt %d/%d failed: %s",
+                attempt, COLLECT_OUTPUT_MAX_RETRIES, exc,
+            )
+            if attempt == COLLECT_OUTPUT_MAX_RETRIES:
+                raise
+    return ""  # unreachable, satisfies type checker
+
+
+async def _run_query(prompt: str, options: ClaudeAgentOptions) -> str:
+    """Run query and collect results as a single coroutine (wrappable by wait_for)."""
+    result_text: list[str] = []
     async for message in query(prompt=prompt, options=options):
         if isinstance(message, ResultMessage):
             if hasattr(message, "result") and message.result:
@@ -98,6 +123,32 @@ async def _collect_output(options: ClaudeAgentOptions, prompt: str) -> str:
                     result_text.append(block.text)
                     print(block.text, end="", flush=True)
     return "\n".join(result_text)
+
+
+def _truncate_findings(findings_text: str, total_count: int, max_items: int = MAX_FINDINGS_IN_PROMPT) -> str:
+    """Keep only the first *max_items* findings; append explicit instructions for the rest."""
+    entries = findings_text.split("\n- [")
+    if len(entries) <= max_items + 1:  # first split element may be empty or header
+        return findings_text
+    kept = "\n- [".join(entries[: max_items + 1])
+    omitted = len(entries) - max_items - 1
+    return kept + (
+        f"\n\n⚠ IMPORTANT: Only {max_items} of {total_count} findings are shown above. "
+        f"{omitted} findings were omitted to stay within context limits. "
+        f"You MUST use get_graph_summary to see the full node list, then use "
+        f"get_neighborhood on nodes not shown above to retrieve their details. "
+        f"The literature review must cover ALL findings, not just the ones listed here."
+    )
+
+
+def _truncate_changelog(changelog_text: str, max_items: int = MAX_CHANGELOG_OUTCOMES_IN_PROMPT) -> str:
+    """Keep only the first *max_items* changelog entries."""
+    entries = changelog_text.split("\n- **")
+    if len(entries) <= max_items + 1:
+        return changelog_text
+    kept = "\n- **".join(entries[: max_items + 1])
+    omitted = len(entries) - max_items - 1
+    return kept + f"\n\n({omitted} additional changelog entries omitted.)"
 
 
 def _build_report_options(system_prompt: str) -> ClaudeAgentOptions:
@@ -114,6 +165,7 @@ def _build_report_options(system_prompt: str) -> ClaudeAgentOptions:
         tools=[],
         allowed_tools=[
             "mcp__research-graph__get_graph_summary",
+            "mcp__research-graph__get_session_findings",
             "mcp__research-graph__get_neighborhood",
         ],
         mcp_servers={"research-graph": mcp_server_config},
@@ -128,9 +180,6 @@ def _build_report_options(system_prompt: str) -> ClaudeAgentOptions:
 
 async def write_literature_review(session_id: str, question: str) -> Path:
     """Generate a literature review from the post-review knowledge graph."""
-    graph = load_graph()
-    graph_summary = summarize_graph(graph)
-
     findings = get_session_findings(session_id)
     findings_text = format_findings_for_review(findings)
 
@@ -146,10 +195,9 @@ async def write_literature_review(session_id: str, question: str) -> Path:
     system_prompt = REPORT_WRITER_LIT_REVIEW.format(
         session_id=session_id,
         research_question=question,
-        graph_summary=graph_summary,
-        findings_text=findings_text,
+        findings_text=_truncate_findings(findings_text, len(findings)),
         review_summary=review_summary,
-        changelog_text=changelog_text,
+        changelog_text=_truncate_changelog(changelog_text),
     )
 
     options = _build_report_options(system_prompt)
@@ -169,9 +217,6 @@ async def write_insights_report(
     session_id: str, question: str, synthesis_output: str
 ) -> Path:
     """Generate a key insights & discussion document from synthesis + review."""
-    graph = load_graph()
-    graph_summary = summarize_graph(graph)
-
     findings = get_session_findings(session_id)
     findings_text = format_findings_for_review(findings)
 
@@ -202,7 +247,6 @@ async def write_insights_report(
     system_prompt = REPORT_WRITER_INSIGHTS.format(
         session_id=session_id,
         research_question=question,
-        graph_summary=graph_summary,
         findings_text=findings_text,
         synthesis_text=synthesis_output,
         review_summary=review_summary,
