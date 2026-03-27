@@ -17,8 +17,10 @@ export default function useGraphSocket() {
   const [sessions, setSessions] = useState([]);
   const [agentPhase, setAgentPhase] = useState(null);
   const [documentContent, setDocumentContent] = useState(null);
+  const [toasts, setToasts] = useState([]);
   const wsRef = useRef(null);
   const reconnectTimer = useRef(null);
+  const toastIdRef = useRef(0);
 
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
@@ -64,6 +66,13 @@ export default function useGraphSocket() {
           setActiveSessionIdState(msg.data.session_id);
         } else if (msg.type === "document_content") {
           setDocumentContent(msg.data);
+        } else if (msg.type === "notification") {
+          const d = msg.data;
+          toastIdRef.current += 1;
+          setToasts((prev) => [
+            ...prev.slice(-2), // keep max 3 (2 existing + 1 new)
+            { id: toastIdRef.current, level: d.level, message: d.message, detail: d.detail },
+          ]);
         }
       } catch {
         // ignore parse errors
@@ -191,6 +200,11 @@ export default function useGraphSocket() {
     [send]
   );
 
+  const dismissToast = useCallback(
+    (id) => setToasts((prev) => prev.filter((t) => t.id !== id)),
+    []
+  );
+
   return {
     graph,
     connected,
@@ -217,5 +231,8 @@ export default function useGraphSocket() {
     listSessions,
     startNewResearch,
     getDocument,
+    // Toast notifications (Phase 6A)
+    toasts,
+    dismissToast,
   };
 }
