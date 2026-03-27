@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import ActivityFeed from "./ActivityFeed";
 import GraphView from "./GraphView";
 import NodeEditor from "./NodeEditor";
 import NodeChat from "./NodeChat";
@@ -37,6 +38,7 @@ export default function App() {
     setActiveSession,
     listSessions,
     startNewResearch,
+    activities,
     toasts,
     dismissToast,
   } = useGraphSocket();
@@ -272,6 +274,9 @@ export default function App() {
               </div>
             ))}
           </div>
+
+          {/* Activity Feed (bottom drawer) */}
+          <ActivityFeed activities={activities} />
         </div>
 
         {/* Right Panel */}

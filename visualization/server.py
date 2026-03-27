@@ -814,6 +814,95 @@ def _run_chat_agent(system_prompt: str, user_text: str) -> str:
 _last_session_state: dict | None = None
 _last_phase_per_session: dict[str, str] = {}  # session_id -> last known phase+detail hash
 
+# Activity feed (Phase 2A): track previous graph snapshot for diffing
+_last_graph_nodes: dict[str, dict] = {}  # node_id -> node dict (snapshot for diff)
+
+
+NODE_TYPE_LABELS = {
+    "concept": "discovered concept",
+    "claim": "added claim",
+    "source": "added source",
+    "question": "raised question",
+    "direction": "proposed direction",
+    "decision": "recorded decision",
+}
+
+
+def _diff_graph_activities(graph: dict) -> list[dict]:
+    """Compare current graph against last snapshot. Return activity entries for new/modified nodes."""
+    activities = []
+    now = datetime.now(timezone.utc).isoformat()
+    current_nodes = {n["id"]: n for n in graph.get("nodes", [])}
+
+    for nid, node in current_nodes.items():
+        prev = _last_graph_nodes.get(nid)
+        node_type = node.get("type", "concept")
+        label = node.get("label", "Untitled")
+        session_id = node.get("provenance", {}).get("session_id", "")
+
+        if prev is None:
+            # New node
+            action_verb = NODE_TYPE_LABELS.get(node_type, f"added {node_type}")
+            activities.append({
+                "timestamp": node.get("provenance", {}).get("timestamp", now),
+                "action": action_verb,
+                "detail": label,
+                "node_id": nid,
+                "node_type": node_type,
+                "session_id": session_id,
+            })
+        else:
+            # Check for confidence change
+            old_conf = prev.get("confidence")
+            new_conf = node.get("confidence")
+            if old_conf is not None and new_conf is not None and old_conf != new_conf:
+                direction = "raised" if new_conf > old_conf else "lowered"
+                activities.append({
+                    "timestamp": now,
+                    "action": f"confidence {direction}",
+                    "detail": f"{label}: {old_conf:.2f} → {new_conf:.2f}",
+                    "node_id": nid,
+                    "node_type": node_type,
+                    "session_id": session_id,
+                })
+            # Check for flagging
+            if node.get("flagged") and not prev.get("flagged"):
+                activities.append({
+                    "timestamp": now,
+                    "action": "flagged",
+                    "detail": label,
+                    "node_id": nid,
+                    "node_type": node_type,
+                    "session_id": session_id,
+                })
+            # Check for withdrawal
+            if node.get("withdrawn") and not prev.get("withdrawn"):
+                activities.append({
+                    "timestamp": now,
+                    "action": "withdrawn",
+                    "detail": label,
+                    "node_id": nid,
+                    "node_type": node_type,
+                    "session_id": session_id,
+                })
+
+    _last_graph_nodes.clear()
+    _last_graph_nodes.update(current_nodes)
+    return activities
+
+
+async def broadcast_activities(graph: dict) -> None:
+    """Diff the graph and broadcast activity entries to all clients."""
+    activities = _diff_graph_activities(graph)
+    if not activities or not clients:
+        return
+    for activity in activities:
+        payload = json.dumps({"type": "activity", "data": activity})
+        await asyncio.gather(
+            *(c.send(payload) for c in clients),
+            return_exceptions=True,
+        )
+
 
 def _find_active_session_state() -> dict | None:
     """Check for any session in awaiting_user_input phase."""
@@ -887,20 +976,35 @@ async def broadcast_phase_changes() -> None:
                     edge_count = len(g.get("edges", []))
                 except (json.JSONDecodeError, OSError):
                     pass
-            payload = json.dumps({
-                "type": "agent_phase",
+            phase_data = {
+                "session_id": sid,
+                "phase": phase,
+                "detail": detail,
+                "node_count": node_count,
+                "edge_count": edge_count,
+                "started_at": state.get("updated_at"),
+            }
+            payload = json.dumps({"type": "agent_phase", "data": phase_data})
+            if clients:
+                await asyncio.gather(
+                    *(c.send(payload) for c in clients),
+                    return_exceptions=True,
+                )
+            # Emit an activity entry for the phase transition
+            activity_detail = detail if detail else phase.replace("_", " ").title()
+            activity_payload = json.dumps({
+                "type": "activity",
                 "data": {
+                    "timestamp": state.get("updated_at", datetime.now(timezone.utc).isoformat()),
+                    "action": "phase transition",
+                    "detail": activity_detail,
+                    "node_type": "direction",
                     "session_id": sid,
-                    "phase": phase,
-                    "detail": detail,
-                    "node_count": node_count,
-                    "edge_count": edge_count,
-                    "started_at": state.get("updated_at"),
                 },
             })
             if clients:
                 await asyncio.gather(
-                    *(c.send(payload) for c in clients),
+                    *(c.send(activity_payload) for c in clients),
                     return_exceptions=True,
                 )
 
@@ -1067,10 +1171,14 @@ async def check_spawned_processes() -> None:
 async def watch_graph() -> None:
     global _last_graph_hash
     _last_graph_hash = _graph_hash()
+    # Initialize activity diff baseline
+    _diff_graph_activities(_load_graph())
     while True:
         await asyncio.sleep(POLL_INTERVAL)
         current = _graph_hash()
         if current != _last_graph_hash:
+            graph = _load_graph()
+            await broadcast_activities(graph)
             await broadcast_graph()
         await broadcast_session_state()
         await broadcast_phase_changes()
