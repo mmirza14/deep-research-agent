@@ -50,6 +50,32 @@ from research_agent.socratic.review import (
     format_findings_for_review,
 )
 
+
+# ---------------------------------------------------------------------------
+# Phase state management — writes state.json so server + MCP can broadcast
+# ---------------------------------------------------------------------------
+
+def _update_phase(session_id: str, phase: str, detail: str) -> None:
+    """Write current phase to state.json for live status broadcasting."""
+    state_path = SESSIONS_DIR / f"session_{session_id}" / "state.json"
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Preserve existing fields (e.g. research_question, paused_at)
+    existing = {}
+    if state_path.exists():
+        try:
+            existing = json.loads(state_path.read_text())
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    existing.update({
+        "phase": phase,
+        "detail": detail,
+        "session_id": session_id,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    })
+    state_path.write_text(json.dumps(existing, indent=2))
+
 # Path to the standalone MCP server script
 MCP_SERVER_SCRIPT = str(Path(__file__).resolve().parent / "mcp_server.py")
 
@@ -277,10 +303,21 @@ async def _collect_agent_output(options: ClaudeAgentOptions, prompt: str) -> str
 
 async def run_research(question: str, session_id: str) -> None:
     """Run a full research session: research → Socratic review → synthesis → Socratic review."""
+    try:
+        await _run_research_pipeline(question, session_id)
+    except Exception as exc:
+        _update_phase(session_id, "error", f"Agent crashed: {exc}")
+        print(f"\n\nERROR: Research session failed: {exc}")
+        raise
+
+
+async def _run_research_pipeline(question: str, session_id: str) -> None:
+    """Inner pipeline — separated so run_research can catch errors and update phase."""
 
     # -----------------------------------------------------------------------
     # Step 1: Research phase — researchers investigate and populate the graph
     # -----------------------------------------------------------------------
+    _update_phase(session_id, "researching", "Decomposing question and dispatching researchers")
     print("=" * 60)
     print("PHASE: Research")
     print("=" * 60)
@@ -294,6 +331,7 @@ async def run_research(question: str, session_id: str) -> None:
     # -----------------------------------------------------------------------
     # Step 1.5: Validate quantitative claims before review
     # -----------------------------------------------------------------------
+    _update_phase(session_id, "validating", "Validating quantitative claims and checking for conflicts of interest")
     from research_agent.validation import validate_session_claims, detect_coi
     validation_result = validate_session_claims(session_id)
     if validation_result:
@@ -304,6 +342,7 @@ async def run_research(question: str, session_id: str) -> None:
 
     findings = get_session_findings(session_id)
     if findings:
+        _update_phase(session_id, "socratic_review_1", f"Reviewing {len(findings)} findings")
         print("\n\n" + "=" * 60)
         print(f"PHASE: Socratic Review — Stage 1 (Findings)")
         print(f"Reviewing {len(findings)} findings...")
@@ -325,6 +364,7 @@ async def run_research(question: str, session_id: str) -> None:
         # --- Report: Literature Review ---
         from research_agent.report_writer import write_literature_review
 
+        _update_phase(session_id, "writing_literature_review", "Generating literature review from validated findings")
         print("\n\n" + "=" * 60)
         print("PHASE: Report — Literature Review")
         print("=" * 60 + "\n")
@@ -344,12 +384,14 @@ async def run_research(question: str, session_id: str) -> None:
     # -----------------------------------------------------------------------
     # Step 2.5: Analysis Mode — pause for user feedback via mind map
     # -----------------------------------------------------------------------
+    # Note: _wait_for_user_input writes its own state.json with phase=awaiting_user_input
     await _wait_for_user_input(session_id, question, lit_review_path or Path())
     user_feedback = _collect_user_feedback(session_id)
 
     # -----------------------------------------------------------------------
     # Step 3: Synthesis — lead agent synthesizes with user feedback
     # -----------------------------------------------------------------------
+    _update_phase(session_id, "synthesizing", "Analyzing user feedback and synthesizing findings")
     print("\n\n" + "=" * 60)
     print("PHASE: Collaborative Synthesis (post-review + user feedback)")
     print("=" * 60 + "\n")
@@ -372,6 +414,7 @@ async def run_research(question: str, session_id: str) -> None:
     # Step 4: Stage 2 Socratic Review — Critic/Defender review synthesis
     # -----------------------------------------------------------------------
     if synthesis_output.strip():
+        _update_phase(session_id, "socratic_review_2", "Reviewing synthesis conclusions")
         print("\n\n" + "=" * 60)
         print("PHASE: Socratic Review — Stage 2 (Synthesis)")
         print("=" * 60 + "\n")
@@ -393,6 +436,7 @@ async def run_research(question: str, session_id: str) -> None:
         # --- Report: Insights & Discussion ---
         from research_agent.report_writer import write_insights_report
 
+        _update_phase(session_id, "writing_insights", "Generating insights report")
         print("\n\n" + "=" * 60)
         print("PHASE: Report — Insights & Discussion")
         print("=" * 60 + "\n")
@@ -401,6 +445,13 @@ async def run_research(question: str, session_id: str) -> None:
             session_id, question, synthesis_output
         )
         print(f"\nInsights report saved: {insights_path}")
+
+    # Count final graph stats
+    from research_agent.graph.store import load_graph
+    final_graph = load_graph(session_graph_path(session_id))
+    node_count = len(final_graph.nodes)
+    edge_count = len(final_graph.edges)
+    _update_phase(session_id, "complete", f"{node_count} nodes, {edge_count} edges. Research complete.")
 
     print("\n\n" + "=" * 60)
     print("Research session complete.")

@@ -515,6 +515,31 @@ use get_neighborhood or query_graph to explore further.
 """
 
 
+# ---------------------------------------------------------------------------
+# Research Question Refinement (Phase 1A — MCP Orchestration)
+# ---------------------------------------------------------------------------
+
+QUESTION_REFINEMENT_PROMPT = """\
+You are a research question refinement assistant. Given a vague topic or question, \
+produce a precise, well-scoped research question suitable for systematic investigation.
+
+Your output MUST be a single JSON object with these fields:
+- "refined": The refined research question (1-2 sentences, specific and measurable)
+- "scope": What the research will focus on (timeframe, population, methodology types)
+- "exclusions": Array of strings — what is explicitly out of scope
+- "suggested_sub_questions": Array of 3-5 specific sub-questions that decompose the main question
+
+Guidelines:
+- Make the question specific enough to be answerable but broad enough to find substantial literature
+- Include temporal bounds when relevant (e.g., "2019-2025")
+- Specify the population, domain, or context
+- Prefer "What is the impact/effect/relationship" framing over yes/no questions
+- Sub-questions should be independently researchable
+
+Output ONLY the JSON object — no preamble, no markdown fences, no commentary.
+"""
+
+
 def format_user_feedback(diff: dict) -> str:
     """Format a graph diff into readable text for the collaborative synthesis prompt."""
     lines = []
