@@ -120,6 +120,13 @@ body {
   to { transform: rotate(360deg); }
 }
 
+/* Node arrival animation (Phase 2B) */
+@keyframes nodeArrival {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 /* Dot pulse for progress indicator */
 @keyframes dotPulse {
   0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
