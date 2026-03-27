@@ -1,17 +1,18 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import GraphView from "./GraphView";
 import NodeEditor from "./NodeEditor";
 import NodeChat from "./NodeChat";
 import AddNodeDialog from "./AddNodeDialog";
 import AnalysisBanner from "./AnalysisBanner";
 import DirectionsPanel from "./DirectionsPanel";
+import HomeScreen from "./HomeScreen";
 import useGraphSocket from "./useGraphSocket";
 
 const SIDEBAR_ICONS = [
   { icon: "sync", label: "Status", action: null },
   { icon: "help_outline", label: "Help", action: null },
   { icon: "send", label: "Directions", action: "directions" },
-  { icon: "history", label: "History", action: null },
+  { icon: "history", label: "History", action: "history" },
 ];
 
 export default function App() {
@@ -30,13 +31,26 @@ export default function App() {
     startChat,
     sendChatMessage,
     endChat,
+    agentPhase,
+    sessions,
+    setActiveSession,
+    listSessions,
+    startNewResearch,
   } = useGraphSocket();
 
   const [selectedNode, setSelectedNode] = useState(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showDirections, setShowDirections] = useState(false);
   const [rightTab, setRightTab] = useState("editor");
+  const [showHome, setShowHome] = useState(true);
   const graphRef = useRef(null);
+
+  // Exit home screen when graph gets populated
+  useEffect(() => {
+    if (graph.nodes.length > 0 && showHome) {
+      setShowHome(false);
+    }
+  }, [graph.nodes.length, showHome]);
 
   const handleNodeSelect = useCallback((nodeData) => {
     setSelectedNode(nodeData);
@@ -90,16 +104,44 @@ export default function App() {
             <span
               style={{
                 ...styles.statusDot,
-                background: connected ? "var(--claim-green)" : "var(--error-container)",
-                boxShadow: connected
-                  ? "0 0 8px rgba(35,134,54,0.6)"
-                  : "0 0 8px rgba(147,0,10,0.4)",
+                background: !connected
+                  ? "var(--error-container)"
+                  : agentPhase?.phase === "complete"
+                  ? "var(--claim-green)"
+                  : agentPhase?.phase === "error"
+                  ? "var(--error-container)"
+                  : agentPhase?.phase && agentPhase.phase !== "awaiting_user_input"
+                  ? "var(--node-direction)"
+                  : "var(--claim-green)",
+                boxShadow: !connected
+                  ? "0 0 8px rgba(147,0,10,0.4)"
+                  : agentPhase?.phase && !["complete", "error", "awaiting_user_input"].includes(agentPhase.phase)
+                  ? "0 0 8px rgba(163,113,247,0.6)"
+                  : "0 0 8px rgba(35,134,54,0.6)",
+                animation: agentPhase?.phase && !["complete", "error", "awaiting_user_input"].includes(agentPhase.phase)
+                  ? "pulse 1.5s ease-in-out infinite"
+                  : "none",
               }}
             />
             <span style={styles.statusLabel}>
-              AGENT STATUS: {connected ? "ACTIVE" : "OFFLINE"}
+              {!connected
+                ? "OFFLINE"
+                : agentPhase?.detail
+                ? agentPhase.detail
+                : "ACTIVE"}
             </span>
+            {agentPhase?.node_count > 0 && connected && (
+              <span style={{ ...styles.statusLabel, color: "var(--text-tertiary)", marginLeft: 4 }}>
+                ({agentPhase.node_count}n / {agentPhase.edge_count}e)
+              </span>
+            )}
           </div>
+          <button style={styles.newResearchBtn} onClick={() => setShowHome(true)}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 4 }}>
+              add_circle
+            </span>
+            New Research
+          </button>
           <button style={styles.addNodeBtn} onClick={() => setShowAddDialog(true)}>
             + Add Node
           </button>
@@ -123,6 +165,21 @@ export default function App() {
       )}
 
       <div style={styles.body}>
+        {showHome && graph.nodes.length === 0 ? (
+          <HomeScreen
+            sessions={sessions}
+            onStartResearch={(q) => {
+              startNewResearch(q);
+              setShowHome(false);
+            }}
+            onSelectSession={(sid) => {
+              setActiveSession(sid);
+              setShowHome(false);
+            }}
+            onRefreshSessions={listSessions}
+          />
+        ) : (
+        <>
         {/* Left Sidebar (collapsed) */}
         <div style={styles.sidebar}>
           {SIDEBAR_ICONS.map(({ icon, label, action }) => (
@@ -140,7 +197,13 @@ export default function App() {
                     : "var(--text-tertiary)",
               }}
               title={label}
-              onClick={action === "directions" ? () => setShowDirections((v) => !v) : undefined}
+              onClick={
+                action === "directions"
+                  ? () => setShowDirections((v) => !v)
+                  : action === "history"
+                  ? () => setShowHome(true)
+                  : undefined
+              }
             >
               <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
                 {icon}
@@ -265,6 +328,8 @@ export default function App() {
             </div>
           </div>
         )}
+        </>
+        )}
       </div>
 
       {/* Add node dialog */}
@@ -340,6 +405,20 @@ const styles = {
     color: "var(--text-tertiary)",
     letterSpacing: "0.05em",
     textTransform: "uppercase",
+  },
+  newResearchBtn: {
+    background: "var(--tertiary-container)",
+    color: "#fff",
+    border: "none",
+    borderRadius: 4,
+    padding: "5px 14px",
+    cursor: "pointer",
+    fontSize: 12,
+    fontWeight: 600,
+    letterSpacing: "0.02em",
+    display: "flex",
+    alignItems: "center",
+    transition: "filter 0.15s ease",
   },
   addNodeBtn: {
     background: "var(--primary-container)",

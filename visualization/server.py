@@ -781,10 +781,11 @@ def _run_chat_agent(system_prompt: str, user_text: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Session state broadcasting (Phase 4: Analysis Mode)
+# Session state broadcasting (Phase 4: Analysis Mode + Phase 1C: Live Phase)
 # ---------------------------------------------------------------------------
 
 _last_session_state: dict | None = None
+_last_phase_per_session: dict[str, str] = {}  # session_id -> last known phase+detail hash
 
 
 def _find_active_session_state() -> dict | None:
@@ -804,8 +805,28 @@ def _find_active_session_state() -> dict | None:
     return None
 
 
+def _scan_session_phases() -> dict[str, dict]:
+    """Read state.json from all sessions and return {session_id: state_dict}."""
+    result = {}
+    sessions_dir = DATA_DIR / "sessions"
+    if not sessions_dir.exists():
+        return result
+    for session_dir in sessions_dir.iterdir():
+        if not session_dir.is_dir() or not session_dir.name.startswith("session_"):
+            continue
+        state_path = session_dir / "state.json"
+        if state_path.exists():
+            try:
+                state = json.loads(state_path.read_text())
+                sid = session_dir.name.removeprefix("session_")
+                result[sid] = state
+            except (json.JSONDecodeError, OSError):
+                continue
+    return result
+
+
 async def broadcast_session_state() -> None:
-    """Broadcast active session state to all connected clients."""
+    """Broadcast active session state (awaiting_user_input) to all connected clients."""
     global _last_session_state
     state = _find_active_session_state()
     if state != _last_session_state:
@@ -816,6 +837,45 @@ async def broadcast_session_state() -> None:
                 *(c.send(payload) for c in clients),
                 return_exceptions=True,
             )
+
+
+async def broadcast_phase_changes() -> None:
+    """Detect phase changes in any session and broadcast agent_phase messages."""
+    global _last_phase_per_session
+    current_phases = _scan_session_phases()
+    for sid, state in current_phases.items():
+        phase = state.get("phase", "")
+        detail = state.get("detail", "")
+        key = f"{phase}:{detail}"
+        if _last_phase_per_session.get(sid) != key:
+            _last_phase_per_session[sid] = key
+            # Count nodes for the phase message
+            graph_path = _session_graph_path(sid)
+            node_count = 0
+            edge_count = 0
+            if graph_path.exists():
+                try:
+                    g = json.loads(graph_path.read_text())
+                    node_count = len(g.get("nodes", []))
+                    edge_count = len(g.get("edges", []))
+                except (json.JSONDecodeError, OSError):
+                    pass
+            payload = json.dumps({
+                "type": "agent_phase",
+                "data": {
+                    "session_id": sid,
+                    "phase": phase,
+                    "detail": detail,
+                    "node_count": node_count,
+                    "edge_count": edge_count,
+                    "started_at": state.get("updated_at"),
+                },
+            })
+            if clients:
+                await asyncio.gather(
+                    *(c.send(payload) for c in clients),
+                    return_exceptions=True,
+                )
 
 
 # ---------------------------------------------------------------------------
@@ -930,6 +990,7 @@ async def watch_graph() -> None:
         if current != _last_graph_hash:
             await broadcast_graph()
         await broadcast_session_state()
+        await broadcast_phase_changes()
 
 
 # ---------------------------------------------------------------------------
