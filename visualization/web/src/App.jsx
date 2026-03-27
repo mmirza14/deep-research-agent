@@ -6,6 +6,7 @@ import AddNodeDialog from "./AddNodeDialog";
 import AnalysisBanner from "./AnalysisBanner";
 import DirectionsPanel from "./DirectionsPanel";
 import HomeScreen from "./HomeScreen";
+import SessionPanel from "./SessionPanel";
 import ToastContainer from "./ToastContainer";
 import useGraphSocket from "./useGraphSocket";
 
@@ -34,6 +35,7 @@ export default function App() {
     endChat,
     agentPhase,
     sessions,
+    activeSessionId,
     setActiveSession,
     listSessions,
     startNewResearch,
@@ -44,6 +46,7 @@ export default function App() {
   const [selectedNode, setSelectedNode] = useState(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showDirections, setShowDirections] = useState(false);
+  const [showSessions, setShowSessions] = useState(false);
   const [rightTab, setRightTab] = useState("editor");
   const [showHome, setShowHome] = useState(true);
   const graphRef = useRef(null);
@@ -201,6 +204,8 @@ export default function App() {
                 color:
                   action === "directions" && showDirections
                     ? "var(--primary)"
+                    : action === "history" && showSessions
+                    ? "var(--primary)"
                     : icon === "sync"
                     ? connected
                       ? "var(--claim-green)"
@@ -212,7 +217,7 @@ export default function App() {
                 action === "directions"
                   ? () => setShowDirections((v) => !v)
                   : action === "history"
-                  ? () => setShowHome(true)
+                  ? () => setShowSessions((v) => !v)
                   : undefined
               }
             >
@@ -232,11 +237,29 @@ export default function App() {
           onToggle={() => setShowDirections((v) => !v)}
         />
 
+        {/* Session Panel */}
+        <SessionPanel
+          sessions={sessions}
+          activeSessionId={activeSessionId}
+          visible={showSessions}
+          onToggle={() => setShowSessions((v) => !v)}
+          onSelectSession={(sid) => {
+            setActiveSession(sid);
+            setShowSessions(false);
+            setShowHome(false);
+          }}
+          onNewResearch={() => {
+            setShowSessions(false);
+            setShowHome(true);
+          }}
+          onRefreshSessions={listSessions}
+        />
+
         {/* Graph Canvas */}
         <div
           style={{
             ...styles.canvas,
-            marginLeft: showDirections ? 320 + 56 : 56,
+            marginLeft: (showDirections || showSessions) ? 320 + 56 : 56,
             marginRight: selectedNode ? 360 : 0,
           }}
         >
