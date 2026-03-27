@@ -6,6 +6,7 @@ import AddNodeDialog from "./AddNodeDialog";
 import AnalysisBanner from "./AnalysisBanner";
 import DirectionsPanel from "./DirectionsPanel";
 import HomeScreen from "./HomeScreen";
+import ToastContainer from "./ToastContainer";
 import useGraphSocket from "./useGraphSocket";
 
 const SIDEBAR_ICONS = [
@@ -36,6 +37,8 @@ export default function App() {
     setActiveSession,
     listSessions,
     startNewResearch,
+    toasts,
+    dismissToast,
   } = useGraphSocket();
 
   const [selectedNode, setSelectedNode] = useState(null);
@@ -347,6 +350,9 @@ export default function App() {
           onClose={() => setShowAddDialog(false)}
         />
       )}
+
+      {/* Toast notifications */}
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </>
   );
 }

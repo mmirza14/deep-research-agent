@@ -48,6 +48,12 @@ _workspace_session_ids: list[str] = []
 # Last known hash for change detection
 _last_graph_hash: str = ""
 
+# Spawned agent processes: session_id -> (Popen, spawn_time)
+_spawned_processes: dict[str, tuple] = {}
+
+# Notification queue for async broadcast (filled by sync handlers, flushed by ws_handler)
+_pending_notifications: list[dict] = []
+
 
 # ---------------------------------------------------------------------------
 # Session helpers
@@ -405,6 +411,9 @@ def handle_resume_session(data: dict) -> dict:
     state["phase"] = "resume_synthesis"
     state["resumed_at"] = datetime.now(timezone.utc).isoformat()
     state_path.write_text(json.dumps(state, indent=2))
+
+    _queue_notification("info", "Synthesis resumed", "Agent is processing your feedback.")
+
     return {"ok": True, "session_id": session_id}
 
 
@@ -438,11 +447,20 @@ def handle_start_research(data: dict) -> dict:
     # Spawn research agent as background process, logging to session dir
     log_path = session_dir / "agent.log"
     log_file = open(log_path, "w")
-    subprocess.Popen(
+    proc = subprocess.Popen(
         ["python3", "-m", "research_agent.agent", description, "--session", session_id],
         cwd=str(PROJECT_ROOT),
         stdout=log_file,
         stderr=subprocess.STDOUT,
+    )
+
+    # Track for watchdog
+    _spawned_processes[session_id] = (proc, datetime.now(timezone.utc))
+
+    _queue_notification(
+        "success",
+        "Research session started",
+        f"Exploring direction: {label[:60]}{'...' if len(label) > 60 else ''}",
     )
 
     print(f"Started research session {session_id} from node {node_id}: {label}")
@@ -504,11 +522,20 @@ def handle_start_new_research(data: dict) -> dict:
     # Spawn research agent
     log_path = session_dir / "agent.log"
     log_file = open(log_path, "w")
-    subprocess.Popen(
+    proc = subprocess.Popen(
         ["python3", "-m", "research_agent.agent", question, "--session", session_id],
         cwd=str(PROJECT_ROOT),
         stdout=log_file,
         stderr=subprocess.STDOUT,
+    )
+
+    # Track for watchdog
+    _spawned_processes[session_id] = (proc, datetime.now(timezone.utc))
+
+    _queue_notification(
+        "success",
+        "Research session started",
+        f"Researching: {question[:80]}{'...' if len(question) > 80 else ''}",
     )
 
     print(f"Started new research session {session_id}: {question}")
@@ -946,6 +973,7 @@ async def ws_handler(websocket: websockets.asyncio.server.ServerConnection) -> N
                         )
                     else:
                         await websocket.send(json.dumps({"type": "error", "data": result}))
+                    await broadcast_notifications()
                     continue
                 if msg_type in ("set_active_session", "set_workspace"):
                     # After switching sessions, broadcast the new graph
@@ -954,6 +982,9 @@ async def ws_handler(websocket: websockets.asyncio.server.ServerConnection) -> N
 
                 # Default: broadcast updated graph to ALL clients
                 await broadcast_graph()
+
+                # Flush any notifications queued by the handler
+                await broadcast_notifications()
             else:
                 await websocket.send(json.dumps({
                     "type": "error",
@@ -978,6 +1009,58 @@ async def broadcast_graph() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Toast notifications (Phase 6A)
+# ---------------------------------------------------------------------------
+
+def _queue_notification(level: str, message: str, detail: str | None = None) -> None:
+    """Queue a notification for broadcast on the next poll cycle.
+
+    Called from synchronous handlers — the async poll loop flushes these.
+    """
+    _pending_notifications.append({
+        "level": level,
+        "message": message,
+        "detail": detail,
+    })
+
+
+async def broadcast_notifications() -> None:
+    """Flush any queued notifications to all connected clients."""
+    while _pending_notifications:
+        notif = _pending_notifications.pop(0)
+        payload = json.dumps({"type": "notification", "data": notif})
+        if clients:
+            await asyncio.gather(
+                *(c.send(payload) for c in clients),
+                return_exceptions=True,
+            )
+
+
+async def check_spawned_processes() -> None:
+    """Watchdog: check if any spawned agent processes have died unexpectedly."""
+    dead = []
+    for sid, (proc, spawn_time) in _spawned_processes.items():
+        retcode = proc.poll()
+        if retcode is not None:
+            elapsed = (datetime.now(timezone.utc) - spawn_time).total_seconds()
+            if retcode == 0:
+                _queue_notification(
+                    "success",
+                    "Research complete",
+                    f"Session {sid[:8]} finished successfully.",
+                )
+            else:
+                _queue_notification(
+                    "error",
+                    "Agent process crashed",
+                    f"Session {sid[:8]} exited with code {retcode} after {int(elapsed)}s.",
+                )
+            dead.append(sid)
+    for sid in dead:
+        del _spawned_processes[sid]
+
+
+# ---------------------------------------------------------------------------
 # File watcher — polls graph.json for agent-side changes
 # ---------------------------------------------------------------------------
 
@@ -991,6 +1074,8 @@ async def watch_graph() -> None:
             await broadcast_graph()
         await broadcast_session_state()
         await broadcast_phase_changes()
+        await check_spawned_processes()
+        await broadcast_notifications()
 
 
 # ---------------------------------------------------------------------------
