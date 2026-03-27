@@ -7,6 +7,7 @@ import AddNodeDialog from "./AddNodeDialog";
 import AnalysisBanner from "./AnalysisBanner";
 import DirectionsPanel from "./DirectionsPanel";
 import HomeScreen from "./HomeScreen";
+import PhaseTimeline from "./PhaseTimeline";
 import SessionPanel from "./SessionPanel";
 import ToastContainer from "./ToastContainer";
 import useGraphSocket from "./useGraphSocket";
@@ -198,36 +199,39 @@ export default function App() {
         <>
         {/* Left Sidebar (collapsed) */}
         <div style={styles.sidebar}>
-          {SIDEBAR_ICONS.map(({ icon, label, action }) => (
-            <button
-              key={icon}
-              style={{
-                ...styles.sidebarIcon,
-                color:
-                  action === "directions" && showDirections
-                    ? "var(--primary)"
-                    : action === "history" && showSessions
-                    ? "var(--primary)"
-                    : icon === "sync"
-                    ? connected
-                      ? "var(--claim-green)"
-                      : "var(--error-container)"
-                    : "var(--text-tertiary)",
-              }}
-              title={label}
-              onClick={
-                action === "directions"
-                  ? () => setShowDirections((v) => !v)
-                  : action === "history"
-                  ? () => setShowSessions((v) => !v)
-                  : undefined
-              }
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
-                {icon}
-              </span>
-            </button>
-          ))}
+          <div style={styles.sidebarIcons}>
+            {SIDEBAR_ICONS.map(({ icon, label, action }) => (
+              <button
+                key={icon}
+                style={{
+                  ...styles.sidebarIcon,
+                  color:
+                    action === "directions" && showDirections
+                      ? "var(--primary)"
+                      : action === "history" && showSessions
+                      ? "var(--primary)"
+                      : icon === "sync"
+                      ? connected
+                        ? "var(--claim-green)"
+                        : "var(--error-container)"
+                      : "var(--text-tertiary)",
+                }}
+                title={label}
+                onClick={
+                  action === "directions"
+                    ? () => setShowDirections((v) => !v)
+                    : action === "history"
+                    ? () => setShowSessions((v) => !v)
+                    : undefined
+                }
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+                  {icon}
+                </span>
+              </button>
+            ))}
+          </div>
+          <PhaseTimeline agentPhase={agentPhase} />
         </div>
 
         {/* Directions Panel */}
@@ -508,10 +512,17 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    paddingTop: 16,
-    gap: 24,
     zIndex: 40,
     flexShrink: 0,
+    justifyContent: "space-between",
+    overflow: "hidden",
+  },
+  sidebarIcons: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    paddingTop: 16,
+    gap: 24,
   },
   sidebarIcon: {
     background: "none",
