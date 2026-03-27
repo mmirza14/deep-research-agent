@@ -6,6 +6,7 @@ import NodeChat from "./NodeChat";
 import AddNodeDialog from "./AddNodeDialog";
 import AnalysisBanner from "./AnalysisBanner";
 import DirectionsPanel from "./DirectionsPanel";
+import DocumentViewer from "./DocumentViewer";
 import HomeScreen from "./HomeScreen";
 import SessionPanel from "./SessionPanel";
 import ToastContainer from "./ToastContainer";
@@ -40,6 +41,8 @@ export default function App() {
     setActiveSession,
     listSessions,
     startNewResearch,
+    getDocument,
+    documentContent,
     activities,
     toasts,
     dismissToast,
@@ -175,7 +178,8 @@ export default function App() {
           hasLitReview={!!sessionState?.lit_review_path}
           onResume={() => resumeSession(sessionState?.session_id)}
           onViewDocument={(sid, docType) => {
-            // TODO: wire to document viewer in Phase 4A
+            getDocument(sid, docType);
+            setRightTab("docs");
           }}
         />
       )}
@@ -255,6 +259,10 @@ export default function App() {
             setShowHome(true);
           }}
           onRefreshSessions={listSessions}
+          onViewDocument={(sid, docType) => {
+            getDocument(sid, docType);
+            setRightTab("docs");
+          }}
         />
 
         {/* Graph Canvas */}
@@ -262,7 +270,7 @@ export default function App() {
           style={{
             ...styles.canvas,
             marginLeft: (showDirections || showSessions) ? 320 + 56 : 56,
-            marginRight: selectedNode ? 360 : 0,
+            marginRight: (selectedNode || rightTab === "docs") ? 360 : 0,
           }}
         >
           <GraphView
@@ -303,7 +311,7 @@ export default function App() {
         </div>
 
         {/* Right Panel */}
-        {selectedNode && (
+        {(selectedNode || rightTab === "docs") && (
           <div style={styles.rightPanel}>
             <div style={styles.rightPanelHeader}>
               <span style={styles.panelTitle}>Analysis Panel</span>
@@ -314,6 +322,7 @@ export default function App() {
                   if (chatState?.chatId) endChat(chatState.chatId);
                 }}
                 style={styles.panelCloseBtn}
+                title="Close panel"
               >
                 <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
                   close
@@ -339,6 +348,15 @@ export default function App() {
                 </span>
                 CHAT
               </button>
+              <button
+                style={rightTab === "docs" ? styles.tabActive : styles.tabInactive}
+                onClick={() => setRightTab("docs")}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 6 }}>
+                  description
+                </span>
+                DOCS
+              </button>
             </div>
             <div style={styles.rightPanelContent}>
               {rightTab === "editor" ? (
@@ -355,13 +373,18 @@ export default function App() {
                   onAddEdge={addEdge}
                   onResearchThis={startResearch}
                 />
-              ) : (
+              ) : rightTab === "chat" ? (
                 <NodeChat
                   node={selectedNode}
                   chatState={chatState}
                   onStartChat={startChat}
                   onSendMessage={sendChatMessage}
                   onEndChat={endChat}
+                />
+              ) : (
+                <DocumentViewer
+                  document={documentContent}
+                  onClose={() => setRightTab("editor")}
                 />
               )}
             </div>
