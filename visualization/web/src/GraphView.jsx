@@ -220,6 +220,8 @@ const GraphView = forwardRef(function GraphView({ graph, onNodeSelect, onEdgeCon
   const lastStructureRef = useRef("");
   const forcePositionsRef = useRef(new Map());
   const panRef = useRef(null);
+  const knownNodeIds = useRef(new Set());
+  const [newNodeIds, setNewNodeIds] = useState(new Set());
 
   useImperativeHandle(ref, () => ({
     panToNode(nodeId) {
@@ -242,6 +244,21 @@ const GraphView = forwardRef(function GraphView({ graph, onNodeSelect, onEdgeCon
       mergedPositions.set(id, pos);
     }
 
+    // Detect newly arrived nodes
+    const currentIds = new Set(graph.nodes.map((n) => n.id));
+    const arrivals = new Set();
+    for (const id of currentIds) {
+      if (!knownNodeIds.current.has(id)) {
+        arrivals.add(id);
+      }
+    }
+    knownNodeIds.current = currentIds;
+
+    if (arrivals.size > 0) {
+      setNewNodeIds(arrivals);
+      setTimeout(() => setNewNodeIds(new Set()), 350);
+    }
+
     const { flowNodes, flowEdges } = toFlowElements(
       graph,
       mergedPositions,
@@ -253,10 +270,14 @@ const GraphView = forwardRef(function GraphView({ graph, onNodeSelect, onEdgeCon
       const prevMap = new Map(prev.map((n) => [n.id, n]));
       return flowNodes.map((fn) => {
         const existing = prevMap.get(fn.id);
-        if (existing) {
-          return { ...fn, position: existing.position };
+        const isNew = arrivals.has(fn.id);
+        const node = existing
+          ? { ...fn, position: existing.position }
+          : fn;
+        if (isNew) {
+          node.data = { ...node.data, isNew: true };
         }
-        return fn;
+        return node;
       });
     });
     setEdges(flowEdges);

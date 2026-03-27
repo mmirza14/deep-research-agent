@@ -7,7 +7,7 @@ const SHAPE_CLIPS = {
 };
 
 function GraphNode({ data }) {
-  const { color, dotSize, labelOpacity, type, selected } = data;
+  const { color, dotSize, labelOpacity, type, selected, isNew } = data;
   const clipPath = SHAPE_CLIPS[type] || null;
 
   return (
@@ -16,7 +16,8 @@ function GraphNode({ data }) {
         position: "relative",
         width: dotSize,
         height: dotSize,
-        transition: "transform 0.15s ease",
+        transition: "transform 0.15s ease, opacity 0.3s ease",
+        animation: isNew ? "nodeArrival 0.3s ease-out" : "none",
       }}
     >
       {/* Selected glow ring */}
