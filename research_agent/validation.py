@@ -9,7 +9,21 @@ from __future__ import annotations
 import re
 from urllib.parse import urlparse
 
+from research_agent.config import session_graph_path
 from research_agent.graph.store import load_graph, save_graph
+
+
+def _load_session_or_global(session_id: str):
+    sgp = session_graph_path(session_id)
+    return load_graph(sgp) if sgp.exists() else load_graph()
+
+
+def _save_session_or_global(graph, session_id: str):
+    sgp = session_graph_path(session_id)
+    if sgp.exists():
+        save_graph(graph, sgp)
+    else:
+        save_graph(graph)
 
 
 def validate_session_claims(session_id: str) -> str:
@@ -17,7 +31,7 @@ def validate_session_claims(session_id: str) -> str:
 
     Returns a summary string (empty if nothing flagged).
     """
-    graph = load_graph()
+    graph = _load_session_or_global(session_id)
 
     # Build set of claim node IDs that have a cites edge
     cited_claims: set[str] = set()
@@ -45,7 +59,7 @@ def validate_session_claims(session_id: str) -> str:
         flagged.append(f"[{node['id']}] {node['label']}")
 
     if flagged:
-        save_graph(graph)
+        _save_session_or_global(graph, session_id)
         return (
             f"Validation: flagged {len(flagged)} unsourced quantitative claims "
             f"(confidence capped at 0.50):\n  " + "\n  ".join(flagged)
@@ -58,7 +72,7 @@ def detect_coi(session_id: str) -> str:
 
     Returns a summary string (empty if nothing flagged).
     """
-    graph = load_graph()
+    graph = _load_session_or_global(session_id)
 
     # Build map: source node id → domain
     source_domains: dict[str, str] = {}
@@ -112,7 +126,7 @@ def detect_coi(session_id: str) -> str:
                 break  # one COI flag per claim is enough
 
     if flagged:
-        save_graph(graph)
+        _save_session_or_global(graph, session_id)
         return (
             f"COI detection: flagged {len(flagged)} claims with potential "
             f"conflict of interest:\n  " + "\n  ".join(flagged)

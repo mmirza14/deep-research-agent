@@ -1,9 +1,9 @@
-"""Phase 3: WebSocket server for real-time mind map sync.
+"""WebSocket server for real-time mind map sync.
 
-Watches graph.json for agent-side changes and broadcasts to all connected
-browser clients. Accepts user mutations (add/edit/delete nodes, add edges,
-flag for re-investigation) and writes them back to graph.json so the agent
-sees them on its next read.
+Supports per-session graphs. Each client can view a single session or a
+workspace composite of multiple sessions. Watches the active session's
+graph.json for agent-side changes and broadcasts to all connected browser
+clients.
 
 Also serves the built React app as static files.
 
@@ -18,8 +18,10 @@ import asyncio
 import hashlib
 import json
 import mimetypes
+import shutil
 import sys
 import uuid
+import webbrowser
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -29,38 +31,232 @@ from websockets.asyncio.server import serve as ws_serve
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
-GRAPH_PATH = DATA_DIR / "graph.json"
+SESSIONS_DIR = DATA_DIR / "sessions"
+GRAPH_PATH = DATA_DIR / "graph.json"  # legacy global graph
 DIST_DIR = Path(__file__).resolve().parent / "web" / "dist"
 
 PORT = 8420
 POLL_INTERVAL = 0.5  # seconds between graph.json checks
 
-# Track connected clients
+# Track connected clients and their active session
 clients: set[websockets.asyncio.server.ServerConnection] = set()
 
-# Last known hash of graph.json for change detection
+# Global active session ID (simple v1: shared across all clients)
+_active_session_id: str | None = None
+_workspace_session_ids: list[str] = []
+
+# Last known hash for change detection
 _last_graph_hash: str = ""
 
 
 # ---------------------------------------------------------------------------
-# Graph I/O
+# Session helpers
+# ---------------------------------------------------------------------------
+
+def _session_graph_path(session_id: str) -> Path:
+    return SESSIONS_DIR / f"session_{session_id}" / "graph.json"
+
+
+def _active_graph_path() -> Path:
+    """Return the graph path for the currently active view."""
+    if _workspace_session_ids:
+        return Path("")  # workspace mode — no single file
+    if _active_session_id:
+        return _session_graph_path(_active_session_id)
+    return GRAPH_PATH  # legacy fallback
+
+
+def _list_sessions() -> list[dict]:
+    """Scan data/sessions/ and return metadata for each session."""
+    if not SESSIONS_DIR.exists():
+        return []
+    sessions = []
+    for session_dir in sorted(SESSIONS_DIR.iterdir(), reverse=True):
+        if not session_dir.is_dir() or not session_dir.name.startswith("session_"):
+            continue
+        sid = session_dir.name.removeprefix("session_")
+        graph_path = session_dir / "graph.json"
+        state_path = session_dir / "state.json"
+        pending_path = session_dir / "pending_research.json"
+
+        # Count nodes
+        node_count = 0
+        edge_count = 0
+        if graph_path.exists():
+            try:
+                g = json.loads(graph_path.read_text())
+                node_count = len(g.get("nodes", []))
+                edge_count = len(g.get("edges", []))
+            except (json.JSONDecodeError, OSError):
+                pass
+
+        # Read status
+        status = "unknown"
+        phase = None
+        if state_path.exists():
+            try:
+                state = json.loads(state_path.read_text())
+                phase = state.get("phase")
+                if phase == "awaiting_user_input":
+                    status = "paused"
+                elif phase == "complete":
+                    status = "complete"
+                elif phase == "error":
+                    status = "error"
+                else:
+                    status = "running"
+            except (json.JSONDecodeError, OSError):
+                pass
+        elif pending_path.exists():
+            status = "running"
+
+        # Read research question
+        question = ""
+        if pending_path.exists():
+            try:
+                pending = json.loads(pending_path.read_text())
+                question = pending.get("research_question", "")
+            except (json.JSONDecodeError, OSError):
+                pass
+
+        # Check for documents
+        has_lit_review = (session_dir / "literature_review.md").exists()
+        has_insights = (session_dir / "insights_report.md").exists()
+
+        created_at = datetime.fromtimestamp(
+            session_dir.stat().st_ctime, tz=timezone.utc
+        ).isoformat()
+
+        sessions.append({
+            "session_id": sid,
+            "question": question,
+            "status": status,
+            "phase": phase,
+            "created_at": created_at,
+            "node_count": node_count,
+            "edge_count": edge_count,
+            "has_lit_review": has_lit_review,
+            "has_insights": has_insights,
+        })
+    return sessions
+
+
+# ---------------------------------------------------------------------------
+# Migration — split global graph.json into per-session graphs
+# ---------------------------------------------------------------------------
+
+def _migrate_global_graph() -> None:
+    """If a global graph.json exists, split it into per-session graphs."""
+    if not GRAPH_PATH.exists():
+        return
+    # Don't migrate if sessions already exist
+    if SESSIONS_DIR.exists() and any(SESSIONS_DIR.iterdir()):
+        return
+
+    try:
+        data = json.loads(GRAPH_PATH.read_text())
+    except (json.JSONDecodeError, OSError):
+        return
+
+    nodes = data.get("nodes", [])
+    edges = data.get("edges", [])
+    if not nodes:
+        return
+
+    # Group nodes by provenance.session_id
+    session_nodes: dict[str, list] = {}
+    for node in nodes:
+        sid = node.get("provenance", {}).get("session_id", "unknown")
+        session_nodes.setdefault(sid, []).append(node)
+
+    # Group edges — assign to session of source node
+    node_session: dict[str, str] = {}
+    for node in nodes:
+        sid = node.get("provenance", {}).get("session_id", "unknown")
+        node_session[node["id"]] = sid
+
+    session_edges: dict[str, list] = {}
+    for edge in edges:
+        sid = node_session.get(edge.get("source"), "unknown")
+        session_edges.setdefault(sid, []).append(edge)
+
+    # Write per-session graphs
+    SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
+    for sid, snodes in session_nodes.items():
+        session_dir = SESSIONS_DIR / f"session_{sid}"
+        session_dir.mkdir(parents=True, exist_ok=True)
+        graph_data = {
+            "nodes": snodes,
+            "edges": session_edges.get(sid, []),
+        }
+        (session_dir / "graph.json").write_text(json.dumps(graph_data, indent=2))
+
+    # Move original to legacy
+    shutil.move(str(GRAPH_PATH), str(DATA_DIR / "graph_legacy.json"))
+    print(f"Migrated global graph.json → {len(session_nodes)} per-session graphs")
+
+
+# ---------------------------------------------------------------------------
+# Graph I/O (session-aware)
 # ---------------------------------------------------------------------------
 
 def _load_graph() -> dict:
-    if not GRAPH_PATH.exists():
+    """Load the graph for the active view (session, workspace, or legacy)."""
+    if _workspace_session_ids:
+        return _load_workspace(_workspace_session_ids)
+    path = _active_graph_path()
+    if not path.exists():
         return {"nodes": [], "edges": []}
-    return json.loads(GRAPH_PATH.read_text())
+    return json.loads(path.read_text())
+
+
+def _load_workspace(session_ids: list[str]) -> dict:
+    """Merge multiple session graphs into one composite."""
+    seen_node_ids: set[str] = set()
+    seen_edge_ids: set[str] = set()
+    merged_nodes = []
+    merged_edges = []
+    for sid in session_ids:
+        path = _session_graph_path(sid)
+        if not path.exists():
+            continue
+        try:
+            g = json.loads(path.read_text())
+        except (json.JSONDecodeError, OSError):
+            continue
+        for node in g.get("nodes", []):
+            if node["id"] not in seen_node_ids:
+                seen_node_ids.add(node["id"])
+                merged_nodes.append(node)
+        for edge in g.get("edges", []):
+            if edge["id"] not in seen_edge_ids:
+                seen_edge_ids.add(edge["id"])
+                merged_edges.append(edge)
+    return {"nodes": merged_nodes, "edges": merged_edges}
 
 
 def _save_graph(data: dict) -> None:
-    GRAPH_PATH.parent.mkdir(parents=True, exist_ok=True)
-    GRAPH_PATH.write_text(json.dumps(data, indent=2))
+    """Save to the active session's graph (not workspace mode)."""
+    if _workspace_session_ids:
+        return  # workspace is read-only composite
+    path = _active_graph_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2))
 
 
 def _graph_hash() -> str:
-    if not GRAPH_PATH.exists():
+    if _workspace_session_ids:
+        # Hash all workspace session graphs together
+        h = hashlib.md5()
+        for sid in _workspace_session_ids:
+            p = _session_graph_path(sid)
+            if p.exists():
+                h.update(p.read_bytes())
+        return h.hexdigest()
+    path = _active_graph_path()
+    if not path.exists():
         return ""
-    return hashlib.md5(GRAPH_PATH.read_bytes()).hexdigest()
+    return hashlib.md5(path.read_bytes()).hexdigest()
 
 
 # ---------------------------------------------------------------------------
@@ -223,8 +419,11 @@ def handle_start_research(data: dict) -> dict:
         return {"error": "description required"}
 
     session_id = uuid.uuid4().hex[:8]
-    session_dir = DATA_DIR / "sessions" / f"session_{session_id}"
+    session_dir = SESSIONS_DIR / f"session_{session_id}"
     session_dir.mkdir(parents=True, exist_ok=True)
+
+    # Initialize empty session graph
+    (session_dir / "graph.json").write_text(json.dumps({"nodes": [], "edges": []}, indent=2))
 
     # Write pending research metadata
     pending = {
@@ -250,6 +449,104 @@ def handle_start_research(data: dict) -> dict:
     return {"ok": True, "session_id": session_id}
 
 
+def handle_set_active_session(data: dict) -> dict:
+    """Switch the active session for all clients."""
+    global _active_session_id, _workspace_session_ids
+    sid = data.get("session_id")
+    if not sid:
+        return {"error": "session_id required"}
+    _active_session_id = sid
+    _workspace_session_ids = []  # exit workspace mode
+    return {"ok": True, "session_id": sid}
+
+
+def handle_set_workspace(data: dict) -> dict:
+    """Set workspace mode with multiple sessions."""
+    global _workspace_session_ids, _active_session_id
+    sids = data.get("session_ids", [])
+    if not sids:
+        return {"error": "session_ids required"}
+    _workspace_session_ids = sids
+    _active_session_id = None  # workspace mode
+    return {"ok": True, "session_ids": sids}
+
+
+def handle_list_sessions(data: dict) -> dict:
+    """Return all sessions with metadata."""
+    return {"sessions": _list_sessions()}
+
+
+def handle_start_new_research(data: dict) -> dict:
+    """Start a new research session from a question string (web UI home screen)."""
+    import subprocess
+
+    question = data.get("question", "").strip()
+    if not question:
+        return {"error": "question required"}
+
+    session_id = uuid.uuid4().hex[:8]
+    session_dir = SESSIONS_DIR / f"session_{session_id}"
+    session_dir.mkdir(parents=True, exist_ok=True)
+
+    # Initialize empty session graph
+    (session_dir / "graph.json").write_text(json.dumps({"nodes": [], "edges": []}, indent=2))
+
+    # Write pending research metadata
+    pending = {
+        "research_question": question,
+        "origin_node_id": None,
+        "origin_label": None,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    (session_dir / "pending_research.json").write_text(json.dumps(pending, indent=2))
+
+    # Spawn research agent
+    log_path = session_dir / "agent.log"
+    log_file = open(log_path, "w")
+    subprocess.Popen(
+        ["python3", "-m", "research_agent.agent", question, "--session", session_id],
+        cwd=str(PROJECT_ROOT),
+        stdout=log_file,
+        stderr=subprocess.STDOUT,
+    )
+
+    print(f"Started new research session {session_id}: {question}")
+    return {"ok": True, "session_id": session_id, "question": question}
+
+
+def handle_get_document(data: dict) -> dict:
+    """Return a document's content from a session directory."""
+    sid = data.get("session_id")
+    doc_type = data.get("doc_type", "")
+    if not sid or not doc_type:
+        return {"error": "session_id and doc_type required"}
+
+    doc_map = {
+        "literature_review": "literature_review.md",
+        "insights": "insights_report.md",
+        "transcript_findings": "transcript_findings.md",
+        "transcript_synthesis": "transcript_synthesis.md",
+        "changelog_findings": "changelog_findings.md",
+        "changelog_synthesis": "changelog_synthesis.md",
+    }
+    filename = doc_map.get(doc_type)
+    if not filename:
+        return {"error": f"Unknown doc_type: {doc_type}"}
+
+    doc_path = SESSIONS_DIR / f"session_{sid}" / filename
+    if not doc_path.exists():
+        return {"error": f"Document not found: {filename}"}
+
+    content = doc_path.read_text()
+    return {
+        "session_id": sid,
+        "doc_type": doc_type,
+        "title": doc_type.replace("_", " ").title(),
+        "content": content,
+    }
+
+
 HANDLERS = {
     "add_node": handle_add_node,
     "update_node": handle_update_node,
@@ -258,6 +555,11 @@ HANDLERS = {
     "flag_node": handle_flag_node,
     "resume_session": handle_resume_session,
     "start_research": handle_start_research,
+    "set_active_session": handle_set_active_session,
+    "set_workspace": handle_set_workspace,
+    "list_sessions": handle_list_sessions,
+    "start_new_research": handle_start_new_research,
+    "get_document": handle_get_document,
 }
 
 
@@ -439,10 +741,13 @@ def _run_chat_agent(system_prompt: str, user_text: str) -> str:
     from research_agent.config import CHAT_MODEL, CHAT_MAX_TURNS
 
     mcp_server_script = str(Path(__file__).resolve().parent.parent / "research_agent" / "mcp_server.py")
+    mcp_args = [mcp_server_script]
+    if _active_session_id:
+        mcp_args.extend(["--session", _active_session_id])
     mcp_server_config = {
         "type": "stdio",
         "command": "python3",
-        "args": [mcp_server_script],
+        "args": mcp_args,
     }
 
     options = ClaudeAgentOptions(
@@ -556,7 +861,38 @@ async def ws_handler(websocket: websockets.asyncio.server.ServerConnection) -> N
             handler = HANDLERS.get(msg_type)
             if handler:
                 result = handler(msg_data)
-                # Broadcast updated graph to ALL clients (including sender)
+
+                # Some handlers return data directly to the sender
+                if msg_type == "list_sessions":
+                    await websocket.send(json.dumps({
+                        "type": "sessions_list", "data": result,
+                    }))
+                    continue
+                if msg_type == "get_document":
+                    await websocket.send(json.dumps({
+                        "type": "document_content", "data": result,
+                    }))
+                    continue
+                if msg_type == "start_new_research":
+                    # Notify all clients
+                    if result.get("ok"):
+                        payload = json.dumps({
+                            "type": "research_started",
+                            "data": {"session_id": result["session_id"], "question": result["question"]},
+                        })
+                        await asyncio.gather(
+                            *(c.send(payload) for c in clients),
+                            return_exceptions=True,
+                        )
+                    else:
+                        await websocket.send(json.dumps({"type": "error", "data": result}))
+                    continue
+                if msg_type in ("set_active_session", "set_workspace"):
+                    # After switching sessions, broadcast the new graph
+                    await broadcast_graph()
+                    continue
+
+                # Default: broadcast updated graph to ALL clients
                 await broadcast_graph()
             else:
                 await websocket.send(json.dumps({
@@ -668,6 +1004,16 @@ async def http_handler(
 # ---------------------------------------------------------------------------
 
 async def main(dev: bool = False) -> None:
+    # Run migration on startup (idempotent)
+    _migrate_global_graph()
+
+    # Auto-select the most recent session if none is active
+    global _active_session_id
+    if not _active_session_id:
+        sessions = _list_sessions()
+        if sessions:
+            _active_session_id = sessions[0]["session_id"]
+
     if dev:
         print("Dev mode: allowing CORS from Vite dev server")
 
@@ -682,7 +1028,9 @@ async def main(dev: bool = False) -> None:
 
     print(f"WebSocket server: ws://localhost:{PORT}")
     if not dev and DIST_DIR.exists():
-        print(f"Mind map UI:      http://localhost:{PORT}")
+        url = f"http://localhost:{PORT}"
+        print(f"Mind map UI:      {url}")
+        webbrowser.open(url)
     elif dev:
         print("Run 'npm run dev' in visualization/web/ for the React UI")
 

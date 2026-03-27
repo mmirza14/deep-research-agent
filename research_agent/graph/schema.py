@@ -106,6 +106,13 @@ class Graph:
                 return True
         return False
 
+    def node_degree(self, node_id: str) -> int:
+        """Count total edges (inbound + outbound) connected to a node."""
+        return sum(
+            1 for e in self.edges
+            if e["source"] == node_id or e["target"] == node_id
+        )
+
     def get_neighborhood(self, node_id: str, depth: int = 1) -> dict:
         visited_nodes: set[str] = {node_id}
         frontier: set[str] = {node_id}

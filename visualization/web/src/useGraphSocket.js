@@ -12,6 +12,11 @@ export default function useGraphSocket() {
   const [connected, setConnected] = useState(false);
   const [sessionState, setSessionState] = useState(null);
   const [chatState, setChatState] = useState(null); // { chatId, messages: [{role, text}], waiting }
+  const [activeSessionId, setActiveSessionIdState] = useState(null);
+  const [workspaceSessionIds, setWorkspaceSessionIdsState] = useState([]);
+  const [sessions, setSessions] = useState([]);
+  const [agentPhase, setAgentPhase] = useState(null);
+  const [documentContent, setDocumentContent] = useState(null);
   const wsRef = useRef(null);
   const reconnectTimer = useRef(null);
 
@@ -51,6 +56,14 @@ export default function useGraphSocket() {
             messages: [...prev.messages, { role: "assistant", text: `Error: ${msg.data.error}` }],
             waiting: false,
           } : prev);
+        } else if (msg.type === "sessions_list") {
+          setSessions(msg.data.sessions || []);
+        } else if (msg.type === "agent_phase") {
+          setAgentPhase(msg.data);
+        } else if (msg.type === "research_started") {
+          setActiveSessionIdState(msg.data.session_id);
+        } else if (msg.type === "document_content") {
+          setDocumentContent(msg.data);
         }
       } catch {
         // ignore parse errors
@@ -145,6 +158,39 @@ export default function useGraphSocket() {
     [send]
   );
 
+  const setActiveSession = useCallback(
+    (sessionId) => {
+      setActiveSessionIdState(sessionId);
+      setWorkspaceSessionIdsState([]);
+      send("set_active_session", { session_id: sessionId });
+    },
+    [send]
+  );
+
+  const setWorkspace = useCallback(
+    (sessionIds) => {
+      setWorkspaceSessionIdsState(sessionIds);
+      setActiveSessionIdState(null);
+      send("set_workspace", { session_ids: sessionIds });
+    },
+    [send]
+  );
+
+  const listSessions = useCallback(
+    () => send("list_sessions", {}),
+    [send]
+  );
+
+  const startNewResearch = useCallback(
+    (question) => send("start_new_research", { question }),
+    [send]
+  );
+
+  const getDocument = useCallback(
+    (sessionId, docType) => send("get_document", { session_id: sessionId, doc_type: docType }),
+    [send]
+  );
+
   return {
     graph,
     connected,
@@ -160,5 +206,16 @@ export default function useGraphSocket() {
     startChat,
     sendChatMessage,
     endChat,
+    // Session management (Phase 0)
+    activeSessionId,
+    workspaceSessionIds,
+    sessions,
+    agentPhase,
+    documentContent,
+    setActiveSession,
+    setWorkspace,
+    listSessions,
+    startNewResearch,
+    getDocument,
   };
 }

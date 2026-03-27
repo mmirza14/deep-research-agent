@@ -32,7 +32,14 @@ After all researchers report back, synthesize by:
 
 RESEARCHER_AGENT_DESCRIPTION = """\
 A researcher subagent that investigates a specific sub-topic by searching the web, \
-reading sources, and writing findings to the knowledge graph as nodes and edges.\
+reading sources, and writing findings to the knowledge graph as nodes and edges.
+
+IMPORTANT — Before adding a new source or claim node:
+1. Call query_graph with the source title or claim text to check for existing nodes.
+2. If a matching node exists, link to it with add_edge instead of creating a duplicate.
+3. If a related (but different) node exists, create your node AND add a related_to edge \
+to connect them.
+This avoids duplicate nodes and builds a denser, more useful graph.\
 """
 
 # ---------------------------------------------------------------------------
@@ -47,6 +54,17 @@ added to the knowledge graph.
 Session ID: {session_id}
 Review stage: Findings Review (Stage 1)
 Round: {round_number} of {max_rounds}
+
+You have read-only access to the knowledge graph via MCP tools:
+- get_graph_summary: overview of the full graph
+- get_neighborhood: explore nodes and edges within N hops of a given node
+- query_graph: keyword search over node descriptions
+
+Before challenging a finding:
+- Use get_neighborhood to check what evidence supports it (source nodes, cites edges)
+- Use query_graph to search for contradicting evidence elsewhere in the graph
+Do not challenge findings that are well-supported by multiple independent sources \
+unless the sources themselves are problematic.
 
 Below are the findings under review (graph nodes added by researchers this session).
 Nodes marked ⚠ UNSOURCED QUANTITATIVE CLAIM lack citation edges to source nodes — prioritize these.
@@ -136,6 +154,13 @@ Session ID: {session_id}
 Review stage: Synthesis Review (Stage 2)
 Round: {round_number} of {max_rounds}
 
+You have read-only access to the knowledge graph via MCP tools:
+- get_graph_summary: overview of the full graph
+- get_neighborhood: explore nodes and edges within N hops of a given node
+- query_graph: keyword search over node descriptions
+
+Use these tools to verify that synthesis claims are actually supported by evidence in the graph.
+
 Below is the synthesis under review:
 
 {synthesis_text}
@@ -222,16 +247,18 @@ Session ID: {session_id}
 Research question: {research_question}
 
 You have read-only access to the knowledge graph via MCP tools:
-- mcp__research-graph__get_graph_summary: overview of the full graph
-- mcp__research-graph__get_neighborhood: explore nodes within N hops of a given node
+- mcp__research-graph__get_graph_summary: overview of the full graph (node counts, types, \
+most connected nodes, low-confidence areas)
+- mcp__research-graph__get_session_findings: retrieve ALL researcher findings for a session \
+in one call — use this instead of crawling node-by-node
+- mcp__research-graph__get_neighborhood: explore nodes and edges within N hops of a given node
 
-Use these tools to explore the graph for additional detail beyond what is provided below. \
+Your primary source of truth is the graph. Start by calling get_graph_summary and \
+get_session_findings, then use get_neighborhood to drill into specific nodes as needed. \
+The context below is a partial snapshot to orient you — the graph contains the complete data. \
 Do NOT attempt to add, edit, or delete any nodes or edges.
 
-## Context provided
-
-### Graph summary (post-review)
-{graph_summary}
+## Context snapshot
 
 ### Findings (researcher nodes this session)
 {findings_text}
@@ -289,16 +316,18 @@ Session ID: {session_id}
 Research question: {research_question}
 
 You have read-only access to the knowledge graph via MCP tools:
-- mcp__research-graph__get_graph_summary: overview of the full graph
-- mcp__research-graph__get_neighborhood: explore nodes within N hops of a given node
+- mcp__research-graph__get_graph_summary: overview of the full graph (node counts, types, \
+most connected nodes, low-confidence areas)
+- mcp__research-graph__get_session_findings: retrieve ALL researcher findings for a session \
+in one call — use this instead of crawling node-by-node
+- mcp__research-graph__get_neighborhood: explore nodes and edges within N hops of a given node
 
-Use these tools to explore the graph for additional detail beyond what is provided below. \
+Your primary source of truth is the graph. Start by calling get_graph_summary and \
+get_session_findings, then use get_neighborhood to drill into specific nodes as needed. \
+The context below is a partial snapshot to orient you — the graph contains the complete data. \
 Do NOT attempt to add, edit, or delete any nodes or edges.
 
-## Context provided
-
-### Graph summary (post-review)
-{graph_summary}
+## Context snapshot
 
 ### Findings (researcher nodes this session)
 {findings_text}

@@ -5,4 +5,5 @@ dist/
 .DS_Store
 data/graph_snapshots/
 data/sessions/
+data/graph_index.npz
 .venv/
