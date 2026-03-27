@@ -28,6 +28,7 @@ export default function SessionPanel({
   onSelectSession,
   onNewResearch,
   onRefreshSessions,
+  onViewDocument,
 }) {
   useEffect(() => {
     if (visible) onRefreshSessions();
@@ -105,8 +106,30 @@ export default function SessionPanel({
               </div>
               {(s.has_lit_review || s.has_insights) && (
                 <div style={styles.docRow}>
-                  {s.has_lit_review && <span style={styles.docBadge}>Lit Review</span>}
-                  {s.has_insights && <span style={styles.docBadge}>Insights</span>}
+                  {s.has_lit_review && (
+                    <span
+                      role="button"
+                      style={styles.docBadgeBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onViewDocument(s.session_id, "literature_review");
+                      }}
+                    >
+                      Lit Review
+                    </span>
+                  )}
+                  {s.has_insights && (
+                    <span
+                      role="button"
+                      style={styles.docBadgeBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onViewDocument(s.session_id, "insights");
+                      }}
+                    >
+                      Insights
+                    </span>
+                  )}
                 </div>
               )}
             </button>
@@ -239,5 +262,15 @@ const styles = {
     padding: "2px 6px",
     background: "var(--surface-high)",
     borderRadius: 3,
+  },
+  docBadgeBtn: {
+    color: "var(--primary)",
+    fontSize: 10,
+    fontWeight: 600,
+    padding: "2px 6px",
+    background: "var(--surface-high)",
+    borderRadius: 3,
+    cursor: "pointer",
+    transition: "background 0.15s ease",
   },
 };
