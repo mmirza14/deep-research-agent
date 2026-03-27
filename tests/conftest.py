@@ -12,22 +12,31 @@ import pytest
 
 @pytest.fixture()
 def tmp_graph(tmp_path):
-    """Create a temporary graph.json and patch GRAPH_PATH everywhere."""
+    """Create a temporary graph.json and patch GRAPH_PATH everywhere.
+
+    Also patches SESSIONS_DIR and _load_all_sessions so that cross-session
+    dedup falls back to the single graph file during tests.
+    """
     graph_path = tmp_path / "graph.json"
     graph_path.write_text(json.dumps({"nodes": [], "edges": []}))
+
+    sessions_dir = tmp_path / "sessions"
+    sessions_dir.mkdir()
 
     # Patch the config constant AND every module that imports it at top level
     patches = [
         patch("research_agent.config.GRAPH_PATH", graph_path),
+        patch("research_agent.config.SESSIONS_DIR", sessions_dir),
         patch("research_agent.graph.store.GRAPH_PATH", graph_path),
         patch("research_agent.mcp_server.GRAPH_PATH", graph_path),
+        patch("research_agent.mcp_server.SESSIONS_DIR", sessions_dir),
+        patch("research_agent.mcp_server.EMBEDDING_INDEX_PATH", tmp_path / "graph_index.npz"),
     ]
     for p in patches:
         p.start()
 
     # Also patch the default parameter on load_graph/save_graph
     import research_agent.graph.store as _store
-    _orig_load = _store.load_graph.__wrapped__ if hasattr(_store.load_graph, '__wrapped__') else None
     _store.load_graph.__defaults__ = (graph_path,)
     _store.save_graph.__defaults__ = (graph_path,)
 
@@ -37,6 +46,37 @@ def tmp_graph(tmp_path):
     from research_agent.config import GRAPH_PATH as _orig_path
     _store.load_graph.__defaults__ = (_orig_path,)
     _store.save_graph.__defaults__ = (_orig_path,)
+    for p in patches:
+        p.stop()
+
+
+@pytest.fixture()
+def tmp_sessions(tmp_path):
+    """Create temp session directories for cross-session testing.
+
+    Returns (sessions_dir, graph_path_for_active_session) with all
+    necessary patches applied.
+    """
+    sessions_dir = tmp_path / "sessions"
+    sessions_dir.mkdir()
+
+    # Active session gets its own graph
+    active_dir = sessions_dir / "session_active"
+    active_dir.mkdir()
+    active_graph = active_dir / "graph.json"
+    active_graph.write_text(json.dumps({"nodes": [], "edges": []}))
+
+    patches = [
+        patch("research_agent.config.SESSIONS_DIR", sessions_dir),
+        patch("research_agent.mcp_server.GRAPH_PATH", active_graph),
+        patch("research_agent.mcp_server.SESSIONS_DIR", sessions_dir),
+        patch("research_agent.mcp_server.EMBEDDING_INDEX_PATH", active_dir / "graph_index.npz"),
+    ]
+    for p in patches:
+        p.start()
+
+    yield sessions_dir, active_graph
+
     for p in patches:
         p.stop()
 

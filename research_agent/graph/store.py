@@ -6,7 +6,7 @@ from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-from research_agent.config import GRAPH_PATH, SNAPSHOTS_DIR
+from research_agent.config import GRAPH_PATH, SNAPSHOTS_DIR, session_graph_path
 from research_agent.graph.schema import Graph
 
 
@@ -30,6 +30,43 @@ def snapshot_graph(session_id: str, path: Path = GRAPH_PATH) -> Path | None:
     dest = SNAPSHOTS_DIR / f"{session_id}_{ts}.json"
     shutil.copy2(path, dest)
     return dest
+
+
+def load_session_graph(session_id: str) -> Graph:
+    """Load the graph for a specific session."""
+    path = session_graph_path(session_id)
+    return load_graph(path)
+
+
+def save_session_graph(graph: Graph, session_id: str) -> None:
+    """Save a graph to a specific session's directory."""
+    path = session_graph_path(session_id)
+    save_graph(graph, path)
+
+
+def load_workspace(session_ids: list[str]) -> Graph:
+    """Load multiple session graphs and merge into one in-memory Graph.
+
+    De-duplicates by node ID — nodes appearing in multiple sessions keep
+    their canonical version from the originating session.
+    """
+    seen_node_ids: set[str] = set()
+    seen_edge_ids: set[str] = set()
+    merged = Graph()
+
+    for sid in session_ids:
+        g = load_session_graph(sid)
+        for node in g.nodes:
+            if node["id"] not in seen_node_ids:
+                # Canonical: first session that owns this node
+                seen_node_ids.add(node["id"])
+                merged.nodes.append(node)
+        for edge in g.edges:
+            if edge["id"] not in seen_edge_ids:
+                seen_edge_ids.add(edge["id"])
+                merged.edges.append(edge)
+
+    return merged
 
 
 def _find_snapshot(session_id: str) -> Path | None:
@@ -60,7 +97,12 @@ def diff_graph_since(session_id: str) -> dict:
     else:
         snap_data = {"nodes": [], "edges": []}
 
-    current = load_graph()
+    # Load from session graph if it exists, fall back to global
+    session_path = session_graph_path(session_id)
+    if session_path.exists():
+        current = load_graph(session_path)
+    else:
+        current = load_graph()
 
     snap_node_ids = {n["id"] for n in snap_data["nodes"]}
     snap_nodes_by_id = {n["id"]: n for n in snap_data["nodes"]}

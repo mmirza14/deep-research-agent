@@ -2,13 +2,16 @@
 """Standalone MCP stdio server exposing graph tools.
 
 Each agent process spawns its own instance of this server.
-All instances read/write the same graph.json file on disk,
-so there's no in-memory caching — every call loads fresh state.
+When launched with --session <id>, reads/writes the session-specific graph.
+Otherwise falls back to the global graph.json (legacy mode).
+
+No in-memory caching — every call loads fresh state from disk.
 """
 
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
@@ -16,7 +19,23 @@ from mcp.server.fastmcp import FastMCP
 # Resolve paths relative to project root (two levels up from this file)
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
+SESSIONS_DIR = DATA_DIR / "sessions"
 GRAPH_PATH = DATA_DIR / "graph.json"
+
+# Parse --session arg to scope graph I/O to a specific session
+_session_id: str | None = None
+_args = sys.argv[1:]
+if "--session" in _args:
+    _idx = _args.index("--session")
+    if _idx + 1 < len(_args):
+        _session_id = _args[_idx + 1]
+
+if _session_id:
+    from research_agent.config import session_graph_path
+    GRAPH_PATH = session_graph_path(_session_id)
+
+# Per-session embedding index path (lives next to the session graph.json)
+EMBEDDING_INDEX_PATH = GRAPH_PATH.parent / "graph_index.npz"
 
 mcp = FastMCP("research-graph")
 
@@ -24,6 +43,7 @@ mcp = FastMCP("research-graph")
 # --- Graph I/O (no caching — always fresh from disk) ---
 
 def _load() -> dict:
+    """Load the active session's graph (used for reads and writes)."""
     if not GRAPH_PATH.exists():
         return {"nodes": [], "edges": []}
     return json.loads(GRAPH_PATH.read_text())
@@ -32,6 +52,45 @@ def _load() -> dict:
 def _save(data: dict) -> None:
     GRAPH_PATH.parent.mkdir(parents=True, exist_ok=True)
     GRAPH_PATH.write_text(json.dumps(data, indent=2))
+
+
+def _load_all_sessions() -> dict:
+    """Load a merged read-only view of ALL session graphs for cross-session dedup.
+
+    Returns {"nodes": [...], "edges": [...]} with nodes from every session.
+    Falls back to the active session graph if no sessions directory exists.
+    """
+    if not SESSIONS_DIR.exists():
+        return _load()
+
+    all_nodes = []
+    all_edges = []
+    seen_node_ids: set[str] = set()
+    seen_edge_ids: set[str] = set()
+
+    for session_dir in SESSIONS_DIR.iterdir():
+        if not session_dir.is_dir():
+            continue
+        gp = session_dir / "graph.json"
+        if not gp.exists():
+            continue
+        try:
+            data = json.loads(gp.read_text())
+        except (json.JSONDecodeError, OSError):
+            continue
+        for node in data.get("nodes", []):
+            if node["id"] not in seen_node_ids:
+                seen_node_ids.add(node["id"])
+                all_nodes.append(node)
+        for edge in data.get("edges", []):
+            if edge["id"] not in seen_edge_ids:
+                seen_edge_ids.add(edge["id"])
+                all_edges.append(edge)
+
+    if not all_nodes:
+        return _load()
+
+    return {"nodes": all_nodes, "edges": all_edges}
 
 
 # --- Tools ---
@@ -67,15 +126,49 @@ def add_node(
     graph = _load()
 
     # --- Cross-session deduplication ---
-    for existing in graph["nodes"]:
+    # Load ALL session graphs for dedup comparison so we catch duplicates
+    # across sessions, not just within the active session.
+    all_graphs = _load_all_sessions()
+
+    # Try semantic similarity first, fall back to string matching
+    _semantic_dup_id = None
+    _semantic_dup_ratio = 0.0
+    try:
+        from research_agent.config import EMBEDDING_MODEL
+        from research_agent.graph.embeddings import GraphIndex, cosine_similarity
+
+        index = GraphIndex(model_name=EMBEDDING_MODEL, index_path=EMBEDDING_INDEX_PATH)
+        if index.available and index.load():
+            candidate_text = f"{label} {description}"
+            results = index.search(candidate_text, top_k=3)
+            for existing_id, score in results:
+                existing_node = next(
+                    (n for n in all_graphs["nodes"]
+                     if n["id"] == existing_id and n.get("type") == type
+                     and not n.get("withdrawn", False)),
+                    None,
+                )
+                if existing_node and score > 0.85:
+                    _semantic_dup_id = existing_id
+                    _semantic_dup_ratio = score
+                    break
+    except Exception:
+        pass
+
+    for existing in all_graphs["nodes"]:
         if existing.get("type") != type:
             continue
         if existing.get("withdrawn", False):
             continue
-        ratio = SequenceMatcher(
-            None, existing["label"].lower(), label.lower()
-        ).ratio()
+        # Use semantic match if found, otherwise string match
+        if _semantic_dup_id and existing["id"] == _semantic_dup_id:
+            ratio = _semantic_dup_ratio
+        else:
+            ratio = SequenceMatcher(
+                None, existing["label"].lower(), label.lower()
+            ).ratio()
         if ratio > 0.85:
+            # Duplicate found. Add corroborates edge to THIS session's graph.
             edge_id = uuid.uuid4().hex[:12]
             graph["edges"].append({
                 "id": edge_id,
@@ -89,13 +182,18 @@ def add_node(
                     "mode": mode,
                 },
             })
+            # If the duplicate node lives in THIS session, boost its confidence
+            local_node = next(
+                (n for n in graph["nodes"] if n["id"] == existing["id"]), None
+            )
             old_conf = existing.get("confidence", 0.5)
-            existing["confidence"] = min(old_conf + 0.05, 0.95)
+            if local_node:
+                local_node["confidence"] = min(old_conf + 0.05, 0.95)
             _save(graph)
             return (
                 f"Near-duplicate found: [{existing['id']}] {existing['label']} "
                 f"(similarity={ratio:.2f}). Linked via corroborates edge. "
-                f"Confidence boosted {old_conf:.2f} → {existing['confidence']:.2f}."
+                f"Original confidence: {old_conf:.2f}."
             )
 
     node_id = uuid.uuid4().hex[:12]
@@ -128,6 +226,20 @@ def add_node(
     }
     graph["nodes"].append(node)
     _save(graph)
+
+    # Incrementally update per-session embedding index
+    try:
+        from research_agent.config import EMBEDDING_MODEL
+        from research_agent.graph.embeddings import GraphIndex
+
+        index = GraphIndex(model_name=EMBEDDING_MODEL, index_path=EMBEDDING_INDEX_PATH)
+        if index.available:
+            index.load()
+            index.index_node(node_id, f"{label} {description}")
+            index.save()
+    except Exception:
+        pass
+
     return f"Node added: {node_id}"
 
 
@@ -204,58 +316,14 @@ def get_graph_summary() -> str:
     """Get a compressed text summary of the current knowledge graph.
 
     Returns node counts by type, low-confidence areas, recent nodes,
-    and most-connected nodes.
+    most-connected nodes, and thematic research clusters with top findings.
     """
-    from collections import Counter
+    from research_agent.graph.schema import Graph
+    from research_agent.graph.summarizer import summarize_graph
 
-    graph = _load()
-    # Filter out withdrawn nodes from summaries
-    nodes = [n for n in graph["nodes"] if not n.get("withdrawn", False)]
-    edges = graph["edges"]
-
-    if not nodes:
-        return "Knowledge graph is empty. No nodes or edges yet."
-
-    type_counts = Counter(n["type"] for n in nodes)
-
-    lines = [
-        f"Graph: {len(nodes)} nodes, {len(edges)} edges.",
-        "",
-        "Nodes by type:",
-    ]
-    for t, c in type_counts.most_common():
-        lines.append(f"  {t}: {c}")
-
-    # Low-confidence nodes
-    low_conf = [n for n in nodes if n.get("confidence", 1.0) < 0.4]
-    if low_conf:
-        lines.append("")
-        lines.append(f"Low-confidence nodes ({len(low_conf)}):")
-        for n in low_conf[:5]:
-            lines.append(f"  - [{n['id']}] {n['label']} (conf={n['confidence']:.2f})")
-
-    # Recent additions (last 10)
-    recent = nodes[-10:]
-    lines.append("")
-    lines.append("Recent nodes:")
-    for n in reversed(recent):
-        lines.append(f"  - [{n['id']}] {n['label']} ({n['type']})")
-
-    # Most connected nodes
-    edge_counts: Counter[str] = Counter()
-    for e in edges:
-        edge_counts[e["source"]] += 1
-        edge_counts[e["target"]] += 1
-
-    if edge_counts:
-        lines.append("")
-        lines.append("Most connected nodes:")
-        node_map = {n["id"]: n for n in nodes}
-        for nid, count in edge_counts.most_common(5):
-            label = node_map.get(nid, {}).get("label", nid)
-            lines.append(f"  - {label}: {count} connections")
-
-    return "\n".join(lines)
+    raw = _load()
+    graph = Graph(nodes=raw["nodes"], edges=raw["edges"])
+    return summarize_graph(graph)
 
 
 @mcp.tool()
@@ -372,10 +440,10 @@ def validate_claims(session_id: str = "") -> str:
 
 @mcp.tool()
 def query_graph(query: str) -> str:
-    """Search the knowledge graph by keyword.
+    """Search the knowledge graph by keyword and semantic similarity.
 
-    Scores each node by keyword overlap between the query and the node's
-    label + description. Returns top 10 matches with their 1-hop edges.
+    Uses embedding-based semantic search (if available) merged with keyword
+    overlap. Returns top 10 matches with their 1-hop edges.
 
     Args:
         query: A natural language search query.
@@ -383,39 +451,72 @@ def query_graph(query: str) -> str:
     from research_agent.graph.analysis import tokenize
 
     graph = _load()
+    node_map = {n["id"]: n for n in graph["nodes"] if not n.get("withdrawn")}
+
+    # --- Keyword search ---
     query_tokens = tokenize(query)
-    if not query_tokens:
-        return json.dumps({"results": [], "message": "No searchable terms in query."})
+    keyword_scores: dict[str, float] = {}
+    if query_tokens:
+        for node in node_map.values():
+            text = f"{node.get('label', '')} {node.get('description', '')}"
+            node_tokens = tokenize(text)
+            overlap = len(query_tokens & node_tokens)
+            if overlap > 0:
+                # Normalize to 0-1 range
+                keyword_scores[node["id"]] = overlap / len(query_tokens)
 
-    scored: list[tuple[int, dict]] = []
-    for node in graph["nodes"]:
-        if node.get("withdrawn"):
-            continue
-        text = f"{node.get('label', '')} {node.get('description', '')}"
-        node_tokens = tokenize(text)
-        overlap = len(query_tokens & node_tokens)
-        if overlap > 0:
-            scored.append((overlap, node))
+    # --- Semantic search ---
+    semantic_scores: dict[str, float] = {}
+    try:
+        from research_agent.config import EMBEDDING_MODEL
+        from research_agent.graph.embeddings import GraphIndex
 
-    scored.sort(key=lambda x: x[0], reverse=True)
-    top = scored[:10]
+        index = GraphIndex(model_name=EMBEDDING_MODEL, index_path=EMBEDDING_INDEX_PATH)
+        if index.available:
+            # Try loading persisted index; rebuild if stale
+            if not index.load() or index.is_stale(GRAPH_PATH):
+                index.index_nodes(list(node_map.values()))
+                index.save()
 
-    if not top:
+            results = index.search(query, top_k=10)
+            for nid, score in results:
+                semantic_scores[nid] = score
+    except Exception:
+        pass  # Fall back to keyword-only
+
+    # --- Merge results ---
+    all_ids = set(keyword_scores.keys()) | set(semantic_scores.keys())
+    if not all_ids:
         return json.dumps({"results": [], "message": "No matching nodes found."})
 
+    merged: list[tuple[float, str]] = []
+    for nid in all_ids:
+        kw = keyword_scores.get(nid, 0.0)
+        sem = semantic_scores.get(nid, 0.0)
+        # Weighted combination: semantic dominates when available
+        if semantic_scores:
+            combined = 0.6 * sem + 0.4 * kw
+        else:
+            combined = kw
+        merged.append((combined, nid))
+
+    merged.sort(key=lambda x: x[0], reverse=True)
+    top = merged[:10]
+
     # Collect 1-hop edges for result nodes
-    result_ids = {n["id"] for _, n in top}
+    result_ids = {nid for _, nid in top}
     result_edges = [
         e for e in graph["edges"]
         if e["source"] in result_ids or e["target"] in result_ids
     ]
 
     results = [
-        {"node": node, "score": score, "edges": [
+        {"node": node_map[nid], "score": round(score, 4), "edges": [
             e for e in result_edges
-            if e["source"] == node["id"] or e["target"] == node["id"]
+            if e["source"] == nid or e["target"] == nid
         ]}
-        for score, node in top
+        for score, nid in top
+        if nid in node_map
     ]
 
     return json.dumps({"results": results}, indent=2)

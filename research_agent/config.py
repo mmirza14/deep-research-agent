@@ -6,6 +6,11 @@ GRAPH_PATH = DATA_DIR / "graph.json"
 SNAPSHOTS_DIR = DATA_DIR / "graph_snapshots"
 SESSIONS_DIR = DATA_DIR / "sessions"
 
+
+def session_graph_path(session_id: str) -> Path:
+    """Return the graph.json path for a specific session."""
+    return SESSIONS_DIR / f"session_{session_id}" / "graph.json"
+
 # AgentDefinition.model accepts 'sonnet' | 'opus' | 'haiku'
 LEAD_MODEL = "sonnet"
 RESEARCHER_MODEL = "sonnet"
@@ -19,7 +24,8 @@ CRITIC_MODEL = "sonnet"
 DEFENDER_MODEL = "sonnet"
 MAX_SOCRATIC_ROUNDS = 5
 CONFIDENCE_ESCALATION_THRESHOLD = 0.4  # Defender confidence below this triggers extra rounds
-SOCRATIC_MAX_TURNS_PER_ROUND = 10  # Max turns per critic/defender agent call
+SOCRATIC_MAX_TURNS_PER_ROUND = 10  # Max turns per defender agent call
+CRITIC_MAX_TURNS = 10  # Critic gets more turns (has MCP tool calls)
 
 # Report writer
 REPORT_WRITER_MODEL = "sonnet"
@@ -35,6 +41,13 @@ DIRECTION_MAX_TURNS = 20
 # Single-node chat (Phase 5)
 CHAT_MODEL = "haiku"
 CHAT_MAX_TURNS = 5
+
+# Semantic search embeddings
+# Research question refinement (Phase 1A)
+REFINEMENT_MODEL = "haiku"
+
+EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+EMBEDDING_INDEX_PATH = DATA_DIR / "graph_index.npz"
 
 # Visualization server
 WS_PORT = 8420

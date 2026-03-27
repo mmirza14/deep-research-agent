@@ -26,9 +26,10 @@ from research_agent.config import (
     DIRECTION_MODEL,
     DIRECTION_MAX_TURNS,
     GRAPH_PATH,
+    session_graph_path,
 )
 from research_agent.graph.analysis import analyze_graph_structure
-from research_agent.graph.store import load_graph, snapshot_graph
+from research_agent.graph.store import load_graph, load_workspace, snapshot_graph
 from research_agent.graph.summarizer import summarize_graph
 from research_agent.prompts import DIRECTION_AGENT_PROMPT
 
@@ -77,7 +78,7 @@ def build_direction_options(session_id: str) -> ClaudeAgentOptions:
     mcp_server_config = {
         "type": "stdio",
         "command": "python3",
-        "args": [MCP_SERVER_SCRIPT],
+        "args": [MCP_SERVER_SCRIPT, "--session", session_id],
     }
 
     return ClaudeAgentOptions(
@@ -97,15 +98,37 @@ def build_direction_options(session_id: str) -> ClaudeAgentOptions:
     )
 
 
-async def run_direction_finding(session_id: str | None = None) -> None:
-    """Run direction finding on the knowledge graph."""
+async def run_direction_finding(
+    session_id: str | None = None,
+    session_ids: list[str] | None = None,
+) -> None:
+    """Run direction finding on the knowledge graph.
+
+    If session_ids is provided, loads a workspace composite of those sessions.
+    Otherwise falls back to a single session graph or the global graph.
+    """
     dir_session_id = f"dir-{uuid.uuid4().hex[:8]}"
 
     # Snapshot before modifications
     snapshot_graph(dir_session_id)
 
-    # Load and analyze
-    graph = load_graph()
+    # Load graph: workspace composite > single session > global
+    if session_ids:
+        graph = load_workspace(session_ids)
+    elif session_id:
+        sgp = session_graph_path(session_id)
+        graph = load_graph(sgp) if sgp.exists() else load_graph()
+    else:
+        graph = load_graph()
+    # Ensure direction session directory + graph.json exist
+    from research_agent.config import SESSIONS_DIR
+    dir_session_dir = SESSIONS_DIR / f"session_{dir_session_id}"
+    dir_session_dir.mkdir(parents=True, exist_ok=True)
+    dir_graph_path = session_graph_path(dir_session_id)
+    if not dir_graph_path.exists():
+        import json as _json
+        dir_graph_path.write_text(_json.dumps({"nodes": [], "edges": []}, indent=2))
+
     print(f"Loaded graph: {len(graph.nodes)} nodes, {len(graph.edges)} edges\n")
 
     print("=" * 60)

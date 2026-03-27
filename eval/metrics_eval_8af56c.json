@@ -1,0 +1,50 @@
+{
+  "session_id": "eval_8af56c",
+  "truncation_coverage": {
+    "total_findings": 151,
+    "overlap_pct": 26.7,
+    "promoted": 22,
+    "demoted": 22
+  },
+  "critic_tool_usage": {
+    "total_tool_refs_in_transcript": 0,
+    "critic_tool_refs": 0,
+    "tool_breakdown": {
+      "get_neighborhood": 0,
+      "query_graph": 0,
+      "get_graph_summary": 0
+    },
+    "total_challenge_outcomes": 157,
+    "evidence_grounded_challenges": 22,
+    "evidence_grounded_pct": 14.0
+  },
+  "duplicate_metrics": {
+    "session_nodes": 178,
+    "caught_duplicates": 13,
+    "potential_missed_duplicates": 14,
+    "dedup_rate": 48.1
+  },
+  "density_metrics": {
+    "total_active_nodes": 461,
+    "total_edges": 577,
+    "edges_per_node": 1.25,
+    "session_edges": 244,
+    "related_to_edges": 22,
+    "cross_topic_potential": 31,
+    "edge_type_distribution": {
+      "cites": 117,
+      "supports": 83,
+      "related_to": 22,
+      "corroborates": 9,
+      "leads_to": 8,
+      "subtopic_of": 5
+    }
+  },
+  "thematic_coverage": {
+    "has_thematic_section": true,
+    "theme_count": 7,
+    "has_gap_detection": true,
+    "gap_items": 2,
+    "summary_tokens_approx": 1557
+  }
+}

@@ -35,6 +35,7 @@ from research_agent.config import (
     PAUSE_POLL_INTERVAL,
     SESSIONS_DIR,
     GRAPH_PATH,
+    session_graph_path,
 )
 from research_agent.graph.store import snapshot_graph, diff_graph_since
 from research_agent.prompts import (
@@ -118,7 +119,7 @@ def build_options(session_id: str) -> ClaudeAgentOptions:
     mcp_server_config = {
         "type": "stdio",
         "command": "python3",
-        "args": [MCP_SERVER_SCRIPT],
+        "args": [MCP_SERVER_SCRIPT, "--session", session_id],
     }
 
     return ClaudeAgentOptions(
@@ -159,7 +160,7 @@ def build_synthesis_options(
     mcp_server_config = {
         "type": "stdio",
         "command": "python3",
-        "args": [MCP_SERVER_SCRIPT],
+        "args": [MCP_SERVER_SCRIPT, "--session", session_id],
     }
 
     return ClaudeAgentOptions(
@@ -193,7 +194,7 @@ def build_collaborative_synthesis_options(
     mcp_server_config = {
         "type": "stdio",
         "command": "python3",
-        "args": [MCP_SERVER_SCRIPT],
+        "args": [MCP_SERVER_SCRIPT, "--session", session_id],
     }
 
     return ClaudeAgentOptions(
@@ -356,7 +357,7 @@ async def run_research(question: str, session_id: str) -> None:
     from research_agent.graph.summarizer import summarize_graph
     from research_agent.graph.store import load_graph
 
-    graph = load_graph()
+    graph = load_graph(session_graph_path(session_id))
     graph_summary = summarize_graph(graph)
 
     synth_options = build_collaborative_synthesis_options(
@@ -417,7 +418,7 @@ def _link_origin_node(session_id: str, question_node_id: str) -> None:
         if origin_id:
             from research_agent.graph.store import load_graph, save_graph
             from research_agent.graph.schema import Edge
-            graph = load_graph()
+            graph = load_graph(session_graph_path(session_id))
             edge = Edge(
                 source=origin_id,
                 target=question_node_id,
@@ -430,7 +431,7 @@ def _link_origin_node(session_id: str, question_node_id: str) -> None:
                 },
             )
             graph.add_edge(edge)
-            save_graph(graph)
+            save_graph(graph, session_graph_path(session_id))
             print(f"Linked origin node {origin_id} → {question_node_id} via leads_to")
         # Mark as started
         pending["status"] = "running"
@@ -454,8 +455,15 @@ def main() -> None:
     if session_id is None:
         session_id = uuid.uuid4().hex[:8]
 
-    # Snapshot existing graph before this session modifies it
-    snapshot_graph(session_id)
+    # Ensure session directory and graph.json exist
+    session_dir = SESSIONS_DIR / f"session_{session_id}"
+    session_dir.mkdir(parents=True, exist_ok=True)
+    sgp = session_graph_path(session_id)
+    if not sgp.exists():
+        sgp.write_text(json.dumps({"nodes": [], "edges": []}, indent=2))
+
+    # Snapshot existing session graph before this session modifies it
+    snapshot_graph(session_id, sgp)
 
     if args:
         question = " ".join(args)

@@ -20,11 +20,14 @@ from claude_agent_sdk import (
 
 from research_agent.config import (
     CRITIC_MODEL,
+    CRITIC_MAX_TURNS,
     DEFENDER_MODEL,
     MAX_SOCRATIC_ROUNDS,
     CONFIDENCE_ESCALATION_THRESHOLD,
     SOCRATIC_MAX_TURNS_PER_ROUND,
+    SESSIONS_DIR,
 )
+from research_agent.config import session_graph_path
 from research_agent.graph.store import load_graph, save_graph
 from research_agent.prompts import (
     CRITIC_FINDINGS,
@@ -35,6 +38,18 @@ from research_agent.prompts import (
 from research_agent.socratic.changelog import Changelog, ChallengeOutcome
 from research_agent.socratic.transcript import Transcript
 
+# Path to the standalone MCP server script
+MCP_SERVER_SCRIPT = str(Path(__file__).resolve().parent.parent / "mcp_server.py")
+
+# Socratic outcome scores for relevance ranking
+_SOCRATIC_SCORES = {
+    "retained": 1.0,          # challenged and defended
+    "modified": 0.5,          # partially conceded
+    "removed": 0.2,           # conceded / soft-deleted
+    "retained_unchallenged": 0.7,
+    "secondary_adjustment": 0.5,
+}
+
 
 # ---------------------------------------------------------------------------
 # Graph helpers
@@ -42,7 +57,8 @@ from research_agent.socratic.transcript import Transcript
 
 def get_session_findings(session_id: str) -> list[dict]:
     """Return all nodes added by researchers in this session."""
-    graph = load_graph()
+    sgp = session_graph_path(session_id)
+    graph = load_graph(sgp) if sgp.exists() else load_graph()
     return [
         n for n in graph.nodes
         if n.get("provenance", {}).get("session_id") == session_id
@@ -74,6 +90,30 @@ def format_findings_for_review(nodes: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def load_socratic_scores(session_id: str) -> dict[str, float]:
+    """Return a Socratic outcome score per node_id from the findings changelog.
+
+    Scores: defended=1.0, modified=0.5, removed=0.2, unchallenged=0.7.
+    Returns empty dict if no changelog exists yet.
+    """
+    path = SESSIONS_DIR / f"session_{session_id}" / "changelog_findings.json"
+    if not path.exists():
+        return {}
+
+    import json as _json
+    try:
+        data = _json.loads(path.read_text())
+    except (ValueError, OSError):
+        return {}
+
+    scores: dict[str, float] = {}
+    for o in data.get("outcomes", []):
+        node_id = o.get("node_id", "")
+        outcome = o.get("outcome", "")
+        scores[node_id] = _SOCRATIC_SCORES.get(outcome, 0.7)
+    return scores
+
+
 # ---------------------------------------------------------------------------
 # Agent interaction
 # ---------------------------------------------------------------------------
@@ -86,6 +126,44 @@ async def _run_agent(system_prompt: str, model: str) -> str:
         tools=[],
         allowed_tools=[],
         max_turns=SOCRATIC_MAX_TURNS_PER_ROUND,
+        permission_mode="bypassPermissions",
+    )
+
+    result_text = []
+    async for message in query(prompt="Begin your review.", options=options):
+        if isinstance(message, ResultMessage):
+            if hasattr(message, "result") and message.result:
+                result_text.append(message.result)
+        elif hasattr(message, "content"):
+            for block in getattr(message, "content", []):
+                if hasattr(block, "text"):
+                    result_text.append(block.text)
+
+    return "\n".join(result_text)
+
+
+async def _run_critic_agent(system_prompt: str, session_id: str = "") -> str:
+    """Run the Critic with read-only MCP graph access for evidence-grounded challenges."""
+    mcp_args = [MCP_SERVER_SCRIPT]
+    if session_id:
+        mcp_args.extend(["--session", session_id])
+    mcp_server_config = {
+        "type": "stdio",
+        "command": "python3",
+        "args": mcp_args,
+    }
+
+    options = ClaudeAgentOptions(
+        model=CRITIC_MODEL,
+        system_prompt=system_prompt,
+        tools=[],
+        allowed_tools=[
+            "mcp__research-graph__get_graph_summary",
+            "mcp__research-graph__get_neighborhood",
+            "mcp__research-graph__query_graph",
+        ],
+        mcp_servers={"research-graph": mcp_server_config},
+        max_turns=CRITIC_MAX_TURNS,
         permission_mode="bypassPermissions",
     )
 
@@ -269,12 +347,17 @@ def _apply_graph_mutations(
     changelog: Changelog,
     findings: list[dict],
     round_number: int,
+    session_id: str = "",
 ) -> list[dict]:
     """Apply concessions to the graph and record in changelog.
 
     Returns a list of mutation records: [{node_id, field, old, new}].
     """
-    graph = load_graph()
+    if session_id:
+        sgp = session_graph_path(session_id)
+        graph = load_graph(sgp) if sgp.exists() else load_graph()
+    else:
+        graph = load_graph()
     node_map = {n["id"]: n for n in graph.nodes}
     findings_map = {n["id"]: n for n in findings}
     mutations: list[dict] = []
@@ -360,12 +443,19 @@ def _apply_graph_mutations(
                 round_number=round_number,
             ))
 
-    save_graph(graph)
+    if session_id:
+        sgp = session_graph_path(session_id)
+        save_graph(graph, sgp)
+    else:
+        save_graph(graph)
 
     # --- Validation pass: verify writes landed ---
     if mutations:
         import sys
-        verified = load_graph()
+        if session_id:
+            verified = load_graph(session_graph_path(session_id))
+        else:
+            verified = load_graph()
         v_map = {n["id"]: n for n in verified.nodes}
         for m in mutations:
             if m["field"] != "confidence":
@@ -400,6 +490,20 @@ async def run_findings_review(session_id: str) -> tuple[Transcript, Changelog]:
         return transcript, changelog
 
     findings_text = format_findings_for_review(findings)
+
+    # Truncate findings for Critic prompt if session is large
+    MAX_CRITIC_FINDINGS = 30
+    critic_findings_text = findings_text
+    if len(findings) > MAX_CRITIC_FINDINGS:
+        # Sort by confidence descending for Critic injection
+        sorted_findings = sorted(findings, key=lambda n: n.get("confidence", 0.5), reverse=True)
+        critic_findings_text = format_findings_for_review(sorted_findings[:MAX_CRITIC_FINDINGS])
+        critic_findings_text += (
+            f"\n\n⚠ Only {MAX_CRITIC_FINDINGS} of {len(findings)} findings shown above "
+            f"(highest confidence first). Use query_graph and get_neighborhood to review "
+            f"findings not listed above."
+        )
+
     transcript = Transcript(session_id=session_id, stage="findings")
     changelog = Changelog(session_id=session_id, stage="findings")
 
@@ -413,7 +517,7 @@ async def run_findings_review(session_id: str) -> tuple[Transcript, Changelog]:
             session_id=session_id,
             round_number=round_num,
             max_rounds=MAX_SOCRATIC_ROUNDS,
-            findings_text=findings_text,
+            findings_text=critic_findings_text,
         )
         # After round 1, include the Defender's prior response and applied mutations
         if last_critic_message:
@@ -429,7 +533,7 @@ async def run_findings_review(session_id: str) -> tuple[Transcript, Changelog]:
                 )
             critic_prompt += "Continue your review. Raise new challenges or follow up on unresolved ones."
 
-        critic_response = await _run_agent(critic_prompt, CRITIC_MODEL)
+        critic_response = await _run_critic_agent(critic_prompt, session_id=session_id)
         transcript.add_entry(round_num, "critic", critic_response)
 
         # Check for early termination
@@ -453,7 +557,7 @@ async def run_findings_review(session_id: str) -> tuple[Transcript, Changelog]:
 
         # Parse outcomes and apply mutations
         outcomes = _parse_defender_response(defender_response, findings)
-        round_mutations = _apply_graph_mutations(outcomes, changelog, findings, round_num)
+        round_mutations = _apply_graph_mutations(outcomes, changelog, findings, round_num, session_id=session_id)
 
         # Build mutation summary for next round's Critic context
         if round_mutations:
@@ -485,6 +589,17 @@ async def run_findings_review(session_id: str) -> tuple[Transcript, Changelog]:
         # Refresh findings text with updated graph state
         findings = get_session_findings(session_id)
         findings_text = format_findings_for_review(findings)
+        # Refresh truncated Critic view
+        if len(findings) > MAX_CRITIC_FINDINGS:
+            sorted_f = sorted(findings, key=lambda n: n.get("confidence", 0.5), reverse=True)
+            critic_findings_text = format_findings_for_review(sorted_f[:MAX_CRITIC_FINDINGS])
+            critic_findings_text += (
+                f"\n\n⚠ Only {MAX_CRITIC_FINDINGS} of {len(findings)} findings shown above "
+                f"(highest confidence first). Use query_graph and get_neighborhood to review "
+                f"findings not listed above."
+            )
+        else:
+            critic_findings_text = findings_text
 
     else:
         changelog.termination_reason = "max_rounds"
@@ -547,7 +662,7 @@ async def run_synthesis_review(
                 f"Continue your review or state NO FURTHER OBJECTIONS."
             )
 
-        critic_response = await _run_agent(critic_prompt, CRITIC_MODEL)
+        critic_response = await _run_critic_agent(critic_prompt, session_id=session_id)
         transcript.add_entry(round_num, "critic", critic_response)
 
         if "NO FURTHER OBJECTIONS" in critic_response.upper():
