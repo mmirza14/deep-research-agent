@@ -1084,6 +1084,27 @@ async def ws_handler(websocket: websockets.asyncio.server.ServerConnection) -> N
                     await broadcast_graph()
                     continue
 
+                # Send operation result to the originating client
+                success = result is not None and result is not False
+                op_label = msg_type.replace("_", " ")
+                detail = ""
+                if msg_type == "add_node" and isinstance(result, dict):
+                    detail = result.get("label", "")
+                elif msg_type == "delete_node":
+                    detail = data.get("id", "")[:8]
+                elif msg_type == "flag_node":
+                    detail = data.get("id", "")[:8]
+                elif msg_type == "add_edge":
+                    detail = data.get("relationship", "")
+                await websocket.send(json.dumps({
+                    "type": "operation_result",
+                    "data": {
+                        "operation": msg_type,
+                        "success": success,
+                        "detail": detail if success else f"{op_label} failed",
+                    },
+                }))
+
                 # Default: broadcast updated graph to ALL clients
                 await broadcast_graph()
 
