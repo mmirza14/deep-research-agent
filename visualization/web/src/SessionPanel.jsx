@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const STATUS_COLORS = {
   running: { bg: "rgba(163,113,247,0.2)", fg: "#a371f7" },
@@ -23,15 +23,28 @@ function formatDate(iso) {
 export default function SessionPanel({
   sessions,
   activeSessionId,
+  workspaceSessionIds,
   visible,
   onToggle,
   onSelectSession,
   onNewResearch,
   onRefreshSessions,
+  onSetWorkspace,
 }) {
+  const [workspaceMode, setWorkspaceMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+
   useEffect(() => {
     if (visible) onRefreshSessions();
   }, [visible, onRefreshSessions]);
+
+  // Sync selectedIds from workspace state
+  useEffect(() => {
+    if (workspaceSessionIds?.length > 0) {
+      setWorkspaceMode(true);
+      setSelectedIds(new Set(workspaceSessionIds));
+    }
+  }, [workspaceSessionIds]);
 
   if (!visible) return null;
 
@@ -41,13 +54,50 @@ export default function SessionPanel({
     return tb.localeCompare(ta);
   });
 
+  const isInWorkspace = workspaceMode && workspaceSessionIds?.length > 0;
+
+  const toggleWorkspaceMode = () => {
+    if (workspaceMode) {
+      // Exiting workspace mode — clear selections
+      setWorkspaceMode(false);
+      setSelectedIds(new Set());
+      // If there was an active workspace, switch back to single session
+      if (workspaceSessionIds?.length > 0 && sessions.length > 0) {
+        onSelectSession(sessions[0].session_id);
+      }
+    } else {
+      setWorkspaceMode(true);
+    }
+  };
+
+  const toggleSession = (sid) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(sid)) {
+        next.delete(sid);
+      } else {
+        next.add(sid);
+      }
+      return next;
+    });
+  };
+
+  const applyWorkspace = () => {
+    const ids = [...selectedIds];
+    if (ids.length > 0) {
+      onSetWorkspace(ids);
+    }
+  };
+
   return (
     <div style={styles.panel}>
       <div style={styles.header}>
         <div>
           <div style={styles.title}>Research Sessions</div>
           <div style={styles.subtitle}>
-            {sessions.length} session{sessions.length !== 1 ? "s" : ""}
+            {workspaceMode
+              ? `${selectedIds.size} selected for workspace`
+              : `${sessions.length} session${sessions.length !== 1 ? "s" : ""}`}
           </div>
         </div>
         <button onClick={onToggle} style={styles.closeBtn}>
@@ -57,12 +107,37 @@ export default function SessionPanel({
         </button>
       </div>
 
-      <button style={styles.newBtn} onClick={onNewResearch}>
-        <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6 }}>
-          add_circle
-        </span>
-        New Research
-      </button>
+      <div style={styles.controls}>
+        <button style={styles.newBtn} onClick={onNewResearch}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6 }}>
+            add_circle
+          </span>
+          New Research
+        </button>
+        <button
+          style={{
+            ...styles.workspaceToggle,
+            background: workspaceMode ? "var(--primary-container)" : "var(--surface-high)",
+            color: workspaceMode ? "#fff" : "var(--text-secondary)",
+          }}
+          onClick={toggleWorkspaceMode}
+          title={workspaceMode ? "Exit workspace mode" : "Enter workspace mode"}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4 }}>
+            workspaces
+          </span>
+          {workspaceMode ? "Exit Workspace" : "Workspace"}
+        </button>
+      </div>
+
+      {workspaceMode && selectedIds.size >= 2 && (
+        <button
+          style={styles.applyBtn}
+          onClick={applyWorkspace}
+        >
+          View {selectedIds.size} Sessions Combined
+        </button>
+      )}
 
       <div style={styles.body}>
         {sorted.length === 0 && (
@@ -72,43 +147,74 @@ export default function SessionPanel({
         )}
 
         {sorted.map((s) => {
-          const isActive = s.session_id === activeSessionId;
+          const isActive = !workspaceMode && s.session_id === activeSessionId;
+          const isChecked = workspaceMode && selectedIds.has(s.session_id);
+          const isWorkspaceActive = isInWorkspace && workspaceSessionIds.includes(s.session_id);
           const colors = STATUS_COLORS[s.status] || STATUS_COLORS.unknown;
           return (
             <button
               key={s.session_id}
               style={{
                 ...styles.card,
-                borderColor: isActive ? "var(--primary)" : "var(--ghost-border)",
-                background: isActive ? "var(--surface-high)" : "var(--surface-container)",
+                borderColor: isActive || isWorkspaceActive
+                  ? "var(--primary)"
+                  : isChecked
+                  ? "var(--node-direction)"
+                  : "var(--ghost-border)",
+                background: isActive || isWorkspaceActive
+                  ? "var(--surface-high)"
+                  : isChecked
+                  ? "rgba(138,88,221,0.08)"
+                  : "var(--surface-container)",
               }}
-              onClick={() => onSelectSession(s.session_id)}
+              onClick={() =>
+                workspaceMode
+                  ? toggleSession(s.session_id)
+                  : onSelectSession(s.session_id)
+              }
             >
-              <div style={styles.cardQuestion}>
-                {s.question || `Session ${s.session_id}`}
-              </div>
-              <div style={styles.cardMeta}>
-                <span
-                  style={{
-                    ...styles.statusBadge,
-                    background: colors.bg,
-                    color: colors.fg,
-                    animation: s.status === "running" ? "pulse 1.5s ease-in-out infinite" : "none",
-                  }}
-                >
-                  {s.status}
-                </span>
-                <span style={styles.statText}>{s.node_count} nodes</span>
-                {s.created_at && (
-                  <span style={styles.statText}>{formatDate(s.created_at)}</span>
+              <div style={styles.cardRow}>
+                {workspaceMode && (
+                  <span
+                    className="material-symbols-outlined"
+                    style={{
+                      fontSize: 18,
+                      color: isChecked ? "var(--node-direction)" : "var(--text-muted)",
+                      flexShrink: 0,
+                      marginRight: 8,
+                    }}
+                  >
+                    {isChecked ? "check_box" : "check_box_outline_blank"}
+                  </span>
                 )}
-              </div>
-              {(s.has_lit_review || s.has_insights) && (
-                <div style={styles.docRow}>
-                  {s.has_lit_review && <span style={styles.docBadge}>Lit Review</span>}
-                  {s.has_insights && <span style={styles.docBadge}>Insights</span>}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={styles.cardQuestion}>
+                    {s.question || `Session ${s.session_id}`}
+                  </div>
+                  <div style={styles.cardMeta}>
+                    <span
+                      style={{
+                        ...styles.statusBadge,
+                        background: colors.bg,
+                        color: colors.fg,
+                        animation: s.status === "running" ? "pulse 1.5s ease-in-out infinite" : "none",
+                      }}
+                    >
+                      {s.status}
+                    </span>
+                    <span style={styles.statText}>{s.node_count} nodes</span>
+                    {s.created_at && (
+                      <span style={styles.statText}>{formatDate(s.created_at)}</span>
+                    )}
+                  </div>
+                  {(s.has_lit_review || s.has_insights) && (
+                    <div style={styles.docRow}>
+                      {s.has_lit_review && <span style={styles.docBadge}>Lit Review</span>}
+                      {s.has_insights && <span style={styles.docBadge}>Insights</span>}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </button>
           );
         })}
@@ -155,20 +261,50 @@ const styles = {
     padding: 4,
     borderRadius: 4,
   },
+  controls: {
+    display: "flex",
+    gap: 6,
+    padding: "0 16px 12px",
+  },
   newBtn: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    margin: "0 16px 12px",
-    padding: "8px 14px",
+    flex: 1,
+    padding: "8px 10px",
     background: "var(--tertiary-container)",
+    color: "#fff",
+    border: "none",
+    borderRadius: 6,
+    fontSize: 11,
+    fontWeight: 600,
+    cursor: "pointer",
+    letterSpacing: "0.02em",
+    transition: "filter 0.15s ease",
+  },
+  workspaceToggle: {
+    display: "flex",
+    alignItems: "center",
+    padding: "8px 10px",
+    border: "none",
+    borderRadius: 6,
+    fontSize: 11,
+    fontWeight: 600,
+    cursor: "pointer",
+    letterSpacing: "0.02em",
+    transition: "background 0.15s ease, color 0.15s ease",
+  },
+  applyBtn: {
+    margin: "0 16px 8px",
+    padding: "8px 14px",
+    background: "var(--node-direction)",
     color: "#fff",
     border: "none",
     borderRadius: 6,
     fontSize: 12,
     fontWeight: 600,
     cursor: "pointer",
-    letterSpacing: "0.02em",
+    textAlign: "center",
     transition: "filter 0.15s ease",
   },
   body: {
@@ -196,6 +332,10 @@ const styles = {
     textAlign: "left",
     fontFamily: "inherit",
     transition: "border-color 0.15s ease, background 0.15s ease",
+  },
+  cardRow: {
+    display: "flex",
+    alignItems: "flex-start",
   },
   cardQuestion: {
     fontSize: 13,

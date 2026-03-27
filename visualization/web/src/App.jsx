@@ -37,7 +37,9 @@ export default function App() {
     agentPhase,
     sessions,
     activeSessionId,
+    workspaceSessionIds,
     setActiveSession,
+    setWorkspace,
     listSessions,
     startNewResearch,
     activities,
@@ -109,6 +111,14 @@ export default function App() {
             </span>
             Edges: {graph.edges.length}
           </span>
+          {workspaceSessionIds.length > 0 && (
+            <span style={{ ...styles.stats, color: "var(--node-direction)" }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4 }}>
+                workspaces
+              </span>
+              Workspace ({workspaceSessionIds.length})
+            </span>
+          )}
         </div>
         <div style={styles.headerRight}>
           <div style={styles.agentStatus}>
@@ -243,6 +253,7 @@ export default function App() {
         <SessionPanel
           sessions={sessions}
           activeSessionId={activeSessionId}
+          workspaceSessionIds={workspaceSessionIds}
           visible={showSessions}
           onToggle={() => setShowSessions((v) => !v)}
           onSelectSession={(sid) => {
@@ -255,6 +266,11 @@ export default function App() {
             setShowHome(true);
           }}
           onRefreshSessions={listSessions}
+          onSetWorkspace={(ids) => {
+            setWorkspace(ids);
+            setShowSessions(false);
+            setShowHome(false);
+          }}
         />
 
         {/* Graph Canvas */}
