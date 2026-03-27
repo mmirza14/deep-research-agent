@@ -78,7 +78,10 @@ export default function App() {
     [addEdge]
   );
 
-  const hasBanner = sessionState?.phase === "awaiting_user_input";
+  const bannerPhases = ["awaiting_user_input", "synthesizing", "socratic_review_2", "writing_insights", "complete"];
+  const hasBanner =
+    sessionState?.phase === "awaiting_user_input" ||
+    (agentPhase?.phase && bannerPhases.includes(agentPhase.phase));
 
   return (
     <>
@@ -155,12 +158,17 @@ export default function App() {
         </div>
       </div>
 
-      {/* Analysis banner */}
+      {/* Analysis banner — shown during review + post-proceed phases */}
       {hasBanner && (
         <AnalysisBanner
-          sessionId={sessionState.session_id}
-          pausedAt={sessionState.paused_at}
-          onResume={() => resumeSession(sessionState.session_id)}
+          sessionId={sessionState?.session_id || agentPhase?.session_id}
+          pausedAt={sessionState?.paused_at}
+          agentPhase={agentPhase}
+          hasLitReview={!!sessionState?.lit_review_path}
+          onResume={() => resumeSession(sessionState?.session_id)}
+          onViewDocument={(sid, docType) => {
+            // TODO: wire to document viewer in Phase 4A
+          }}
         />
       )}
 

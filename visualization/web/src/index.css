@@ -114,6 +114,18 @@ body {
   50% { opacity: 0.4; }
 }
 
+/* Spin animation for progress icons */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Dot pulse for progress indicator */
+@keyframes dotPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
 /* Edge dash animation */
 @keyframes dash-offset {
   to { stroke-dashoffset: -20; }
