@@ -75,6 +75,16 @@ export default function useGraphSocket() {
             ...prev.slice(-2), // keep max 3 (2 existing + 1 new)
             { id: toastIdRef.current, level: d.level, message: d.message, detail: d.detail },
           ]);
+        } else if (msg.type === "operation_result") {
+          const d = msg.data;
+          toastIdRef.current += 1;
+          const level = d.success ? "success" : "error";
+          const opLabel = (d.operation || "").replace(/_/g, " ");
+          const message = d.success ? opLabel : `${opLabel} failed`;
+          setToasts((prev) => [
+            ...prev.slice(-2),
+            { id: toastIdRef.current, level, message, detail: d.detail },
+          ]);
         } else if (msg.type === "activity") {
           activityIdRef.current += 1;
           const entry = { id: activityIdRef.current, ...msg.data };

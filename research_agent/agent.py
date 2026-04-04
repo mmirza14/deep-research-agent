@@ -32,6 +32,7 @@ from research_agent.config import (
     LEAD_MODEL,
     RESEARCHER_MODEL,
     MAX_TURNS,
+    RESEARCH_PHASE_TIMEOUT,
     PAUSE_POLL_INTERVAL,
     SESSIONS_DIR,
     GRAPH_PATH,
@@ -113,6 +114,8 @@ After all researchers report back:
 - Present a brief overview of what was found across sub-topics
 - Note any contradictions or low-confidence areas
 - STOP here — your findings summary is your final output for this phase
+
+IMPORTANT: If any researcher subagent fails or does not return results, do NOT wait indefinitely. Proceed with the results from the researchers that completed successfully. Note which research tracks were incomplete in your findings summary.
 """
 
 SYNTHESIS_PROMPT = """\
@@ -285,9 +288,9 @@ def _collect_user_feedback(session_id: str) -> str:
     return format_user_feedback(diff)
 
 
-async def _collect_agent_output(options: ClaudeAgentOptions, prompt: str) -> str:
-    """Run an agent and collect all text output."""
-    result_text = []
+async def _run_query(prompt: str, options: ClaudeAgentOptions) -> str:
+    """Run query and collect results as a single coroutine (wrappable by wait_for)."""
+    result_text: list[str] = []
     async for message in query(prompt=prompt, options=options):
         if isinstance(message, ResultMessage):
             if hasattr(message, "result") and message.result:
@@ -299,6 +302,15 @@ async def _collect_agent_output(options: ClaudeAgentOptions, prompt: str) -> str
                     result_text.append(block.text)
                     print(block.text, end="", flush=True)
     return "\n".join(result_text)
+
+
+async def _collect_agent_output(
+    options: ClaudeAgentOptions, prompt: str, timeout: float | None = None
+) -> str:
+    """Run an agent and collect all text output, with optional timeout."""
+    if timeout is None:
+        return await _run_query(prompt, options)
+    return await asyncio.wait_for(_run_query(prompt, options), timeout=timeout)
 
 
 async def run_research(question: str, session_id: str) -> None:
@@ -323,7 +335,14 @@ async def _run_research_pipeline(question: str, session_id: str) -> None:
     print("=" * 60)
 
     options = build_options(session_id)
-    findings_output = await _collect_agent_output(options, question)
+    try:
+        findings_output = await _collect_agent_output(
+            options, question, timeout=RESEARCH_PHASE_TIMEOUT
+        )
+    except asyncio.TimeoutError:
+        print(f"\n\nWARNING: Research phase timed out after {RESEARCH_PHASE_TIMEOUT}s. "
+              "Proceeding with partial results.")
+        findings_output = "(Research phase timed out — proceeding with partial results from completed researchers)"
 
     # -----------------------------------------------------------------------
     # Step 2: Stage 1 Socratic Review — Critic/Defender review findings

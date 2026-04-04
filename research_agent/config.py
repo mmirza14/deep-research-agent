@@ -18,6 +18,7 @@ RESEARCHER_MODEL = "sonnet"
 MAX_RESEARCHER_SUBAGENTS = 3
 MAX_SEARCH_RESULTS_PER_SUBTOPIC = 5
 MAX_TURNS = 30
+RESEARCH_PHASE_TIMEOUT = 600  # seconds — max wait for research phase (subagent spawning)
 
 # Socratic review
 CRITIC_MODEL = "sonnet"
